@@ -1,0 +1,247 @@
+:root {
+    --apple-blue: #007AFF;
+    --nav-height: 52px;
+    --g2-radius: 54px; 
+    --g2-blur: blur(20px);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: #000 !important; 
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    color: white;
+    min-height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none; 
+}
+
+body::-webkit-scrollbar {
+    display: none; 
+}
+
+#particleCanvas {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    background-color: transparent !important;
+    pointer-events: none;
+}
+
+.icloud-nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: var(--nav-height);
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: saturate(180%) var(--g2-blur);
+    -webkit-backdrop-filter: saturate(180%) var(--g2-blur);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-content {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.timer-icon {
+    width: 24px;
+    height: 24px;
+    border: 2px solid white;
+    border-radius: 50%;
+    position: relative;
+}
+
+.timer-icon .hand {
+    position: absolute;
+    width: 2px;
+    height: 8px;
+    background: white;
+    top: 3px;
+    left: 9px;
+    transform-origin: bottom;
+    animation: rotate 5s linear infinite;
+}
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.brand-name {
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+}
+
+.main-viewport {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: var(--nav-height);
+}
+
+.g2-super-ellipse {
+    width: 420px;
+    background: linear-gradient(180deg, rgba(40, 40, 40, 0.75) 0%, rgba(20, 20, 20, 0.9) 100%);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: var(--g2-radius);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    min-height: 480px;
+    overflow: hidden;
+    padding: 40px;
+    transition: all 0.7s cubic-bezier(0.2, 0, 0, 1); 
+}
+
+.video-container {
+    width: 120px;
+    height: 120px;
+    margin: 20px auto 40px;
+    background: radial-gradient(circle, var(--apple-blue) 0%, transparent 70%);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pulse-ring {
+    width: 100px;
+    height: 100px;
+    border: 1px solid var(--apple-blue);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.4); opacity: 0; }
+}
+
+.welcome-title {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    letter-spacing: -0.5px;
+    text-align: center;
+}
+
+.auth-view {
+    display: none; 
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-view.active {
+    display: flex; 
+    animation: authIn 0.6s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes authIn {
+    from { opacity: 0; transform: scale(0.95) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.input-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+.apple-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.apple-input:focus {
+    border-color: var(--apple-blue);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.action-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--apple-blue);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.next-btn:hover { background: white; color: black; }
+
+.form-switch {
+    margin-top: 20px;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.form-switch span {
+    color: var(--apple-blue);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+
+.icloud-footer {
+    padding: 60px 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.5;
+}
