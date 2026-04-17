@@ -42,3 +42,116 @@
         }
     </style>
 </head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+
+    <nav class="icloud-nav">
+        <div class="nav-content">
+            <div class="nav-left">
+                <div class="logo-group">
+                    <div class="timer-icon"><div class="hand"></div></div>
+                    <span class="brand-name">No More Last Minute</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-viewport">
+        <div id="main-container" class="g2-super-ellipse">
+            <div class="card-inner">
+                <div id="video-placeholder" class="video-container">
+                    <div class="pulse-ring"></div>
+                </div>
+                
+                <div id="view-intro" class="auth-view active">
+                    <h1 class="welcome-title">Sign In</h1>
+                    <button class="next-btn" onclick="showView('signin')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="view-signin" class="auth-view">
+                    <h1 class="welcome-title">Sign In</h1>
+                    <div class="input-stack">
+                        <input type="email" id="signin-email" placeholder="Student Email" class="apple-input">
+                        <input type="password" id="signin-password" placeholder="Password" class="apple-input">
+                    </div>
+                    <button class="action-btn" onclick="handleSignIn()">Login</button>
+                    <p class="form-switch">Don't have an ID? <span onclick="showView('signup')">Create Yours</span></p>
+                </div>
+
+                <div id="view-signup" class="auth-view">
+                    <h1 class="welcome-title">Sign Up</h1>
+                    <div class="input-stack">
+                        <input type="text" id="signup-name" placeholder="Full Name" class="apple-input">
+                        <input type="email" id="signup-email" placeholder="Student Email" class="apple-input">
+                        <input type="password" id="signup-password" placeholder="Password" class="apple-input">
+                    </div>
+                    <button class="action-btn" onclick="handleSignUp()">Create Account</button>
+                    <p class="form-switch">Already have an ID? <span onclick="showView('signin')">Sign In</span></p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="icloud-footer">
+        <div class="footer-content">
+            <p>© 2026 NMLM Project. MMU Foundation in Computing.</p>
+        </div>
+    </footer>
+
+    <script src="js/particle.js"></script>
+    <script>
+
+        function showView(viewId) {
+            const currentView = document.querySelector('.auth-view.active');
+            const nextView = document.getElementById('view-' + viewId);
+
+            if (!nextView || currentView === nextView) return;
+
+            if (currentView) {
+                currentView.classList.remove('active');
+                currentView.style.display = 'none';
+            }
+            
+            nextView.style.display = 'flex';
+            nextView.classList.add('active');
+        }
+
+        async function handleSignIn() {
+            const email = document.getElementById('signin-email').value;
+            const password = document.getElementById('signin-password').value;
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/signin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert(`Login Successful! Hello, ${data.user.fullname}`);
+                } else { alert("Error: " + data.message); }
+            } catch (err) { alert("Backend server not running!"); }
+        }
+
+        async function handleSignUp() {
+            const fullname = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullname, email, password })
+                });
+                const data = await response.json();
+                if (response.ok) { 
+                    alert("Account Created Successfully!"); 
+                    showView('signin'); 
+                } else { alert("Error: " + data.message); }
+            } catch (err) { alert("Backend server not running!"); }
+        }
+    </script>
+</body>
+</html>
