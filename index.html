@@ -3,18 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>No More Last Minute - Auth Only</title>
+    <title>No More Last Minute</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modals.css">
     <style>
         :root {
+            --dashboard-gap: 20px;
             --g2-blur: blur(20px);
             --apple-blue: #007AFF;
+        }
+
+        .hidden-features {
+            display: none !important;
+        }
+
+        .dashboard-mode {
+            width: min(100%, 1200px) !important;
+            max-width: 1200px !important;
+            min-height: calc(100vh - var(--nav-height) - 60px) !important;
+            height: auto !important;
+            padding: clamp(20px, 2.5vw, 36px) !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            margin: 0 auto;
+            display: block;
+            overflow: visible;
         }
 
         .icloud-nav {
             height: 60px; 
             display: flex;
             align-items: center;
+            padding: 0 var(--dashboard-gap);
             background: rgba(10, 10, 10, 0.6);
             backdrop-filter: var(--g2-blur);
             -webkit-backdrop-filter: var(--g2-blur);
@@ -29,16 +48,308 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
         }
 
-        .welcome-title {
-            font-size: 28px;
+        .nav-actions-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .pill-scroller-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 2px;
+            border-radius: 100px;
+            position: relative;
+            max-width: 380px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pill-track {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 2px 10px; 
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .pill-track::-webkit-scrollbar { display: none; }
+        .pill-track { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .pill {
+            white-space: nowrap;
+            padding: 6px 18px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 400;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.45);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .pill.active {
+            background: white;
+            color: black;
             font-weight: 600;
-            margin-bottom: 30px;
-            letter-spacing: -0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .pill-arrow-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            flex-shrink: 0; 
+            margin: 0 4px;
+        }
+        
+        .pill-arrow-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .nav-circle-group { display: flex; gap: 10px; }
+        .nav-hamburger {
+            display: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .nav-hamburger:hover,
+        .nav-hamburger.open {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+        }
+
+        .nav-hamburger span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 1px;
+            position: relative;
+            transition: background 0.25s ease;
+        }
+
+        .nav-hamburger span::before,
+        .nav-hamburger span::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 1px;
+            left: 0;
+            transition: transform 0.25s ease, top 0.25s ease, opacity 0.25s ease;
+        }
+
+        .nav-hamburger span::before { top: -6px; }
+        .nav-hamburger span::after { top: 6px; }
+        .nav-hamburger:hover { background: rgba(255, 255, 255, 0.15); }
+
+        .nav-hamburger.open span { background: transparent; }
+        .nav-hamburger.open span::before { top: 0; transform: rotate(45deg); }
+        .nav-hamburger.open span::after { top: 0; transform: rotate(-45deg); }
+
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            padding: 14px 18px 18px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+            z-index: 105;
+            flex-direction: column;
+            gap: 18px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-8px);
+            transition: opacity 0.28s ease, transform 0.28s ease;
+        }
+
+        .mobile-menu.open {
+            display: flex;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .mobile-menu-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .mobile-menu .pill {
+            flex: 1 1 auto;
+            min-width: 90px;
+            padding: 10px 14px;
+        }
+
+        .mobile-menu .nav-circle-group {
+            gap: 12px;
+        }
+
+        .mobile-menu .icon-circle {
+            width: 40px;
+            height: 40px;
+        }
+
+        .icon-circle {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.85);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .icon-circle:hover { background: rgba(255, 255, 255, 0.12); transform: translateY(-1px); }
+
+        .dashboard-layout {
+            display: flex;
+            flex-direction: column;
+            gap: var(--dashboard-gap);
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .dashboard-tiles {
+            display: grid;
+            grid-template-columns: minmax(320px, 1.2fr) minmax(320px, 0.8fr);
+            grid-auto-rows: auto;
+            gap: var(--dashboard-gap);
+            width: 100%;
+        }
+
+        @media (max-width: 1000px) {
+            .dashboard-tiles {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .g2-component {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .placeholder-chart {
+            width: 100%;
+            height: 80%;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 1080px) {
+            .dashboard-mode {
+                width: calc(100vw - 48px) !important;
+                max-width: 100vw !important;
+                height: auto !important;
+                padding: 24px !important;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .icloud-nav {
+                padding: 0 14px;
+                height: 62px;
+            }
+            .nav-content {
+                gap: 12px;
+            }
+            .pill-scroller-container,
+            .nav-circle-group {
+                display: none !important;
+            }
+            .nav-hamburger {
+                display: none;
+            }
+            .mobile-menu {
+                width: calc(100vw - 32px);
+                left: 16px;
+                right: 16px;
+            }
+            .mobile-menu .nav-circle-group {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-mode {
+                width: calc(100vw - 32px) !important;
+                padding: 20px !important;
+            }
+            .nav-content {
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+            .brand-name {
+                font-size: 15px;
+            }
+            .pill {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .dashboard-mode {
+                width: calc(100vw - 20px) !important;
+                padding: 18px !important;
+            }
+            .nav-hamburger {
+                width: 40px;
+                height: 40px;
+            }
+            .mobile-menu {
+                width: calc(100vw - 24px);
+                left: 12px;
+                right: 12px;
+                padding: 14px 16px 18px;
+            }
+            .mobile-menu .pill {
+                min-width: 80px;
+                padding: 9px 12px;
+            }
         }
     </style>
 </head>
@@ -52,6 +363,83 @@
                     <div class="timer-icon"><div class="hand"></div></div>
                     <span class="brand-name">No More Last Minute</span>
                 </div>
+            </div>
+
+            <div class="nav-actions-wrapper">
+                <button class="nav-hamburger" id="mobileMenuButton" onclick="toggleMobileMenu()" aria-label="Navigation menu">
+                    <span></span>
+                </button>
+                <div class="pill-scroller-container" id="nav-pills" style="display: none;">
+                    <button class="pill-arrow-btn left" onclick="scrollPills('left')">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+
+                    <div class="pill-track" id="pillTrack">
+                        <div class="pill active" onclick="selectPill(this, 'dashboard')">Overview</div>
+                        <div class="pill" onclick="selectPill(this, 'task')">Task</div>
+                        <div class="pill" onclick="selectPill(this, 'leaderboard')">Leaderboard</div>
+                        <div class="pill" onclick="selectPill(this, 'stats')">Stats</div>
+                        <div class="pill" onclick="selectPill(this, 'promodora')">Promodora</div>
+                    </div>
+
+                    <button class="pill-arrow-btn right" onclick="scrollPills('right')">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="nav-circle-group" id="nav-actions" style="display: none;">
+                    <button class="icon-circle" title="Search" onclick="openModal('search')">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                    <button class="icon-circle" title="Settings" onclick="openModal('settings')">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </button>
+                    <button class="icon-circle" onclick="openModal('account')" title="Account">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+            <div class="mobile-menu-section">
+                <div class="pill active" onclick="selectPill(this, 'dashboard')">Overview</div>
+                <div class="pill" onclick="selectPill(this, 'task')">Task</div>
+                <div class="pill" onclick="selectPill(this, 'leaderboard')">Leaderboard</div>
+                <div class="pill" onclick="selectPill(this, 'stats')">Stats</div>
+                <div class="pill" onclick="selectPill(this, 'promodora')">Promodora</div>
+            </div>
+            <div class="mobile-menu-section mobile-actions">
+                <button class="icon-circle" title="Search">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+                <button class="icon-circle" title="Settings">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+                <button class="icon-circle" onclick="showView('signin')" title="Account">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
             </div>
         </div>
     </nav>
@@ -75,7 +463,7 @@
                 <div id="view-signin" class="auth-view">
                     <h1 class="welcome-title">Sign In</h1>
                     <div class="input-stack">
-                        <input type="email" id="signin-email" placeholder="Student Email" class="apple-input">
+                        <input type="email" id="signin-email" placeholder="Email or Student ID" class="apple-input">
                         <input type="password" id="signin-password" placeholder="Password" class="apple-input">
                     </div>
                     <button class="action-btn" onclick="handleSignIn()">Login</button>
@@ -92,16 +480,218 @@
                     <button class="action-btn" onclick="handleSignUp()">Create Account</button>
                     <p class="form-switch">Already have an ID? <span onclick="showView('signin')">Sign In</span></p>
                 </div>
+
+                <div id="view-dashboard" class="auth-view">
+                    <div class="dashboard-layout">
+                        <div class="dashboard-tiles">
+                            <div class="g2-component tile-summary">
+                                <h4 class="section-label" id="user-greeting" style="margin:0; opacity: 0.6; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Quick Summary</h4>
+                                <div class="stats-subgrid">
+                                    <div class="stat-item">
+                                        <span class="stat-value">0</span>
+                                        <span class="stat-label">Total Task</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">0</span>
+                                        <span class="stat-label">Completed</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">0</span>
+                                        <span class="stat-label">Pending</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value">0</span>
+                                        <span class="stat-label">Minutes</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="g2-component tile-completion" style="display:flex; align-items:center; justify-content:space-between;">
+                                <div>
+                                    <span class="stat-label">Overall Completion</span>
+                                    <span class="stat-value" style="font-size: 32px;">0%</span>
+                                </div>
+                                <div class="mini-progress-ring"></div>
+                            </div>
+
+                            <div class="g2-component tile-chart">
+                                <h4 class="section-label" style="margin:0; opacity: 0.6; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Recent Study Trend</h4>
+                                <div class="placeholder-chart">
+                                    <p>Visualizing your productivity...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="view-task" class="auth-view">
+                    <div class="task-page-layout">
+                        <div class="calendar-header">
+                            <button class="cal-arrow" onclick="changeMonth(-1)">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </button>
+                            <h2 id="current-month-display">May 2026</h2>
+                            <button class="cal-arrow" onclick="changeMonth(1)">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                        </div>
+
+                        <div class="task-content-grid">
+                            <div class="g2-component calendar-card">
+                                <div class="weekday-labels">
+                                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thr</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                                </div>
+                                <div id="calendar-days-grid" class="days-grid">
+                                    </div>
+                            </div>
+
+                            <div class="task-sidebar">
+                                <div class="g2-component input-card">
+                                    <span class="card-label">New Task</span>
+                                    <input type="text" id="task-title" placeholder="Title" class="task-input">
+                                    <textarea id="task-desc" placeholder="Description" class="task-input" rows="3"></textarea>
+                                        
+                                        <div class="time-picker-row">
+                                            <span class="input-sublabel">Execution Time:</span>
+                                            <input type="time" id="task-time" class="task-input-time">
+                                        </div>
+
+                                    <div class="color-picker">
+                                        <div class="color-dot" style="background: #FF3B30;" onclick="selectColor(this, '#FF3B30')"></div>
+                                        <div class="color-dot" style="background: #FF9500;" onclick="selectColor(this, '#FF9500')"></div>
+                                        <div class="color-dot" style="background: #FFCC00;" onclick="selectColor(this, '#FFCC00')"></div>
+                                        <div class="color-dot" style="background: #34C759;" onclick="selectColor(this, '#34C759')"></div>
+                                        <div class="color-dot" style="background: #007AFF;" onclick="selectColor(this, '#007AFF')"></div>
+                                        <div class="color-dot" style="background: #5856D6;" onclick="selectColor(this, '#5856D6')"></div>
+                                        <div class="color-dot" style="background: #AF52DE;" onclick="selectColor(this, '#AF52DE')"></div>
+                                    </div>
+
+                                    <button class="action-btn confirm-btn" onclick="saveTask()">Confirm</button>
+                                </div>
+
+                                <div class="g2-component list-card">
+                                    <span class="card-label">Today's Tasks</span>
+                                    <div id="daily-task-list" class="task-items-container">
+                                        <div class="task-item-entry">
+                                            <div class="task-info">
+                                                <span class="dot-indicator" style="background: #007AFF;"></span>
+                                                <div class="text-group">
+                                                    <p class="t-name">Event Party</p>
+                                                    <p class="t-time">09:00 AM - 12:00 PM</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
+
+    <!-- Search Modal -->
+    <div class="modal-backdrop" id="searchBackdrop"></div>
+    <div class="modal-container" id="searchModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>Search</span>
+                <button class="modal-close-btn" onclick="closeModal('search')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search pages, tasks, features..." oninput="handleSearch(this.value)">
+            </div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-backdrop" id="settingsBackdrop"></div>
+    <div class="modal-container" id="settingsModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>Settings</span>
+                <button class="modal-close-btn" onclick="closeModal('settings')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="settings-layout">
+                <div class="settings-sidebar">
+                    <div class="settings-menu-item active" onclick="switchSettingsTab(event, 'general')">General</div>
+                    <div class="settings-menu-item" onclick="switchSettingsTab(event, 'contact')">Contact</div>
+                </div>
+                <div class="settings-content">
+                    <div id="settings-general" class="settings-section active">
+                        <div class="settings-item">
+                            <span class="settings-item-label">Theme</span>
+                            <span class="settings-item-value">Dark Mode</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Language</span>
+                            <span class="settings-item-value">English</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Notifications</span>
+                            <span class="settings-item-value">Enabled</span>
+                        </div>
+                    </div>
+                    <div id="settings-contact" class="settings-section">
+                        <div class="settings-item">
+                            <span class="settings-item-label">Email</span>
+                            <span class="settings-item-value" onclick="openMailClient('contact@nmlm.app')">contact@nmlm.app</span>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Phone</span>
+                            <span class="settings-item-value">+1 (555) 123-4567</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Modal -->
+    <div class="modal-backdrop" id="accountBackdrop"></div>
+    <div class="modal-container" id="accountModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>Account</span>
+                <button class="modal-close-btn" onclick="closeModal('account')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="account-profile">
+                <div class="account-avatar" id="accountAvatar" onclick="changeAvatar()">U</div>
+                <div class="account-name" id="accountName">User Name</div>
+                <div class="account-email" id="accountEmail">user@example.com</div>
+            </div>
+            <div class="account-actions">
+                <button class="account-action-btn secondary" onclick="editProfile()">Edit Profile</button>
+                <button class="account-action-btn secondary" onclick="switchAccount()">Switch Account</button>
+                <button class="account-action-btn danger" onclick="confirmLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="icloud-footer">
         <div class="footer-content">
-            <p>© 2026 NMLM Project. MMU Foundation in Computing.</p>
+            <p>© 2026 NMLM Project. Multimedia University Student Work.</p>
         </div>
     </footer>
 
-    <script src="js/particle.js"></script> 
+    <script src="js/particle.js"></script>
+    <script src="js/main.js"></script>
     <script>
         const track = document.getElementById('pillTrack');
         const btnLeft = document.querySelector('.pill-arrow-btn.left'); 
