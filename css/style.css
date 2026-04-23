@@ -2,7 +2,7 @@
     --apple-blue: #007AFF;
     --nav-height: 52px;
     --g2-radius: 54px; 
-    --g2-blur: blur(20px);
+    --glass-bg: rgba(255, 255, 255, 0.05);
 }
 
 * {
@@ -20,7 +20,7 @@ body {
     width: 100vw;
     overflow-x: hidden;
     overflow-y: auto;
-    scrollbar-width: none; 
+    scrollbar-width: none;
 }
 
 body::-webkit-scrollbar {
@@ -44,8 +44,8 @@ body::-webkit-scrollbar {
     width: 100%;
     height: var(--nav-height);
     background: rgba(20, 20, 20, 0.7);
-    backdrop-filter: saturate(180%) var(--g2-blur);
-    -webkit-backdrop-filter: saturate(180%) var(--g2-blur);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
     z-index: 100;
     display: flex;
     justify-content: center;
@@ -54,11 +54,132 @@ body::-webkit-scrollbar {
 
 .nav-content {
     width: 100%;
-    max-width: 1200px;
-    padding: 0 20px;
+    max-width: 1440px;
+    padding: 0 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.nav-actions-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.pill-scroller-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 3px;
+    border-radius: 100px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-width: 420px;
+    overflow: hidden; 
+}
+
+
+.pill {
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.5);
+    transition: 0.3s;
+}
+
+.pill.active {
+    background: white;
+    color: black;
+    font-weight: 500;
+}
+
+.pill-arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(40, 40, 40, 0.9); 
+    backdrop-filter: blur(4px);
+    color: white;
+    cursor: pointer;
+    z-index: 100; 
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto; 
+}
+
+.pill-arrow-btn.left {
+    left: 4px;
+}
+
+.pill-arrow-btn.right {
+    right: 4px;
+}
+
+.pill-track {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 2px 35px; 
+    
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 40px,
+        black calc(100% - 40px),
+        transparent
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 40px,
+        black calc(100% - 40px),
+        transparent
+    );
+}
+
+@media (max-width: 768px) {
+    .pill-arrow-btn { display: none !important; }
+    .pill-track { padding: 2px 10px; }
+}
+
+.nav-circle-group {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.icon-circle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.icon-circle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
 }
 
 .logo-group {
@@ -99,10 +220,14 @@ body::-webkit-scrollbar {
     position: relative;
     z-index: 10;
     min-height: 100vh;
+    height: auto;
+    flex-direction: column;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-top: var(--nav-height);
+    background: transparent !important;
+    padding-top: calc(var(--nav-height) + 20px);
+    padding-bottom: 60px;
 }
 
 .g2-super-ellipse {
@@ -118,6 +243,7 @@ body::-webkit-scrollbar {
     min-height: 480px;
     overflow: hidden;
     padding: 40px;
+    position: relative;
     transition: all 0.7s cubic-bezier(0.2, 0, 0, 1); 
 }
 
@@ -153,21 +279,93 @@ body::-webkit-scrollbar {
     text-align: center;
 }
 
+.next-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    transition: 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.next-btn:hover {
+    background: white;
+    color: black;
+}
+
+.features-section {
+    display: none;
+    padding: 100px 20px;
+    justify-content: center;
+    gap: 40px;
+    z-index: 10;
+    position: relative;
+    flex-wrap: wrap;
+    transition: opacity 0.6s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.features-section.active-mode {
+    display: flex !important; 
+}
+
+.feature-card {
+    width: 320px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--g2-radius);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--apple-blue);
+}
+
+
 .auth-view {
     display: none; 
     width: 100%;
+    opacity: 0;
     flex-direction: column;
     align-items: center;
+    text-align: center;
 }
 
 .auth-view.active {
     display: flex; 
+    opacity: 1;
     animation: authIn 0.6s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.auth-view.exiting {
+    display: flex;
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    right: 40px;
+    pointer-events: none;
+    animation: authOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes authIn {
     from { opacity: 0; transform: scale(0.95) translateY(30px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes authOut {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to { opacity: 0; transform: scale(0.98) translateY(-20px); }
 }
 
 .input-stack {
@@ -208,40 +406,491 @@ body::-webkit-scrollbar {
     transition: 0.3s;
 }
 
-.next-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(255, 255, 255, 0.3);
-    background: transparent;
-    color: white;
-    cursor: pointer;
+.action-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+.g2-super-ellipse.dashboard-mode {
+    width: min(100%, 1200px) !important;
+    max-width: 1200px !important;
+    min-height: calc(100vh - var(--nav-height) - 60px) !important;
+    height: auto !important;
+    padding: clamp(24px, 2.5vw, 34px);
+    overflow: visible !important;
+    position: relative;
+    z-index: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    margin: 0 auto;
+}
+
+.g2-super-ellipse.dashboard-mode::-webkit-scrollbar {
+    display: none;
+}
+
+.dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    height: 100%;
+}
+
+.dashboard-tiles {
+    display: grid;
+    grid-template-columns: minmax(320px, 1.1fr) minmax(320px, 0.9fr);
+    grid-auto-rows: auto;
+    gap: 20px;
+}
+
+.g2-component {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 20px;
     transition: 0.3s;
+    flex: 0 1 auto;
 }
 
-.next-btn:hover { background: white; color: black; }
-
-.form-switch {
-    margin-top: 20px;
-    font-size: 14px;
-    opacity: 0.6;
+.stats-subgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
 }
 
-.form-switch span {
-    color: var(--apple-blue);
-    cursor: pointer;
-    font-weight: 500;
+.stat-item {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 15px;
+    border-radius: 18px;
+    text-align: left;
 }
 
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
 
 .icloud-footer {
     padding: 60px 20px;
     background: rgba(0, 0, 0, 0.8);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 10;
     text-align: center;
+}
+
+/* --- Task View 专用样式 --- */
+
+/* 布局控制 */
+.task-page-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+    animation: authIn 0.6s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+/* 防止任务区域子项超出父容器并被遮挡 */
+.task-content-grid,
+.calendar-card,
+.task-sidebar,
+.task-items-container {
+    min-height: 0;
+    min-width: 0;
+}
+
+/* 顶部月份切换 */
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 10px;
+}
+
+.calendar-header h2 {
+    font-size: 24px;
+    font-weight: 500;
+    min-width: 180px;
+}
+
+.cal-arrow {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.cal-arrow:hover { background: rgba(255, 255, 255, 0.15); }
+
+.task-content-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) 380px; 
+    gap: 20px;
+    align-items: stretch;
+    flex: none;
+    min-height: 0;    /* 关键：允许子元素（如任务列表）在高度受限时缩小 */
+    overflow: visible;
+}
+
+/* 日历卡片样式 */
+.calendar-card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px !important;
+    height: 100%;
+}
+
+.weekday-labels {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4);
     font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    /* 核心修复：限制行高，防止在内容多时无限向下拉长 */
+    grid-template-rows: repeat(6, minmax(0, 1fr)); 
+    gap: 10px; 
+    flex: 1;  
+    min-height: 0; /* 允许在高度受限时缩小格子 */
+    height: 100%;
+    padding-bottom: 5px;
+}
+
+.day-cell {
+    aspect-ratio: auto;
+    width: 100%;
+    height: 100%; 
+    min-height: 45px; /* 设定最小高度，保证触控体验 */
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px; /* 增加圆角，更符合 Apple G2 风格 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: all 0.2s ease;
+}
+
+.day-cell:hover { background: rgba(255, 255, 255, 0.08); }
+
+/* 手稿要求的：点击选择该日期，浅蓝色提示 */
+.day-cell.active-date {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid white;
+    color: white;
+}
+
+.day-cell.is-today {
+    background: var(--apple-blue) !important;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 10px 20px rgba(0, 122, 255, 0.4); /* 蓝色悬浮阴影 */
+    transform: translateY(-2px); /* 悬浮位移 */
+    border: none;
+}
+
+.task-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+    gap: 16px; /* 减少组件间的外部间距 */
+}
+
+.new-task-card {
+    flex: 0 0 auto; 
+}
+
+.card-label {
+    display: block;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.task-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    padding: 12px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    outline: none;
+    resize: none;
+}
+
+/* 7色标记 */
+.color-picker {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0 16px;
+}
+
+.color-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.2s;
+}
+
+
+.color-dot:hover { transform: scale(1.2); }
+.color-dot.selected { border-color: white; transform: scale(1.2); }
+
+.task-items-container {
+    flex: 1;         /* 自动占据侧边栏剩下的所有空间 */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto; /* 只有这里可以滚动 */
+    padding-right: 5px; /* 为滚动条留点呼吸感 */
+    
+    /* 隐藏滚动条但保留功能 */
+    scrollbar-width: none; 
+    scroll-behavior: smooth;
+    min-height: 100px;
+}
+
+.task-items-container::-webkit-scrollbar {
+    display: none;
+}
+
+.task-item-entry {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 14px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.task-info { display: flex; align-items: center; gap: 15px; }
+
+.dot-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.t-name { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+.t-time { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
+
+/* 适配小屏幕 */
+@media (max-width: 1100px) {
+    .task-content-grid { grid-template-columns: 1fr; }
+    .task-sidebar { order: -1; }
+}
+
+@media (max-width: 1000px) {
+    .dashboard-tiles {
+        grid-template-columns: 1fr;
+    }
+    .dashboard-layout {
+        gap: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .g2-super-ellipse.dashboard-mode,
+    .g2-super-ellipse {
+        width: calc(100vw - 30px);
+        padding: 20px;
+        border-radius: 32px;
+        margin: 0 15px;
+    }
+    .task-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .g2-super-ellipse.dashboard-mode,
+    .g2-super-ellipse {
+        width: calc(100vw - 30px);
+        padding: 18px;
+        margin: 0 15px;
+    }
+}
+
+@media (max-width: 900px) {
+    .main-viewport {
+        padding-top: calc(var(--nav-height) + 16px);
+        padding-bottom: 40px;
+    }
+
+    .g2-super-ellipse.dashboard-mode {
+        width: calc(100vw - 32px) !important;
+        max-width: 100% !important;
+        padding: 24px;
+    }
+
+    .g2-super-ellipse {
+        width: calc(100vw - 32px);
+        min-height: auto;
+        padding: 28px;
+        border-radius: 34px;
+    }
+
+    .task-content-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .calendar-card,
+    .task-sidebar .g2-component {
+        padding: 22px !important;
+    }
+
+    .task-sidebar {
+        gap: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .g2-super-ellipse.dashboard-mode,
+    .g2-super-ellipse {
+        width: calc(100vw - 24px);
+        padding: 20px;
+    }
+
+    .task-input,
+    .task-input-time,
+    .action-btn {
+        font-size: 14px;
+    }
+
+    .calendar-header {
+        gap: 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .g2-super-ellipse.dashboard-mode,
+    .g2-super-ellipse {
+        width: calc(100vw - 18px);
+        padding: 18px;
+    }
+
+    .pill {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .task-input,
+    .task-input-time {
+        font-size: 13px;
+        padding: 10px;
+    }
+
+    .action-btn {
+        padding: 12px;
+    }
+}
+
+/* --- 时间选择器组件样式 --- */
+
+/* 容器布局 */
+.time-picker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    transition: 0.3s;
+}
+
+.time-picker-row:focus-within {
+    border-color: var(--apple-blue);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.input-sublabel {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 400;
+}
+
+/* 核心 Input 样式 */
+.task-input-time {
+    background: transparent;
+    border: none;
+    color: white;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    text-align: right;
+    width: 100px;
+}
+
+/* 移除 Chrome 的原生时钟图标，保持 Apple 的纯净感 */
+.task-input-time::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* 变成白色 */
     opacity: 0.5;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.task-input-time::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* 确保 Confirm 按钮在输入框下方有足够呼吸感 */
+.confirm-btn {
+    margin-top: 10px;
+}
+
+/* --- 任务列表显示优化 --- */
+.task-item-entry .t-time {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 如果你想在任务列表里给时间加个小图标 */
+.task-item-entry .t-time::before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>') no-repeat center;
+    background-size: contain;
 }
