@@ -101,22 +101,125 @@
         </div>
     </footer>
 
-    <script src="js/particle.js"></script>
+    <script src="js/particle.js"></script> 
     <script>
+        const track = document.getElementById('pillTrack');
+        const btnLeft = document.querySelector('.pill-arrow-btn.left'); 
+        const btnRight = document.querySelector('.pill-arrow-btn.right');
+
+
+        function updateScrollButtons() {
+            if (!track || !btnLeft || !btnRight) return;
+
+            const scrollLeft = track.scrollLeft;
+            const maxScroll = track.scrollWidth - track.clientWidth;
+
+            btnLeft.style.display = scrollLeft > 1 ? 'flex' : 'none';            
+            btnRight.style.display = scrollLeft < (maxScroll - 2) ? 'flex' : 'none';        }
+
+        function scrollPills(direction) {
+            const distance = 160;
+            if (direction === 'left') {
+                track.scrollBy({ left: -distance, behavior: 'smooth' });
+            } else {
+                track.scrollBy({ left: distance, behavior: 'smooth' });
+            }
+        }
+
+        track.addEventListener('scroll', updateScrollButtons);
+        setTimeout(updateScrollButtons, 100);
+        window.addEventListener('resize', () => {
+            updateScrollButtons();
+            updateMobileNavVisibility();
+        });
+
+        function updateMobileNavVisibility() {
+            const hamburger = document.getElementById('mobileMenuButton');
+            const menu = document.getElementById('mobileMenu');
+            const mainContainer = document.getElementById('main-container');
+            const isMobile = window.innerWidth <= 900;
+            const isDashboardPage = mainContainer && mainContainer.classList.contains('dashboard-mode');
+
+            if (hamburger) {
+                if (isMobile && isDashboardPage) {
+                    hamburger.style.display = 'flex';
+                } else {
+                    hamburger.style.display = 'none';
+                }
+            }
+
+            if (menu) {
+                if (!isMobile || !isDashboardPage) {
+                    menu.classList.remove('open');
+                    menu.setAttribute('aria-hidden', 'true');
+                }
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const hamburger = document.getElementById('mobileMenuButton');
+            if (!menu) return;
+            menu.classList.toggle('open');
+            if (hamburger) {
+                hamburger.classList.toggle('open', menu.classList.contains('open'));
+            }
+            menu.setAttribute('aria-hidden', String(!menu.classList.contains('open')));
+        }
+
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const hamburger = document.getElementById('mobileMenuButton');
+            if (!menu) return;
+            menu.classList.remove('open');
+            menu.setAttribute('aria-hidden', 'true');
+            if (hamburger) hamburger.classList.remove('open');
+        }
 
         function showView(viewId) {
             const currentView = document.querySelector('.auth-view.active');
             const nextView = document.getElementById('view-' + viewId);
+            const container = document.getElementById('main-container');
+            const features = document.getElementById('features-section'); 
 
             if (!nextView || currentView === nextView) return;
 
+            if (viewId === 'dashboard' || viewId === 'task') { 
+                container.classList.add('dashboard-mode');
+                if (features) features.style.display = 'flex'; 
+                setTimeout(updateScrollButtons, 100);
+            } else {
+                container.classList.remove('dashboard-mode');
+                if (features) features.style.display = 'none'; 
+                setTimeout(updateScrollButtons, 300);
+            }
+
+            if (viewId === 'task') {
+                const freshDate = new Date();
+                currentYear = freshDate.getFullYear(); // 去掉前面的 let/const
+                currentMonth = freshDate.getMonth();
+                renderCalendar(currentYear, currentMonth);
+            }
+
             if (currentView) {
                 currentView.classList.remove('active');
-                currentView.style.display = 'none';
+                currentView.classList.add('exiting');
+                setTimeout(() => currentView.classList.remove('exiting'), 400);
             }
-            
-            nextView.style.display = 'flex';
-            nextView.classList.add('active');
+            if (nextView) nextView.classList.add('active');
+
+            if (viewId === 'task') {
+                renderCalendar(currentYear, currentMonth); // 确保每次进入Task页面都重新渲染
+            }
+
+            updateMobileNavVisibility();
+        }
+
+        function selectPill(element, viewName) {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            element.classList.add('active');
+            showView(viewName);
+            closeMobileMenu();
         }
 
         async function handleSignIn() {
@@ -130,7 +233,14 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    alert(`Login Successful! Hello, ${data.user.fullname}`);
+                    document.getElementById('nav-pills').style.display = 'flex';
+                    document.getElementById('nav-actions').style.display = 'flex';
+                    
+                    const blueCircle = document.getElementById('video-placeholder');
+                    if (blueCircle) blueCircle.style.display = 'none';
+
+                    document.getElementById('user-greeting').innerText = `Hello, ${data.user.fullname}`;
+                    showView('dashboard');
                 } else { alert("Error: " + data.message); }
             } catch (err) { alert("Backend server not running!"); }
         }
@@ -146,12 +256,202 @@
                     body: JSON.stringify({ fullname, email, password })
                 });
                 const data = await response.json();
-                if (response.ok) { 
-                    alert("Account Created Successfully!"); 
-                    showView('signin'); 
-                } else { alert("Error: " + data.message); }
+                if (response.ok) { alert("Account Created!"); showView('signin'); }
+                else { alert("Error: " + data.message); }
             } catch (err) { alert("Backend server not running!"); }
         }
+
+        function saveTask() {
+            if (!selectedDate) {
+                alert("Please select a date first!");
+                return;
+            }
+
+            const titleEl = document.getElementById('task-title');
+            const descEl = document.getElementById('task-desc');
+            const timeEl = document.getElementById('task-time'); // 获取新元素
+
+            if (!titleEl.value.trim()) {
+                alert("Please enter a title");
+                return;
+            }
+
+            // 处理时间：优先使用用户选择的时间，否则使用当前系统时间
+            let finalTime;
+            if (timeEl && timeEl.value) {
+                // 将 24小时制的 input 值转换为 12小时制 (例如 14:00 -> 02:00 PM)
+                const [hours, minutes] = timeEl.value.split(':');
+                const suffix = hours >= 12 ? 'PM' : 'AM';
+                const displayHours = hours % 12 || 12;
+                finalTime = `${displayHours}:${minutes} ${suffix}`;
+            } else {
+                const now = new Date();
+                finalTime = now.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            }
+
+            const newTask = {
+                title: titleEl.value.trim(),
+                description: descEl.value.trim(),
+                color: selectedColor,
+                time: finalTime // 使用处理后的时间
+            };
+
+            if (!tasks[selectedDate]) tasks[selectedDate] = [];
+            tasks[selectedDate].push(newTask);
+
+            // 重置输入框
+            titleEl.value = '';
+            descEl.value = '';
+            timeEl.value = ''; // 清空时间选择
+            
+            updateTaskList();
+        }
+
+        // ==================== Modal Functions ====================
+        
+        // Open Modal
+        function openModal(type) {
+            const backdrop = document.getElementById(type + 'Backdrop');
+            const modal = document.getElementById(type + 'Modal');
+            
+            if (backdrop && modal) {
+                backdrop.classList.add('open');
+                modal.classList.add('open');
+                backdrop.onclick = () => closeModal(type);
+            }
+        }
+
+        // Close Modal
+        function closeModal(type) {
+            const backdrop = document.getElementById(type + 'Backdrop');
+            const modal = document.getElementById(type + 'Modal');
+            
+            if (backdrop && modal) {
+                backdrop.classList.remove('open');
+                modal.classList.remove('open');
+            }
+        }
+
+        // Search Function
+        function handleSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+            const pages = ['Dashboard', 'Task', 'Leaderboard', 'Stats', 'Pomodoro'];
+            
+            if (!query.trim()) {
+                searchResults.innerHTML = '';
+                return;
+            }
+
+            const lowerQuery = query.toLowerCase();
+            const results = [];
+
+            // Search pages
+            pages.forEach(page => {
+                if (page.toLowerCase().includes(lowerQuery)) {
+                    results.push({ type: 'page', name: page, icon: '📄' });
+                }
+            });
+
+            // Search tasks
+            Object.keys(tasks).forEach(date => {
+                tasks[date].forEach((task, index) => {
+                    if (task.title.toLowerCase().includes(lowerQuery)) {
+                        results.push({ type: 'task', name: task.title, date: date, icon: '✓' });
+                    }
+                });
+            });
+
+            // Display results
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="search-result-item" style="padding: 12px; opacity: 0.6;">No results found</div>';
+                return;
+            }
+
+            searchResults.innerHTML = results.map((result, idx) => {
+                if (result.type === 'page') {
+                    return `<div class="search-result-item" onclick="selectPill(this, '${result.name.toLowerCase()}'); closeModal('search')">
+                        <span>${result.icon}</span>
+                        <span>${result.name}</span>
+                    </div>`;
+                } else {
+                    return `<div class="search-result-item" onclick="selectDate('${result.date}'); closeModal('search')">
+                        <span>${result.icon}</span>
+                        <span>${result.name}</span>
+                        <span style="opacity: 0.6; font-size: 12px;">${result.date}</span>
+                    </div>`;
+                }
+            }).join('');
+        }
+
+        // Switch Settings Tab
+        function switchSettingsTab(event, tabName) {
+            // Update active menu item
+            document.querySelectorAll('.settings-menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update active section
+            document.querySelectorAll('.settings-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const section = document.getElementById('settings-' + tabName);
+            if (section) section.classList.add('active');
+        }
+
+        // Edit Profile
+        function editProfile() {
+            const newName = prompt('Enter your new name:', document.getElementById('accountName').innerText);
+            if (newName && newName.trim()) {
+                document.getElementById('accountName').innerText = newName;
+            }
+        }
+
+        // Switch Account
+        function switchAccount() {
+            if (confirm('Are you sure you want to switch accounts?')) {
+                showView('signin');
+                closeModal('account');
+                closeMobileMenu();
+            }
+        }
+
+        // Logout
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                showView('intro');
+                closeModal('account');
+                closeMobileMenu();
+                document.getElementById('nav-pills').style.display = 'none';
+                document.getElementById('nav-actions').style.display = 'none';
+            }
+        }
+
+        // Change Avatar
+        function changeAvatar() {
+            const initials = prompt('Enter your initials (1-2 characters):', 'U');
+            if (initials && initials.trim()) {
+                document.getElementById('accountAvatar').innerText = initials.toUpperCase().substring(0, 2);
+            }
+        }
+
+        // Open Mail Client
+        function openMailClient(email) {
+            window.location.href = 'mailto:' + email;
+        }
+
+        // Helper function to select date from search
+        function selectDate(dateStr) {
+            const [year, month, day] = dateStr.split('-').map(Number);
+            currentYear = year;
+            currentMonth = month - 1;
+            selectedDate = dateStr;
+            renderCalendar(year, month - 1);
+            updateTaskList();
+            showView('task');
+        }
+
+        updateMobileNavVisibility();
     </script>
 </body>
 </html>
