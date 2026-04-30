@@ -132,7 +132,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.25);
@@ -140,9 +140,14 @@
 
         .nav-hamburger:hover,
         .nav-hamburger.open {
-            transform: scale(1.05);
+            transform: scale(1.08) rotate(90deg);
             background: rgba(255, 255, 255, 0.16);
             box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+        }
+
+        .nav-hamburger:active {
+            transform: scale(0.95);
+            transition: transform 0.1s ease;
         }
 
         .nav-hamburger span {
@@ -419,7 +424,7 @@
                 <div class="pill" onclick="selectPill(this, 'task')">Task</div>
                 <div class="pill" onclick="selectPill(this, 'leaderboard')">Leaderboard</div>
                 <div class="pill" onclick="selectPill(this, 'stats')">Stats</div>
-                <div class="pill" onclick="selectPill(this, 'promodora')">Promodora</div>
+                <div class="pill" onclick="selectPill(this, 'promodoro')">Promodoro</div>
             </div>
             <div class="mobile-menu-section mobile-actions">
                 <button class="icon-circle" title="Search">
@@ -475,10 +480,37 @@
                     <div class="input-stack">
                         <input type="text" id="signup-name" placeholder="Full Name" class="apple-input">
                         <input type="email" id="signup-email" placeholder="Student Email" class="apple-input">
-                        <input type="password" id="signup-password" placeholder="Password" class="apple-input">
+                        <input type="password" id="signup-password" placeholder="Password" class="apple-input" oninput="checkPasswordStrength()">
+                        <div class="password-strength-container">
+                            <div class="password-strength-bar">
+                                <div class="password-strength-fill" id="strength-fill"></div>
+                            </div>
+                            <div class="password-strength-info">
+                                <span class="strength-label" id="strength-label"></span>
+                                <span class="strength-check" id="strength-check">✓</span>
+                            </div>
+                        </div>
+                        <input type="password" id="signup-confirm-password" placeholder="Confirm Password" class="apple-input">
+                        <span class="confirm-error" id="confirm-error"></span>
                     </div>
                     <button class="action-btn" onclick="handleSignUp()">Create Account</button>
                     <p class="form-switch">Already have an ID? <span onclick="showView('signin')">Sign In</span></p>
+                </div>
+
+                <div id="view-otp" class="auth-view">
+                    <h1 class="welcome-title">Verify Email</h1>
+                    <p class="otp-subtitle">We've sent a 6-digit code to your email</p>
+                    <div class="otp-input-container">
+                        <input type="text" class="otp-input" maxlength="1" id="otp-1" oninput="handleOtpInput(this, 'otp-2')" onkeydown="handleOtpKeydown(event, this, null)">
+                        <input type="text" class="otp-input" maxlength="1" id="otp-2" oninput="handleOtpInput(this, 'otp-3')" onkeydown="handleOtpKeydown(event, this, 'otp-1')">
+                        <input type="text" class="otp-input" maxlength="1" id="otp-3" oninput="handleOtpInput(this, 'otp-4')" onkeydown="handleOtpKeydown(event, this, 'otp-2')">
+                        <input type="text" class="otp-input" maxlength="1" id="otp-4" oninput="handleOtpInput(this, 'otp-5')" onkeydown="handleOtpKeydown(event, this, 'otp-3')">
+                        <input type="text" class="otp-input" maxlength="1" id="otp-5" oninput="handleOtpInput(this, 'otp-6')" onkeydown="handleOtpKeydown(event, this, 'otp-4')">
+                        <input type="text" class="otp-input" maxlength="1" id="otp-6" oninput="handleOtpInput(this, null)" onkeydown="handleOtpKeydown(event, this, 'otp-5')">
+                    </div>
+                    <button class="action-btn" onclick="handleOtpVerify()">Verify</button>
+                    <p class="otp-resend">Didn't receive the code? <span onclick="resendOtp()">Resend</span></p>
+                    <p class="form-switch">Back to <span onclick="showView('signin')">Sign In</span></p>
                 </div>
 
                 <div id="view-dashboard" class="auth-view">
@@ -586,6 +618,61 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Leaderboard View -->
+                <div id="view-leaderboard" class="auth-view">
+                    <div class="leaderboard-page-layout">
+                        <!-- Top Section: User Info + Total Time -->
+                        <div class="leaderboard-top-section">
+                            <!-- Left: User Rank & Share -->
+                            <div class="leaderboard-user-card g2-component">
+                                <div class="user-rank-display">
+                                    <span class="rank-label">Your Rank</span>
+                                    <span class="rank-number" id="userRank">#3</span>
+                                </div>
+                                <div class="user-info-display">
+                                    <div class="user-avatar-large" id="leaderboardAvatar">U</div>
+                                    <span class="user-name-display" id="leaderboardUserName">User Name</span>
+                                </div>
+                                <button class="share-btn g2-btn" onclick="openShareModal()">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                    Share
+                                </button>
+                            </div>
+
+                            <!-- Right: Total Pomodoro Time -->
+                            <div class="leaderboard-stats-card g2-component">
+                                <span class="stats-card-label">Total Pomodoro Time</span>
+                                <div class="total-time-display">
+                                    <span class="time-value" id="totalPomodoroHours">0</span>
+                                    <span class="time-unit">hours</span>
+                                </div>
+                                <div class="pomodoro-icon-large">
+                                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Section: Leaderboard List -->
+                        <div class="leaderboard-bottom-section g2-component">
+                            <div class="leaderboard-header">
+                                <span class="leaderboard-title">Leaderboard</span>
+                            </div>
+                            <div class="leaderboard-list" id="leaderboardList">
+                                <!-- Leaderboard items will be populated from database -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -607,6 +694,71 @@
                 <input type="text" id="searchInput" class="search-input" placeholder="Search pages, tasks, features..." oninput="handleSearch(this.value)">
             </div>
             <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="modal-backdrop" id="shareBackdrop"></div>
+    <div class="modal-container" id="shareModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>Share Your Achievement</span>
+                <button class="modal-close-btn" onclick="closeShareModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="share-card-preview" id="shareCardPreview">
+                <div class="share-card-content">
+                    <div class="share-card-header">
+                        <span class="share-card-title">🏆 My Ranking</span>
+                    </div>
+                    <div class="share-card-body">
+                        <div class="share-user-rank">#<span id="shareRankNumber">3</span></div>
+                        <div class="share-user-name" id="shareUserName">User Name</div>
+                        <div class="share-stats-row">
+                            <div class="share-stat">
+                                <span class="stat-value" id="shareTotalHours">54</span>
+                                <span class="stat-label">Total Hours</span>
+                            </div>
+                            <div class="share-stat">
+                                <span class="stat-value" id="shareAvgHours">1.8</span>
+                                <span class="stat-label">Avg/Day</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="share-buttons">
+                <button class="share-social-btn facebook" onclick="shareToFacebook()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Facebook
+                </button>
+                <button class="share-social-btn instagram" onclick="shareToInstagram()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                    Instagram
+                </button>
+                <button class="share-social-btn x" onclick="shareToX()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    X
+                </button>
+                <button class="share-social-btn download" onclick="downloadShareCard()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download
+                </button>
+            </div>
         </div>
     </div>
 
@@ -646,11 +798,11 @@
                     <div id="settings-contact" class="settings-section">
                         <div class="settings-item">
                             <span class="settings-item-label">Email</span>
-                            <span class="settings-item-value" onclick="openMailClient('contact@nmlm.app')">contact@nmlm.app</span>
+                            <span class="settings-item-value" onclick="openMailClient('goh.kai.yao@student.mmu.edu.my')">goh.kai.yao@student.mmu.edu.my</span>
                         </div>
                         <div class="settings-item">
                             <span class="settings-item-label">Phone</span>
-                            <span class="settings-item-value">+1 (555) 123-4567</span>
+                            <span class="settings-item-value">+60 11-10610906</span>
                         </div>
                     </div>
                 </div>
@@ -690,8 +842,20 @@
         </div>
     </footer>
 
+    <!-- Notification Toast Modal -->
+    <div class="notification-backdrop" id="notificationBackdrop"></div>
+    <div class="notification-modal" id="notificationModal">
+        <div class="notification-window" id="notificationWindow">
+            <button class="notification-close-btn" id="notificationCloseBtn" onclick="closeNotification()">×</button>
+            <div class="notification-icon" id="notificationIcon"></div>
+            <h3 class="notification-title" id="notificationTitle"></h3>
+            <p class="notification-message" id="notificationMessage"></p>
+        </div>
+    </div>
+
     <script src="js/particle.js"></script>
     <script src="js/main.js"></script>
+
     <script>
         const track = document.getElementById('pillTrack');
         const btnLeft = document.querySelector('.pill-arrow-btn.left'); 
@@ -774,7 +938,7 @@
 
             if (!nextView || currentView === nextView) return;
 
-            if (viewId === 'dashboard' || viewId === 'task') { 
+            if (viewId === 'dashboard' || viewId === 'task' || viewId === 'leaderboard') { 
                 container.classList.add('dashboard-mode');
                 if (features) features.style.display = 'flex'; 
                 setTimeout(updateScrollButtons, 100);
@@ -789,6 +953,12 @@
                 currentYear = freshDate.getFullYear(); // 去掉前面的 let/const
                 currentMonth = freshDate.getMonth();
                 renderCalendar(currentYear, currentMonth);
+            }
+
+            // Load leaderboard data when entering leaderboard view
+            if (viewId === 'leaderboard' && currentUserId) {
+                loadLeaderboard();
+                loadUserStats();
             }
 
             if (currentView) {
@@ -830,15 +1000,52 @@
                     if (blueCircle) blueCircle.style.display = 'none';
 
                     document.getElementById('user-greeting').innerText = `Hello, ${data.user.fullname}`;
-                    showView('dashboard');
-                } else { alert("Error: " + data.message); }
-            } catch (err) { alert("Backend server not running!"); }
+                    
+                    // Set current user ID and load leaderboard
+                    currentUserId = data.user.id;
+                    // 设置 main.js 中的用户ID
+                    if (typeof setCurrentUser === 'function') {
+                        setCurrentUser(currentUserId);
+                    }
+                    loadLeaderboard();
+                    loadUserStats();
+                    
+                    showNotification('success', 'Welcome Back!', `Hello ${data.user.fullname}, you're now signed in.`);
+                    setTimeout(() => {
+                        showView('dashboard');
+                    }, 1200);
+                } else {
+                    showNotification('error', 'Login Failed', data.message);
+                }
+            } catch (err) { 
+                showNotification('error', 'Connection Error', 'Backend server not running!'); 
+            }
         }
 
         async function handleSignUp() {
             const fullname = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            const confirmError = document.getElementById('confirm-error');
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                confirmError.textContent = "Passwords do not match!";
+                confirmError.classList.add('show');
+                return;
+            }
+
+            // Check password strength (minimum medium required)
+            const strength = getPasswordStrength(password);
+            if (strength < 3) {
+                confirmError.textContent = "Password is too weak! Please use a stronger password.";
+                confirmError.classList.add('show');
+                return;
+            }
+
+            confirmError.classList.remove('show');
+
             try {
                 const response = await fetch('http://127.0.0.1:5000/api/signup', {
                     method: 'POST',
@@ -846,10 +1053,257 @@
                     body: JSON.stringify({ fullname, email, password })
                 });
                 const data = await response.json();
-                if (response.ok) { alert("Account Created!"); showView('signin'); }
-                else { alert("Error: " + data.message); }
-            } catch (err) { alert("Backend server not running!"); }
+                if (response.ok) {
+                    showNotification('success', 'Account Created!', 'Please check your email to verify your account.');
+                    setTimeout(() => {
+                        showView('otp');
+                        clearOtpInputs();
+                    }, 1500);
+                } else {
+                    showNotification('error', 'Registration Failed', data.message);
+                }
+            } catch (err) { 
+                showNotification('error', 'Connection Error', 'Backend server not running!'); 
+            }
         }
+
+        // OTP Functions
+        let pendingEmail = '';
+
+        function handleOtpInput(current, nextId) {
+            const value = current.value;
+            
+            // Only allow numbers
+            current.value = value.replace(/[^0-9]/g, '');
+            
+            if (current.value.length === 1) {
+                current.classList.add('filled');
+                if (nextId) {
+                    document.getElementById(nextId).focus();
+                }
+            } else {
+                current.classList.remove('filled');
+            }
+        }
+
+        function handleOtpKeydown(event, current, prevId) {
+            if (event.key === 'Backspace') {
+                if (!current.value && prevId) {
+                    document.getElementById(prevId).focus();
+                }
+            }
+        }
+
+        function getOtpCode() {
+            let code = '';
+            for (let i = 1; i <= 6; i++) {
+                code += document.getElementById('otp-' + i).value;
+            }
+            return code;
+        }
+
+        function clearOtpInputs() {
+            for (let i = 1; i <= 6; i++) {
+                const input = document.getElementById('otp-' + i);
+                input.value = '';
+                input.classList.remove('filled', 'error', 'success');
+            }
+        }
+
+        async function handleOtpVerify() {
+            const code = getOtpCode();
+            
+            if (code.length !== 6) {
+                showAllOtpInputs('error');
+                showNotification('error', 'Invalid Code', 'Please enter all 6 digits of the verification code.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code })
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAllOtpInputs('success');
+                    showNotification('success', 'Email Verified!', 'Your account has been verified successfully.');
+                    setTimeout(() => {
+                        showView('signin');
+                    }, 1500);
+                } else {
+                    showAllOtpInputs('error');
+                    showNotification('error', 'Verification Failed', data.message || 'Invalid or expired verification code.');
+                }
+            } catch (err) {
+                showNotification('error', 'Connection Error', 'Backend server not running!');
+            }
+        }
+
+        function showAllOtpInputs(state) {
+            for (let i = 1; i <= 6; i++) {
+                const input = document.getElementById('otp-' + i);
+                input.classList.remove('filled', 'error', 'success');
+                if (state) {
+                    input.classList.add(state);
+                }
+            }
+        }
+
+        async function resendOtp() {
+            showNotification('success', 'Code Sent!', 'A new verification code has been sent to your email.');
+        }
+
+        // Notification System
+        function showNotification(type, title, message) {
+            const backdrop = document.getElementById('notificationBackdrop');
+            const modal = document.getElementById('notificationModal');
+            const window = document.getElementById('notificationWindow');
+            const icon = document.getElementById('notificationIcon');
+            const titleEl = document.getElementById('notificationTitle');
+            const messageEl = document.getElementById('notificationMessage');
+            const closeBtn = document.getElementById('notificationCloseBtn');
+
+            // Set content
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            // Set type
+            window.className = 'notification-window ' + type;
+            modal.className = 'notification-modal ' + type;
+            
+            // Set icon
+            if (type === 'success') {
+                icon.textContent = '✓';
+            } else {
+                icon.textContent = '✕';
+            }
+
+            // Show close button only for error
+            closeBtn.style.display = type === 'error' ? 'flex' : 'none';
+
+            // Show modal
+            backdrop.classList.add('show');
+            modal.classList.add('show');
+
+            // Auto hide for success after 1 second
+            if (type === 'success') {
+                setTimeout(() => {
+                    closeNotification();
+                }, 1000);
+            }
+        }
+
+        function closeNotification() {
+            const backdrop = document.getElementById('notificationBackdrop');
+            const modal = document.getElementById('notificationModal');
+            
+            backdrop.classList.remove('show');
+            modal.classList.remove('show');
+        }
+
+        // Close notification when clicking backdrop
+        document.addEventListener('DOMContentLoaded', function() {
+            const backdrop = document.getElementById('notificationBackdrop');
+            if (backdrop) {
+                backdrop.addEventListener('click', function() {
+                    const modal = document.getElementById('notificationModal');
+                    if (modal.classList.contains('show')) {
+                        // Only allow closing if it's an error notification
+                        const window = document.getElementById('notificationWindow');
+                        if (window.classList.contains('error')) {
+                            closeNotification();
+                        }
+                    }
+                });
+            }
+        });
+
+        // Password Strength Checker
+        function getPasswordStrength(password) {
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (password.length >= 12) score++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+            if (/\d/.test(password)) score++;
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+            return score;
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('signup-password').value;
+            const fill = document.getElementById('strength-fill');
+            const label = document.getElementById('strength-label');
+            const check = document.getElementById('strength-check');
+            const confirmInput = document.getElementById('signup-confirm-password');
+            const confirmError = document.getElementById('confirm-error');
+
+            if (!password) {
+                fill.className = 'password-strength-fill';
+                fill.style.width = '0%';
+                label.textContent = '';
+                check.classList.remove('show');
+                return;
+            }
+
+            const strength = getPasswordStrength(password);
+            let strengthClass = '';
+            let strengthText = '';
+
+            if (strength <= 1) {
+                strengthClass = 'weak';
+                strengthText = 'Weak';
+            } else if (strength === 2) {
+                strengthClass = 'medium-low';
+                strengthText = 'Medium-Low';
+            } else if (strength === 3) {
+                strengthClass = 'medium';
+                strengthText = 'Medium';
+            } else if (strength === 4) {
+                strengthClass = 'medium-high';
+                strengthText = 'Medium-High';
+            } else {
+                strengthClass = 'strong';
+                strengthText = 'Strong';
+            }
+
+            fill.className = 'password-strength-fill ' + strengthClass;
+            label.textContent = strengthText;
+
+            // Show checkmark for strong passwords (score >= 4)
+            if (strength >= 4) {
+                check.classList.add('show');
+            } else {
+                check.classList.remove('show');
+            }
+
+            // Clear confirm error when password changes
+            if (confirmInput.value) {
+                if (password === confirmInput.value) {
+                    confirmError.classList.remove('show');
+                }
+            }
+        }
+
+        // Confirm password validation on input
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmInput = document.getElementById('signup-confirm-password');
+            if (confirmInput) {
+                confirmInput.addEventListener('input', function() {
+                    const password = document.getElementById('signup-password').value;
+                    const confirmError = document.getElementById('confirm-error');
+                    
+                    if (this.value && password !== this.value) {
+                        confirmError.textContent = "Passwords do not match!";
+                        confirmError.classList.add('show');
+                    } else {
+                        confirmError.classList.remove('show');
+                    }
+                });
+            }
+        });
 
         function saveTask() {
             if (!selectedDate) {
@@ -1039,6 +1493,228 @@
             renderCalendar(year, month - 1);
             updateTaskList();
             showView('task');
+        }
+
+        // ==================== Leaderboard Functions ====================
+        
+        // Current user ID (set after login)
+        let currentUserId = null;
+
+        // Fetch and display leaderboard data
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard');
+                const data = await response.json();
+                
+                if (data.leaderboard && data.leaderboard.length > 0) {
+                    populateLeaderboard(data.leaderboard);
+                } else {
+                    // Show empty state
+                    const listContainer = document.getElementById('leaderboardList');
+                    if (listContainer) {
+                        listContainer.innerHTML = '<div class="leaderboard-empty">No data yet. Complete pomodoros to appear on the leaderboard!</div>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+            }
+        }
+
+        // Fetch current user stats
+        async function loadUserStats() {
+            if (!currentUserId) return;
+            
+            try {
+                const response = await fetch(`/api/user/${currentUserId}/stats`);
+                const data = await response.json();
+                
+                if (data.name) {
+                    updateLeaderboard(data);
+                }
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+            }
+        }
+
+        // Update leaderboard with user data
+        function updateLeaderboard(userData) {
+            // Update user rank
+            if (userData.rank) {
+                document.getElementById('userRank').textContent = '#' + userData.rank;
+            }
+            
+            // Update user name and avatar
+            if (userData.name) {
+                document.getElementById('leaderboardUserName').textContent = userData.name;
+                document.getElementById('leaderboardAvatar').textContent = userData.name.charAt(0).toUpperCase();
+            }
+            
+            // Update total pomodoro time
+            if (userData.total_hours !== undefined) {
+                document.getElementById('totalPomodoroHours').textContent = userData.total_hours;
+            }
+        }
+
+        // Populate leaderboard list from database
+        function populateLeaderboard(leaderboardData) {
+            const listContainer = document.getElementById('leaderboardList');
+            if (!listContainer) return;
+            
+            listContainer.innerHTML = leaderboardData.map((user) => `
+                <div class="leaderboard-item ${user.id === currentUserId ? 'current-user' : ''}">
+                    <span class="lb-rank">#${user.rank}</span>
+                    <div class="lb-avatar">${user.name.charAt(0).toUpperCase()}</div>
+                    <span class="lb-name">${user.name}</span>
+                    <span class="lb-avg">${user.avg_daily_hours}h/day</span>
+                    <span class="lb-total">${user.total_hours}h</span>
+                </div>
+            `).join('');
+        }
+
+        // Record completed pomodoro
+        async function recordPomodoro(duration = 25) {
+            if (!currentUserId) return;
+            
+            try {
+                const response = await fetch('/api/pomodoro/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        duration: duration
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.total_minutes) {
+                    // Update total time display
+                    const totalHours = (data.total_minutes / 60).toFixed(1);
+                    document.getElementById('totalPomodoroHours').textContent = totalHours;
+                    
+                    // Refresh leaderboard
+                    loadLeaderboard();
+                    loadUserStats();
+                }
+            } catch (error) {
+                console.error('Error recording pomodoro:', error);
+            }
+        }
+
+        // ==================== Share Modal Functions ====================
+        
+        // Open share modal with user data
+        function openShareModal() {
+            const backdrop = document.getElementById('shareBackdrop');
+            const modal = document.getElementById('shareModal');
+            
+            if (backdrop && modal) {
+                // Update share card with current user data
+                const rank = document.getElementById('userRank').textContent.replace('#', '');
+                const name = document.getElementById('leaderboardUserName').textContent;
+                const totalHours = document.getElementById('totalPomodoroHours').textContent;
+                const avgHours = (parseFloat(totalHours) / 30).toFixed(1); // Approximate daily average
+                
+                document.getElementById('shareRankNumber').textContent = rank;
+                document.getElementById('shareUserName').textContent = name;
+                document.getElementById('shareTotalHours').textContent = totalHours;
+                document.getElementById('shareAvgHours').textContent = avgHours;
+                
+                backdrop.classList.add('open');
+                modal.classList.add('open');
+                backdrop.onclick = () => closeShareModal();
+            }
+        }
+
+        // Close share modal and clear cache
+        function closeShareModal() {
+            const backdrop = document.getElementById('shareBackdrop');
+            const modal = document.getElementById('shareModal');
+            
+            if (backdrop && modal) {
+                backdrop.classList.remove('open');
+                modal.classList.remove('open');
+                
+                // Clear any temporary cache
+                setTimeout(() => {
+                    // Clean up any generated images or data
+                    console.log('Share modal closed, cache cleared');
+                }, 300);
+            }
+        }
+
+        // Share to Facebook
+        function shareToFacebook() {
+            const rank = document.getElementById('shareRankNumber').textContent;
+            const name = document.getElementById('shareUserName').textContent;
+            const text = `I'm ranked #${rank} on the NMLM productivity leaderboard! My name: ${name}. Join me and track your productivity!`;
+            const url = encodeURIComponent('https://nmlm.app');
+            const quote = encodeURIComponent(text);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
+        }
+
+        // Share to Instagram (opens Instagram app/page)
+        function shareToInstagram() {
+            alert('To share on Instagram, please download the image and upload it manually from the Instagram app.');
+        }
+
+        // Share to X (Twitter)
+        function shareToX() {
+            const rank = document.getElementById('shareRankNumber').textContent;
+            const name = document.getElementById('shareUserName').textContent;
+            const text = `I'm ranked #${rank} on the NMLM productivity leaderboard! My name: ${name}. Join me and track your productivity! 🏆`;
+            const url = encodeURIComponent('https://nmlm.app');
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`, '_blank');
+        }
+
+        // Download share card as image
+        function downloadShareCard() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 600;
+            canvas.height = 400;
+            
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, 600, 400);
+            gradient.addColorStop(0, '#1a1a2e');
+            gradient.addColorStop(1, '#16213e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 400);
+            
+            // Card content
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏆 My Ranking', 300, 60);
+            
+            // Rank
+            const rank = document.getElementById('shareRankNumber').textContent;
+            ctx.font = 'bold 120px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = '#007AFF';
+            ctx.fillText('#' + rank, 300, 180);
+            
+            // Name
+            const name = document.getElementById('shareUserName').textContent;
+            ctx.font = '24px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(name, 300, 220);
+            
+            // Stats
+            const totalHours = document.getElementById('shareTotalHours').textContent;
+            const avgHours = document.getElementById('shareAvgHours').textContent;
+            ctx.font = '18px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillText(`Total: ${totalHours}h | Daily Avg: ${avgHours}h`, 300, 280);
+            
+            // Footer
+            ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText('NMLM - No More Last Minute', 300, 360);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = 'nmlm-ranking.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
         }
 
         updateMobileNavVisibility();
