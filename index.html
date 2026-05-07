@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-EN">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -259,6 +259,317 @@
             width: 100%;
         }
 
+        .stats-page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: var(--dashboard-gap);
+        }
+
+        .stats-grid .stats-card {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-height: 280px;
+        }
+
+        .stats-grid .summary-card,
+        .stats-grid .trend-card {
+            grid-column: 1 / span 2;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .card-note {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 13px;
+        }
+
+        .stats-subgrid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 18px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .completion-block {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .completion-title {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .completion-bar {
+            width: 100%;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            overflow: hidden;
+        }
+
+        .completion-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #007AFF, #00F5D4);
+            transition: width 0.45s ease;
+        }
+
+        .completion-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .pomodoro-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .pomodoro-stat {
+            padding: 18px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+
+        .pomodoro-value {
+            display: block;
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .pomodoro-label {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 13px;
+        }
+
+        .pomodoro-meter {
+            width: 100%;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            overflow: hidden;
+        }
+
+        .pomodoro-meter-fill {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #34C759, #007AFF);
+            transition: width 0.45s ease;
+        }
+
+        .pomodoro-note,
+        .emotion-subtext,
+        .trend-footer {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 13px;
+        }
+
+        .emotion-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .mood-button {
+            flex: 1 1 120px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-complete-toggle {
+            margin-top: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 10px 12px;
+            color: white;
+            background: rgba(0, 122, 255, 0.16);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .task-complete-toggle:hover {
+            background: rgba(0, 122, 255, 0.24);
+        }
+
+        .task-item-entry.task-completed .t-name {
+            text-decoration: line-through;
+            opacity: 0.75;
+        }
+
+        .mood-button:hover,
+        .mood-button.active {
+            background: rgba(255, 255, 255, 0.14);
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+
+        .mood-good {
+            color: #34C759;
+        }
+
+        .mood-bad {
+            color: #FF3B30;
+        }
+
+        .emotion-trend-label {
+            margin-top: 6px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .hourly-emotion-row {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .emotion-hour-card {
+            padding: 14px 12px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .hour-label {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 12px;
+        }
+
+        .hour-icon {
+            font-size: 28px;
+        }
+
+        .hour-status {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 13px;
+        }
+
+        .trend-scroll-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 14px 6px;
+            min-height: 192px;
+        }
+
+        .trend-scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .trend-day {
+            min-width: 72px;
+            width: 72px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .trend-day-label {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 12px;
+        }
+
+        .trend-bar {
+            width: 100%;
+            height: 100px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+            padding-bottom: 6px;
+        }
+
+        .trend-bar-fill {
+            width: 100%;
+            background: linear-gradient(180deg, #007AFF, #34C759);
+            border-radius: 999px 999px 0 0;
+            transition: height 0.35s ease;
+        }
+
+        .trend-day-value {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 12px;
+        }
+
+        @media (max-width: 1000px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid .summary-card,
+            .stats-grid .trend-card {
+                grid-column: initial;
+            }
+
+            .hourly-emotion-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hourly-emotion-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 1000px) {
             .dashboard-tiles {
                 grid-template-columns: 1fr;
@@ -386,7 +697,7 @@
                         <div class="pill" onclick="selectPill(this, 'task')">Task</div>
                         <div class="pill" onclick="selectPill(this, 'leaderboard')">Leaderboard</div>
                         <div class="pill" onclick="selectPill(this, 'stats')">Stats</div>
-                        <div class="pill" onclick="selectPill(this, 'promodora')">Promodora</div>
+                        <div class="pill" onclick="selectPill(this, 'pomodoro')">Pomodoro</div>
                     </div>
 
                     <button class="pill-arrow-btn right" onclick="scrollPills('right')">
@@ -555,6 +866,87 @@
                         </div>
                     </div>
                 </div>
+                <div id="view-stats" class="auth-view">
+                    <div class="dashboard-layout">
+                        <div class="stats-grid">
+                            <div class="g2-component stats-card summary-card">
+                                <div class="card-header">
+                                    <h4 class="section-label">Quick Summary</h4>
+                                    <span class="card-note">This month</span>
+                                </div>
+                                <div class="stats-subgrid">
+                                    <div class="stat-item">
+                                        <span class="stat-value" id="statTotalTask">0</span>
+                                        <span class="stat-label">Total Tasks</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value" id="statCompletedTask">0</span>
+                                        <span class="stat-label">Completed</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value" id="statPendingTask">0</span>
+                                        <span class="stat-label">Pending</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-value" id="statStudyMinutes">0</span>
+                                        <span class="stat-label">Study Minutes</span>
+                                    </div>
+                                </div>
+                                <div class="completion-block">
+                                    <div class="completion-title">Task Completion</div>
+                                    <div class="completion-bar">
+                                        <div class="completion-fill" id="completionFill"></div>
+                                    </div>
+                                    <div class="completion-text" id="completionText">0% completed</div>
+                                </div>
+                            </div>
+
+                            <div class="g2-component stats-card pomodoro-card">
+                                <div class="card-header">
+                                    <h4 class="section-label">Pomodoro Usage</h4>
+                                    <span class="card-note">Today</span>
+                                </div>
+                                <div class="pomodoro-dashboard">
+                                    <div class="pomodoro-stat">
+                                        <span class="pomodoro-value" id="dailyPomodoroMinutes">0</span>
+                                        <span class="pomodoro-label">Minutes today</span>
+                                    </div>
+                                    <div class="pomodoro-stat">
+                                        <span class="pomodoro-value" id="todayPomodoroSessions">0</span>
+                                        <span class="pomodoro-label">Sessions</span>
+                                    </div>
+                                </div>
+                                <div class="pomodoro-meter">
+                                    <div class="pomodoro-meter-fill" id="pomodoroMeterFill"></div>
+                                </div>
+                                <p class="pomodoro-note">Use this as the central interface for recording your pomodoro sessions.</p>
+                            </div>
+
+                            <div class="g2-component stats-card emotion-card">
+                                <div class="card-header">
+                                    <h4 class="section-label">Emotion Check-In</h4>
+                                    <span class="card-note">Current hour mood</span>
+                                </div>
+                                <p class="emotion-subtext">Tap a mood once an hour. You can change it if needed.</p>
+                                <div class="emotion-buttons">
+                                    <button class="mood-button mood-good" id="moodGoodBtn" onclick="handleMoodClick('good')">Good</button>
+                                    <button class="mood-button mood-bad" id="moodBadBtn" onclick="handleMoodClick('bad')">Bad</button>
+                                </div>
+                                <div class="emotion-trend-label">Last 5 hours</div>
+                                <div class="hourly-emotion-row" id="emotionTrendRow"></div>
+                            </div>
+
+                            <div class="g2-component stats-card trend-card">
+                                <div class="card-header">
+                                    <h4 class="section-label">Recent Study Trend</h4>
+                                    <span class="card-note">Daily pomodoro minutes</span>
+                                </div>
+                                <div class="trend-scroll-container" id="trendScroll"></div>
+                                <div class="trend-footer">Swipe or scroll left / right for more days.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div id="view-task" class="auth-view">
                     <div class="task-page-layout">
                         <div class="calendar-header">
@@ -713,7 +1105,7 @@
             <div class="share-card-preview" id="shareCardPreview">
                 <div class="share-card-content">
                     <div class="share-card-header">
-                        <span class="share-card-title">My Ranking</span>
+                        <span class="share-card-title">🏆 My Ranking</span>
                     </div>
                     <div class="share-card-body">
                         <div class="share-user-rank">#<span id="shareRankNumber">3</span></div>
@@ -798,11 +1190,11 @@
                     <div id="settings-contact" class="settings-section">
                         <div class="settings-item">
                             <span class="settings-item-label">Email</span>
-                            <span class="settings-item-value" onclick="openMailClient('foo.yu.xuan@student.mmu.edu.my')">foo.yu.xuan@student.mmu.edu.my</span>
+                            <span class="settings-item-value" onclick="openMailClient('JOAN.CHAI.WAN@student.mmu.edu.my')">JOAN.CHAI.WAN@student.mmu.edu.my</span>
                         </div>
                         <div class="settings-item">
                             <span class="settings-item-label">Phone</span>
-                            <span class="settings-item-value">+60 10-7697951</span>
+                            <span class="settings-item-value">+60 11-5870 3858</span>
                         </div>
                     </div>
                 </div>
@@ -938,7 +1330,7 @@
 
             if (!nextView || currentView === nextView) return;
 
-            if (viewId === 'dashboard' || viewId === 'task' || viewId === 'leaderboard') { 
+            if (viewId === 'dashboard' || viewId === 'task' || viewId === 'leaderboard' || viewId === 'stats') { 
                 container.classList.add('dashboard-mode');
                 if (features) features.style.display = 'flex'; 
                 setTimeout(updateScrollButtons, 100);
@@ -970,6 +1362,10 @@
 
             if (viewId === 'task') {
                 renderCalendar(currentYear, currentMonth); // 确保每次进入Task页面都重新渲染
+            }
+
+            if (viewId === 'stats') {
+                refreshStats();
             }
 
             updateMobileNavVisibility();
@@ -1054,6 +1450,7 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
+                    pendingEmail = email;
                     showNotification('success', 'Account Created!', 'Please check your email to verify your account.');
                     setTimeout(() => {
                         showView('otp');
@@ -1153,7 +1550,29 @@
         }
 
         async function resendOtp() {
-            showNotification('success', 'Code Sent!', 'A new verification code has been sent to your email.');
+            const email = pendingEmail || document.getElementById('signup-email').value;
+            if (!email) {
+                showNotification('error', 'Email Missing', 'Please sign up or enter your email again.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    pendingEmail = email;
+                    showNotification('success', 'Code Sent!', data.message || 'A new verification code has been sent to your email.');
+                } else {
+                    showNotification('error', 'Resend Failed', data.message || 'Unable to resend code.');
+                }
+            } catch (err) {
+                showNotification('error', 'Connection Error', 'Backend server not running!');
+            }
         }
 
         // Notification System
