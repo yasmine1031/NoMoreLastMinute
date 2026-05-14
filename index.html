@@ -667,7 +667,92 @@
                 padding: 9px 12px;
             }
         }
-    </style>
+
+        /* OTP integration styles */
+        .otp-container {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .otp-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .otp-input {
+            width: 48px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .otp-input:focus {
+            border-color: var(--apple-blue);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
+        }
+
+        .otp-input.filled {
+            border-color: var(--apple-blue);
+            background: rgba(0, 122, 255, 0.1);
+        }
+
+        .otp-input.error {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .otp-input.success {
+            border-color: #10ac84;
+            background: rgba(16, 172, 132, 0.1);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .otp-resend,
+        .otp-footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .otp-resend span,
+        .otp-footer span {
+            color: var(--apple-blue);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .otp-resend span:hover,
+        .otp-footer span:hover {
+            text-decoration: underline;
+            filter: brightness(1.2);
+        }
+
+            </style>
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
@@ -809,19 +894,23 @@
                 </div>
 
                 <div id="view-otp" class="auth-view">
-                    <h1 class="welcome-title">Verify Email</h1>
-                    <p class="otp-subtitle">We've sent a 6-digit code to your email</p>
-                    <div class="otp-input-container">
-                        <input type="text" class="otp-input" maxlength="1" id="otp-1" oninput="handleOtpInput(this, 'otp-2')" onkeydown="handleOtpKeydown(event, this, null)">
-                        <input type="text" class="otp-input" maxlength="1" id="otp-2" oninput="handleOtpInput(this, 'otp-3')" onkeydown="handleOtpKeydown(event, this, 'otp-1')">
-                        <input type="text" class="otp-input" maxlength="1" id="otp-3" oninput="handleOtpInput(this, 'otp-4')" onkeydown="handleOtpKeydown(event, this, 'otp-2')">
-                        <input type="text" class="otp-input" maxlength="1" id="otp-4" oninput="handleOtpInput(this, 'otp-5')" onkeydown="handleOtpKeydown(event, this, 'otp-3')">
-                        <input type="text" class="otp-input" maxlength="1" id="otp-5" oninput="handleOtpInput(this, 'otp-6')" onkeydown="handleOtpKeydown(event, this, 'otp-4')">
-                        <input type="text" class="otp-input" maxlength="1" id="otp-6" oninput="handleOtpInput(this, null)" onkeydown="handleOtpKeydown(event, this, 'otp-5')">
+                    <div class="otp-container">
+                        <div class="otp-header">
+                            <h1 class="welcome-title">Verify Email</h1>
+                            <p class="otp-subtitle">We sent a 6-digit code to your email</p>
+                        </div>
+                        <div class="otp-input-container">
+                            <input type="text" class="otp-input" maxlength="1" id="otp-1" oninput="handleOtpInput(this, 'otp-2')" onkeydown="handleOtpKeydown(event, this, null)">
+                            <input type="text" class="otp-input" maxlength="1" id="otp-2" oninput="handleOtpInput(this, 'otp-3')" onkeydown="handleOtpKeydown(event, this, 'otp-1')">
+                            <input type="text" class="otp-input" maxlength="1" id="otp-3" oninput="handleOtpInput(this, 'otp-4')" onkeydown="handleOtpKeydown(event, this, 'otp-2')">
+                            <input type="text" class="otp-input" maxlength="1" id="otp-4" oninput="handleOtpInput(this, 'otp-5')" onkeydown="handleOtpKeydown(event, this, 'otp-3')">
+                            <input type="text" class="otp-input" maxlength="1" id="otp-5" oninput="handleOtpInput(this, 'otp-6')" onkeydown="handleOtpKeydown(event, this, 'otp-4')">
+                            <input type="text" class="otp-input" maxlength="1" id="otp-6" oninput="handleOtpInput(this, null)" onkeydown="handleOtpKeydown(event, this, 'otp-5')">
+                        </div>
+                        <button class="action-btn" onclick="handleOtpVerify()">Verify</button>
+                        <p class="otp-resend">Didn't receive the code? <span onclick="resendOtp()">Resend</span></p>
+                        <p class="otp-footer">Back to <span onclick="showView('signup')">Sign Up</span></p>
                     </div>
-                    <button class="action-btn" onclick="handleOtpVerify()">Verify</button>
-                    <p class="otp-resend">Didn't receive the code? <span onclick="resendOtp()">Resend</span></p>
-                    <p class="form-switch">Back to <span onclick="showView('signin')">Sign In</span></p>
                 </div>
 
                 <div id="view-dashboard" class="auth-view">
@@ -947,6 +1036,61 @@
                         </div>
                     </div>
                 </div>
+                <div id="view-pomodoro" class="auth-view">
+                    <div class="pomodoro-page">
+                        <div class="pomodoro-container">
+                            <section class="pomodoro-section-left">
+                                <div class="pomodoro-ring-placeholder"></div>
+                                <div class="pomodoro-ring-wrapper">
+                                    <svg class="pomodoro-ring-svg" viewBox="0 0 240 240" aria-hidden="true">
+                                        <circle class="pomodoro-ring-bg" cx="120" cy="120" r="104"></circle>
+                                        <circle class="pomodoro-ring-progress" id="pomodoroRingProgress" cx="120" cy="120" r="104"></circle>
+                                    </svg>
+                                    <div class="pomodoro-ring-dot" id="pomodoroRingDot"></div>
+                                    <div class="pomodoro-ring-display">
+                                        <div class="pomodoro-display-time" id="pomodoroTimerDisplay">00:25:00</div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="pomodoro-section-right">
+                                <div class="pomodoro-control-block">
+                                    <div class="control-header">
+                                        <span class="control-label">Focus Time</span>
+                                        <span class="control-hint">Scroll to adjust</span>
+                                    </div>
+                                    <div class="time-wheel-group">
+                                        <div class="wheel-column">
+                                            <label class="wheel-title">Hours</label>
+                                            <div class="wheel-container">
+                                                <div class="time-wheel" id="hourWheel" data-part="hours"></div>
+                                            </div>
+                                        </div>
+                                        <div class="wheel-column">
+                                            <label class="wheel-title">Minutes</label>
+                                            <div class="wheel-container">
+                                                <div class="time-wheel" id="minuteWheel" data-part="minutes"></div>
+                                            </div>
+                                        </div>
+                                        <div class="wheel-column">
+                                            <label class="wheel-title">Seconds</label>
+                                            <div class="wheel-container">
+                                                <div class="time-wheel" id="secondWheel" data-part="seconds"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="pomodoro-actions">
+                                        <div class="pomodoro-main-actions">
+                                            <button class="btn btn-primary btn-start" id="startPomodoroBtn" onclick="startPomodoro()">Start</button>
+                                            <button class="btn btn-secondary" id="pausePomodoroBtn" onclick="togglePomodoroPause()" style="display:none">Pause</button>
+                                            <button class="btn btn-secondary" id="resetPomodoroBtn" onclick="resetPomodoro()" style="display:none">Reset</button>
+                                        </div>
+                                        <button class="btn btn-zen" id="enterZenBtn" type="button" onclick="enterZenMode()">ZEN Mode</button>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
                 <div id="view-task" class="auth-view">
                     <div class="task-page-layout">
                         <div class="calendar-header">
@@ -1068,6 +1212,16 @@
             </div>
         </div>
     </main>
+    <div class="zen-overlay-view" id="zenOverlayView">
+        <div class="zen-console-card">
+            <div class="zen-tag">ZEN MODE</div>
+            <div class="zen-main-time" id="zenTimerDisplay">25:00</div>
+            <div class="zen-controls">
+                <button class="zen-btn exit" onclick="exitZenMode()" title="Exit Zen Mode">✕</button>
+            </div>
+        </div>
+    </div>
+    <audio id="pomodoroEndAudio" preload="auto"></audio>
 
     <!-- Search Modal -->
     <div class="modal-backdrop" id="searchBackdrop"></div>
@@ -1105,7 +1259,7 @@
             <div class="share-card-preview" id="shareCardPreview">
                 <div class="share-card-content">
                     <div class="share-card-header">
-                        <span class="share-card-title">🏆 My Ranking</span>
+                        <span class="share-card-title">My Ranking</span>
                     </div>
                     <div class="share-card-body">
                         <div class="share-user-rank">#<span id="shareRankNumber">3</span></div>
@@ -1234,6 +1388,9 @@
         </div>
     </footer>
 
+    <audio id="pomodoroEndAudio" preload="auto"></audio>
+    <audio id="zenAudio" preload="auto"></audio>
+
     <!-- Notification Toast Modal -->
     <div class="notification-backdrop" id="notificationBackdrop"></div>
     <div class="notification-modal" id="notificationModal">
@@ -1248,895 +1405,5 @@
     <script src="js/particle.js"></script>
     <script src="js/main.js"></script>
 
-    <script>
-        const track = document.getElementById('pillTrack');
-        const btnLeft = document.querySelector('.pill-arrow-btn.left'); 
-        const btnRight = document.querySelector('.pill-arrow-btn.right');
-
-
-        function updateScrollButtons() {
-            if (!track || !btnLeft || !btnRight) return;
-
-            const scrollLeft = track.scrollLeft;
-            const maxScroll = track.scrollWidth - track.clientWidth;
-
-            btnLeft.style.display = scrollLeft > 1 ? 'flex' : 'none';            
-            btnRight.style.display = scrollLeft < (maxScroll - 2) ? 'flex' : 'none';        }
-
-        function scrollPills(direction) {
-            const distance = 160;
-            if (direction === 'left') {
-                track.scrollBy({ left: -distance, behavior: 'smooth' });
-            } else {
-                track.scrollBy({ left: distance, behavior: 'smooth' });
-            }
-        }
-
-        track.addEventListener('scroll', updateScrollButtons);
-        setTimeout(updateScrollButtons, 100);
-        window.addEventListener('resize', () => {
-            updateScrollButtons();
-            updateMobileNavVisibility();
-        });
-
-        function updateMobileNavVisibility() {
-            const hamburger = document.getElementById('mobileMenuButton');
-            const menu = document.getElementById('mobileMenu');
-            const mainContainer = document.getElementById('main-container');
-            const isMobile = window.innerWidth <= 900;
-            const isDashboardPage = mainContainer && mainContainer.classList.contains('dashboard-mode');
-
-            if (hamburger) {
-                if (isMobile && isDashboardPage) {
-                    hamburger.style.display = 'flex';
-                } else {
-                    hamburger.style.display = 'none';
-                }
-            }
-
-            if (menu) {
-                if (!isMobile || !isDashboardPage) {
-                    menu.classList.remove('open');
-                    menu.setAttribute('aria-hidden', 'true');
-                }
-            }
-        }
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            const hamburger = document.getElementById('mobileMenuButton');
-            if (!menu) return;
-            menu.classList.toggle('open');
-            if (hamburger) {
-                hamburger.classList.toggle('open', menu.classList.contains('open'));
-            }
-            menu.setAttribute('aria-hidden', String(!menu.classList.contains('open')));
-        }
-
-        function closeMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            const hamburger = document.getElementById('mobileMenuButton');
-            if (!menu) return;
-            menu.classList.remove('open');
-            menu.setAttribute('aria-hidden', 'true');
-            if (hamburger) hamburger.classList.remove('open');
-        }
-
-        function showView(viewId) {
-            const currentView = document.querySelector('.auth-view.active');
-            const nextView = document.getElementById('view-' + viewId);
-            const container = document.getElementById('main-container');
-            const features = document.getElementById('features-section'); 
-
-            if (!nextView || currentView === nextView) return;
-
-            if (viewId === 'dashboard' || viewId === 'task' || viewId === 'leaderboard' || viewId === 'stats') { 
-                container.classList.add('dashboard-mode');
-                if (features) features.style.display = 'flex'; 
-                setTimeout(updateScrollButtons, 100);
-            } else {
-                container.classList.remove('dashboard-mode');
-                if (features) features.style.display = 'none'; 
-                setTimeout(updateScrollButtons, 300);
-            }
-
-            if (viewId === 'task') {
-                const freshDate = new Date();
-                currentYear = freshDate.getFullYear(); // 去掉前面的 let/const
-                currentMonth = freshDate.getMonth();
-                renderCalendar(currentYear, currentMonth);
-            }
-
-            // Load leaderboard data when entering leaderboard view
-            if (viewId === 'leaderboard' && currentUserId) {
-                loadLeaderboard();
-                loadUserStats();
-            }
-
-            if (currentView) {
-                currentView.classList.remove('active');
-                currentView.classList.add('exiting');
-                setTimeout(() => currentView.classList.remove('exiting'), 400);
-            }
-            if (nextView) nextView.classList.add('active');
-
-            if (viewId === 'task') {
-                renderCalendar(currentYear, currentMonth); // 确保每次进入Task页面都重新渲染
-            }
-
-            if (viewId === 'stats') {
-                refreshStats();
-            }
-
-            updateMobileNavVisibility();
-        }
-
-        function selectPill(element, viewName) {
-            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-            element.classList.add('active');
-            showView(viewName);
-            closeMobileMenu();
-        }
-
-        async function handleSignIn() {
-            const email = document.getElementById('signin-email').value;
-            const password = document.getElementById('signin-password').value;
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/signin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    document.getElementById('nav-pills').style.display = 'flex';
-                    document.getElementById('nav-actions').style.display = 'flex';
-                    
-                    const blueCircle = document.getElementById('video-placeholder');
-                    if (blueCircle) blueCircle.style.display = 'none';
-
-                    document.getElementById('user-greeting').innerText = `Hello, ${data.user.fullname}`;
-                    
-                    // Set current user ID and load leaderboard
-                    currentUserId = data.user.id;
-                    // 设置 main.js 中的用户ID
-                    if (typeof setCurrentUser === 'function') {
-                        setCurrentUser(currentUserId);
-                    }
-                    loadLeaderboard();
-                    loadUserStats();
-                    
-                    showNotification('success', 'Welcome Back!', `Hello ${data.user.fullname}, you're now signed in.`);
-                    setTimeout(() => {
-                        showView('dashboard');
-                    }, 1200);
-                } else {
-                    showNotification('error', 'Login Failed', data.message);
-                }
-            } catch (err) { 
-                showNotification('error', 'Connection Error', 'Backend server not running!'); 
-            }
-        }
-
-        async function handleSignUp() {
-            const fullname = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = document.getElementById('signup-confirm-password').value;
-            const confirmError = document.getElementById('confirm-error');
-
-            // Check if passwords match
-            if (password !== confirmPassword) {
-                confirmError.textContent = "Passwords do not match!";
-                confirmError.classList.add('show');
-                return;
-            }
-
-            // Check password strength (minimum medium required)
-            const strength = getPasswordStrength(password);
-            if (strength < 3) {
-                confirmError.textContent = "Password is too weak! Please use a stronger password.";
-                confirmError.classList.add('show');
-                return;
-            }
-
-            confirmError.classList.remove('show');
-
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/signup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullname, email, password })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    pendingEmail = email;
-                    showNotification('success', 'Account Created!', 'Please check your email to verify your account.');
-                    setTimeout(() => {
-                        showView('otp');
-                        clearOtpInputs();
-                    }, 1500);
-                } else {
-                    showNotification('error', 'Registration Failed', data.message);
-                }
-            } catch (err) { 
-                showNotification('error', 'Connection Error', 'Backend server not running!'); 
-            }
-        }
-
-        // OTP Functions
-        let pendingEmail = '';
-
-        function handleOtpInput(current, nextId) {
-            const value = current.value;
-            
-            // Only allow numbers
-            current.value = value.replace(/[^0-9]/g, '');
-            
-            if (current.value.length === 1) {
-                current.classList.add('filled');
-                if (nextId) {
-                    document.getElementById(nextId).focus();
-                }
-            } else {
-                current.classList.remove('filled');
-            }
-        }
-
-        function handleOtpKeydown(event, current, prevId) {
-            if (event.key === 'Backspace') {
-                if (!current.value && prevId) {
-                    document.getElementById(prevId).focus();
-                }
-            }
-        }
-
-        function getOtpCode() {
-            let code = '';
-            for (let i = 1; i <= 6; i++) {
-                code += document.getElementById('otp-' + i).value;
-            }
-            return code;
-        }
-
-        function clearOtpInputs() {
-            for (let i = 1; i <= 6; i++) {
-                const input = document.getElementById('otp-' + i);
-                input.value = '';
-                input.classList.remove('filled', 'error', 'success');
-            }
-        }
-
-        async function handleOtpVerify() {
-            const code = getOtpCode();
-            
-            if (code.length !== 6) {
-                showAllOtpInputs('error');
-                showNotification('error', 'Invalid Code', 'Please enter all 6 digits of the verification code.');
-                return;
-            }
-
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: code })
-                });
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showAllOtpInputs('success');
-                    showNotification('success', 'Email Verified!', 'Your account has been verified successfully.');
-                    setTimeout(() => {
-                        showView('signin');
-                    }, 1500);
-                } else {
-                    showAllOtpInputs('error');
-                    showNotification('error', 'Verification Failed', data.message || 'Invalid or expired verification code.');
-                }
-            } catch (err) {
-                showNotification('error', 'Connection Error', 'Backend server not running!');
-            }
-        }
-
-        function showAllOtpInputs(state) {
-            for (let i = 1; i <= 6; i++) {
-                const input = document.getElementById('otp-' + i);
-                input.classList.remove('filled', 'error', 'success');
-                if (state) {
-                    input.classList.add(state);
-                }
-            }
-        }
-
-        async function resendOtp() {
-            const email = pendingEmail || document.getElementById('signup-email').value;
-            if (!email) {
-                showNotification('error', 'Email Missing', 'Please sign up or enter your email again.');
-                return;
-            }
-
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/resend-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                const data = await response.json();
-
-                if (response.ok) {
-                    pendingEmail = email;
-                    showNotification('success', 'Code Sent!', data.message || 'A new verification code has been sent to your email.');
-                } else {
-                    showNotification('error', 'Resend Failed', data.message || 'Unable to resend code.');
-                }
-            } catch (err) {
-                showNotification('error', 'Connection Error', 'Backend server not running!');
-            }
-        }
-
-        // Notification System
-        function showNotification(type, title, message) {
-            const backdrop = document.getElementById('notificationBackdrop');
-            const modal = document.getElementById('notificationModal');
-            const window = document.getElementById('notificationWindow');
-            const icon = document.getElementById('notificationIcon');
-            const titleEl = document.getElementById('notificationTitle');
-            const messageEl = document.getElementById('notificationMessage');
-            const closeBtn = document.getElementById('notificationCloseBtn');
-
-            // Set content
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            
-            // Set type
-            window.className = 'notification-window ' + type;
-            modal.className = 'notification-modal ' + type;
-            
-            // Set icon
-            if (type === 'success') {
-                icon.textContent = '✓';
-            } else {
-                icon.textContent = '✕';
-            }
-
-            // Show close button only for error
-            closeBtn.style.display = type === 'error' ? 'flex' : 'none';
-
-            // Show modal
-            backdrop.classList.add('show');
-            modal.classList.add('show');
-
-            // Auto hide for success after 1 second
-            if (type === 'success') {
-                setTimeout(() => {
-                    closeNotification();
-                }, 1000);
-            }
-        }
-
-        function closeNotification() {
-            const backdrop = document.getElementById('notificationBackdrop');
-            const modal = document.getElementById('notificationModal');
-            
-            backdrop.classList.remove('show');
-            modal.classList.remove('show');
-        }
-
-        // Close notification when clicking backdrop
-        document.addEventListener('DOMContentLoaded', function() {
-            const backdrop = document.getElementById('notificationBackdrop');
-            if (backdrop) {
-                backdrop.addEventListener('click', function() {
-                    const modal = document.getElementById('notificationModal');
-                    if (modal.classList.contains('show')) {
-                        // Only allow closing if it's an error notification
-                        const window = document.getElementById('notificationWindow');
-                        if (window.classList.contains('error')) {
-                            closeNotification();
-                        }
-                    }
-                });
-            }
-        });
-
-        // Password Strength Checker
-        function getPasswordStrength(password) {
-            let score = 0;
-            if (password.length >= 8) score++;
-            if (password.length >= 12) score++;
-            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-            if (/\d/.test(password)) score++;
-            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
-            return score;
-        }
-
-        function checkPasswordStrength() {
-            const password = document.getElementById('signup-password').value;
-            const fill = document.getElementById('strength-fill');
-            const label = document.getElementById('strength-label');
-            const check = document.getElementById('strength-check');
-            const confirmInput = document.getElementById('signup-confirm-password');
-            const confirmError = document.getElementById('confirm-error');
-
-            if (!password) {
-                fill.className = 'password-strength-fill';
-                fill.style.width = '0%';
-                label.textContent = '';
-                check.classList.remove('show');
-                return;
-            }
-
-            const strength = getPasswordStrength(password);
-            let strengthClass = '';
-            let strengthText = '';
-
-            if (strength <= 1) {
-                strengthClass = 'weak';
-                strengthText = 'Weak';
-            } else if (strength === 2) {
-                strengthClass = 'medium-low';
-                strengthText = 'Medium-Low';
-            } else if (strength === 3) {
-                strengthClass = 'medium';
-                strengthText = 'Medium';
-            } else if (strength === 4) {
-                strengthClass = 'medium-high';
-                strengthText = 'Medium-High';
-            } else {
-                strengthClass = 'strong';
-                strengthText = 'Strong';
-            }
-
-            fill.className = 'password-strength-fill ' + strengthClass;
-            label.textContent = strengthText;
-
-            // Show checkmark for strong passwords (score >= 4)
-            if (strength >= 4) {
-                check.classList.add('show');
-            } else {
-                check.classList.remove('show');
-            }
-
-            // Clear confirm error when password changes
-            if (confirmInput.value) {
-                if (password === confirmInput.value) {
-                    confirmError.classList.remove('show');
-                }
-            }
-        }
-
-        // Confirm password validation on input
-        document.addEventListener('DOMContentLoaded', function() {
-            const confirmInput = document.getElementById('signup-confirm-password');
-            if (confirmInput) {
-                confirmInput.addEventListener('input', function() {
-                    const password = document.getElementById('signup-password').value;
-                    const confirmError = document.getElementById('confirm-error');
-                    
-                    if (this.value && password !== this.value) {
-                        confirmError.textContent = "Passwords do not match!";
-                        confirmError.classList.add('show');
-                    } else {
-                        confirmError.classList.remove('show');
-                    }
-                });
-            }
-        });
-
-        function saveTask() {
-            if (!selectedDate) {
-                alert("Please select a date first!");
-                return;
-            }
-
-            const titleEl = document.getElementById('task-title');
-            const descEl = document.getElementById('task-desc');
-            const timeEl = document.getElementById('task-time'); // 获取新元素
-
-            if (!titleEl.value.trim()) {
-                alert("Please enter a title");
-                return;
-            }
-
-            // 处理时间：优先使用用户选择的时间，否则使用当前系统时间
-            let finalTime;
-            if (timeEl && timeEl.value) {
-                // 将 24小时制的 input 值转换为 12小时制 (例如 14:00 -> 02:00 PM)
-                const [hours, minutes] = timeEl.value.split(':');
-                const suffix = hours >= 12 ? 'PM' : 'AM';
-                const displayHours = hours % 12 || 12;
-                finalTime = `${displayHours}:${minutes} ${suffix}`;
-            } else {
-                const now = new Date();
-                finalTime = now.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-            }
-
-            const newTask = {
-                title: titleEl.value.trim(),
-                description: descEl.value.trim(),
-                color: selectedColor,
-                time: finalTime // 使用处理后的时间
-            };
-
-            if (!tasks[selectedDate]) tasks[selectedDate] = [];
-            tasks[selectedDate].push(newTask);
-
-            // 重置输入框
-            titleEl.value = '';
-            descEl.value = '';
-            timeEl.value = ''; // 清空时间选择
-            
-            updateTaskList();
-        }
-
-        // ==================== Modal Functions ====================
-        
-        // Open Modal
-        function openModal(type) {
-            const backdrop = document.getElementById(type + 'Backdrop');
-            const modal = document.getElementById(type + 'Modal');
-            
-            if (backdrop && modal) {
-                backdrop.classList.add('open');
-                modal.classList.add('open');
-                backdrop.onclick = () => closeModal(type);
-            }
-        }
-
-        // Close Modal
-        function closeModal(type) {
-            const backdrop = document.getElementById(type + 'Backdrop');
-            const modal = document.getElementById(type + 'Modal');
-            
-            if (backdrop && modal) {
-                backdrop.classList.remove('open');
-                modal.classList.remove('open');
-            }
-        }
-
-        // Search Function
-        function handleSearch(query) {
-            const searchResults = document.getElementById('searchResults');
-            const pages = ['Dashboard', 'Task', 'Leaderboard', 'Stats', 'Pomodoro'];
-            
-            if (!query.trim()) {
-                searchResults.innerHTML = '';
-                return;
-            }
-
-            const lowerQuery = query.toLowerCase();
-            const results = [];
-
-            // Search pages
-            pages.forEach(page => {
-                if (page.toLowerCase().includes(lowerQuery)) {
-                    results.push({ type: 'page', name: page, icon: '📄' });
-                }
-            });
-
-            // Search tasks
-            Object.keys(tasks).forEach(date => {
-                tasks[date].forEach((task, index) => {
-                    if (task.title.toLowerCase().includes(lowerQuery)) {
-                        results.push({ type: 'task', name: task.title, date: date, icon: '✓' });
-                    }
-                });
-            });
-
-            // Display results
-            if (results.length === 0) {
-                searchResults.innerHTML = '<div class="search-result-item" style="padding: 12px; opacity: 0.6;">No results found</div>';
-                return;
-            }
-
-            searchResults.innerHTML = results.map((result, idx) => {
-                if (result.type === 'page') {
-                    return `<div class="search-result-item" onclick="selectPill(this, '${result.name.toLowerCase()}'); closeModal('search')">
-                        <span>${result.icon}</span>
-                        <span>${result.name}</span>
-                    </div>`;
-                } else {
-                    return `<div class="search-result-item" onclick="selectDate('${result.date}'); closeModal('search')">
-                        <span>${result.icon}</span>
-                        <span>${result.name}</span>
-                        <span style="opacity: 0.6; font-size: 12px;">${result.date}</span>
-                    </div>`;
-                }
-            }).join('');
-        }
-
-        // Switch Settings Tab
-        function switchSettingsTab(event, tabName) {
-            // Update active menu item
-            document.querySelectorAll('.settings-menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Update active section
-            document.querySelectorAll('.settings-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            const section = document.getElementById('settings-' + tabName);
-            if (section) section.classList.add('active');
-        }
-
-        // Edit Profile
-        function editProfile() {
-            const newName = prompt('Enter your new name:', document.getElementById('accountName').innerText);
-            if (newName && newName.trim()) {
-                document.getElementById('accountName').innerText = newName;
-            }
-        }
-
-        // Switch Account
-        function switchAccount() {
-            if (confirm('Are you sure you want to switch accounts?')) {
-                showView('signin');
-                closeModal('account');
-                closeMobileMenu();
-            }
-        }
-
-        // Logout
-        function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                showView('intro');
-                closeModal('account');
-                closeMobileMenu();
-                document.getElementById('nav-pills').style.display = 'none';
-                document.getElementById('nav-actions').style.display = 'none';
-            }
-        }
-
-        // Change Avatar
-        function changeAvatar() {
-            const initials = prompt('Enter your initials (1-2 characters):', 'U');
-            if (initials && initials.trim()) {
-                document.getElementById('accountAvatar').innerText = initials.toUpperCase().substring(0, 2);
-            }
-        }
-
-        // Open Mail Client
-        function openMailClient(email) {
-            window.location.href = 'mailto:' + email;
-        }
-
-        // Helper function to select date from search
-        function selectDate(dateStr) {
-            const [year, month, day] = dateStr.split('-').map(Number);
-            currentYear = year;
-            currentMonth = month - 1;
-            selectedDate = dateStr;
-            renderCalendar(year, month - 1);
-            updateTaskList();
-            showView('task');
-        }
-
-        // ==================== Leaderboard Functions ====================
-        
-        // Current user ID (set after login)
-        let currentUserId = null;
-
-        // Fetch and display leaderboard data
-        async function loadLeaderboard() {
-            try {
-                const response = await fetch('/api/leaderboard');
-                const data = await response.json();
-                
-                if (data.leaderboard && data.leaderboard.length > 0) {
-                    populateLeaderboard(data.leaderboard);
-                } else {
-                    // Show empty state
-                    const listContainer = document.getElementById('leaderboardList');
-                    if (listContainer) {
-                        listContainer.innerHTML = '<div class="leaderboard-empty">No data yet. Complete pomodoros to appear on the leaderboard!</div>';
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading leaderboard:', error);
-            }
-        }
-
-        // Fetch current user stats
-        async function loadUserStats() {
-            if (!currentUserId) return;
-            
-            try {
-                const response = await fetch(`/api/user/${currentUserId}/stats`);
-                const data = await response.json();
-                
-                if (data.name) {
-                    updateLeaderboard(data);
-                }
-            } catch (error) {
-                console.error('Error loading user stats:', error);
-            }
-        }
-
-        // Update leaderboard with user data
-        function updateLeaderboard(userData) {
-            // Update user rank
-            if (userData.rank) {
-                document.getElementById('userRank').textContent = '#' + userData.rank;
-            }
-            
-            // Update user name and avatar
-            if (userData.name) {
-                document.getElementById('leaderboardUserName').textContent = userData.name;
-                document.getElementById('leaderboardAvatar').textContent = userData.name.charAt(0).toUpperCase();
-            }
-            
-            // Update total pomodoro time
-            if (userData.total_hours !== undefined) {
-                document.getElementById('totalPomodoroHours').textContent = userData.total_hours;
-            }
-        }
-
-        // Populate leaderboard list from database
-        function populateLeaderboard(leaderboardData) {
-            const listContainer = document.getElementById('leaderboardList');
-            if (!listContainer) return;
-            
-            listContainer.innerHTML = leaderboardData.map((user) => `
-                <div class="leaderboard-item ${user.id === currentUserId ? 'current-user' : ''}">
-                    <span class="lb-rank">#${user.rank}</span>
-                    <div class="lb-avatar">${user.name.charAt(0).toUpperCase()}</div>
-                    <span class="lb-name">${user.name}</span>
-                    <span class="lb-avg">${user.avg_daily_hours}h/day</span>
-                    <span class="lb-total">${user.total_hours}h</span>
-                </div>
-            `).join('');
-        }
-
-        // Record completed pomodoro
-        async function recordPomodoro(duration = 25) {
-            if (!currentUserId) return;
-            
-            try {
-                const response = await fetch('/api/pomodoro/complete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: currentUserId,
-                        duration: duration
-                    })
-                });
-                const data = await response.json();
-                
-                if (data.total_minutes) {
-                    // Update total time display
-                    const totalHours = (data.total_minutes / 60).toFixed(1);
-                    document.getElementById('totalPomodoroHours').textContent = totalHours;
-                    
-                    // Refresh leaderboard
-                    loadLeaderboard();
-                    loadUserStats();
-                }
-            } catch (error) {
-                console.error('Error recording pomodoro:', error);
-            }
-        }
-
-        // ==================== Share Modal Functions ====================
-        
-        // Open share modal with user data
-        function openShareModal() {
-            const backdrop = document.getElementById('shareBackdrop');
-            const modal = document.getElementById('shareModal');
-            
-            if (backdrop && modal) {
-                // Update share card with current user data
-                const rank = document.getElementById('userRank').textContent.replace('#', '');
-                const name = document.getElementById('leaderboardUserName').textContent;
-                const totalHours = document.getElementById('totalPomodoroHours').textContent;
-                const avgHours = (parseFloat(totalHours) / 30).toFixed(1); // Approximate daily average
-                
-                document.getElementById('shareRankNumber').textContent = rank;
-                document.getElementById('shareUserName').textContent = name;
-                document.getElementById('shareTotalHours').textContent = totalHours;
-                document.getElementById('shareAvgHours').textContent = avgHours;
-                
-                backdrop.classList.add('open');
-                modal.classList.add('open');
-                backdrop.onclick = () => closeShareModal();
-            }
-        }
-
-        // Close share modal and clear cache
-        function closeShareModal() {
-            const backdrop = document.getElementById('shareBackdrop');
-            const modal = document.getElementById('shareModal');
-            
-            if (backdrop && modal) {
-                backdrop.classList.remove('open');
-                modal.classList.remove('open');
-                
-                // Clear any temporary cache
-                setTimeout(() => {
-                    // Clean up any generated images or data
-                    console.log('Share modal closed, cache cleared');
-                }, 300);
-            }
-        }
-
-        // Share to Facebook
-        function shareToFacebook() {
-            const rank = document.getElementById('shareRankNumber').textContent;
-            const name = document.getElementById('shareUserName').textContent;
-            const text = `I'm ranked #${rank} on the NMLM productivity leaderboard! My name: ${name}. Join me and track your productivity!`;
-            const url = encodeURIComponent('https://nmlm.app');
-            const quote = encodeURIComponent(text);
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
-        }
-
-        // Share to Instagram (opens Instagram app/page)
-        function shareToInstagram() {
-            alert('To share on Instagram, please download the image and upload it manually from the Instagram app.');
-        }
-
-        // Share to X (Twitter)
-        function shareToX() {
-            const rank = document.getElementById('shareRankNumber').textContent;
-            const name = document.getElementById('shareUserName').textContent;
-            const text = `I'm ranked #${rank} on the NMLM productivity leaderboard! My name: ${name}. Join me and track your productivity! 🏆`;
-            const url = encodeURIComponent('https://nmlm.app');
-            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`, '_blank');
-        }
-
-        // Download share card as image
-        function downloadShareCard() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 600;
-            canvas.height = 400;
-            
-            // Background
-            const gradient = ctx.createLinearGradient(0, 0, 600, 400);
-            gradient.addColorStop(0, '#1a1a2e');
-            gradient.addColorStop(1, '#16213e');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 600, 400);
-            
-            // Card content
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('🏆 My Ranking', 300, 60);
-            
-            // Rank
-            const rank = document.getElementById('shareRankNumber').textContent;
-            ctx.font = 'bold 120px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillStyle = '#007AFF';
-            ctx.fillText('#' + rank, 300, 180);
-            
-            // Name
-            const name = document.getElementById('shareUserName').textContent;
-            ctx.font = '24px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(name, 300, 220);
-            
-            // Stats
-            const totalHours = document.getElementById('shareTotalHours').textContent;
-            const avgHours = document.getElementById('shareAvgHours').textContent;
-            ctx.font = '18px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
-            ctx.fillText(`Total: ${totalHours}h | Daily Avg: ${avgHours}h`, 300, 280);
-            
-            // Footer
-            ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.fillText('NMLM - No More Last Minute', 300, 360);
-            
-            // Download
-            const link = document.createElement('a');
-            link.download = 'nmlm-ranking.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-
-        updateMobileNavVisibility();
-    </script>
-</body>
+    </body>
 </html>
