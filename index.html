@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>No More Last Minute</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="\assets\img\NMLM_logo.png">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/modals.css">
     <style>
@@ -914,8 +915,8 @@
                 </div>
 
                 <div id="view-dashboard" class="auth-view">
-                    <div class="dashboard-layout">
-                        <div class="dashboard-tiles">
+                    <div class="overview-dashboard-container ov-dashboard-wrapper">
+                        <div class="overview-main-left ov-main-left-panel">
                             <div class="g2-component tile-summary">
                                 <h4 class="section-label" id="user-greeting" style="margin:0; opacity: 0.6; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Quick Summary</h4>
                                 <div class="stats-subgrid">
@@ -950,6 +951,42 @@
                                 <h4 class="section-label" style="margin:0; opacity: 0.6; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Recent Study Trend</h4>
                                 <div class="placeholder-chart">
                                     <p>Visualizing your productivity...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ov-modules-grid-right">
+                            <div class="ov-premium-card ov-card-tasks overview-card tasks-express-module">
+                                <div class="card-header-row" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px;">
+                                    <span class="card-label">TASKS</span>
+                                    <button class="quick-add-btn" onclick="openQuickAddTaskModal()">+ New Task</button>
+                                </div>
+                                <div id="ov-tasks-stream-container" class="mini-task-list"></div>
+                            </div>
+
+                            <div class="ov-premium-card overview-card pomodoro-mini-module">
+                                <span class="card-label">POMODORO</span>
+                                <div class="mini-timer-display" id="ov-timer-display">25:00</div>
+                                <div class="mini-timer-controls" style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+                                    <button id="ov-start-btn" onclick="toggleOverviewPomodoro()" style="width:40px; height:32px; border-radius:12px; border:none; background:rgba(255,255,255,0.08); color:#fff; cursor:pointer;"><i class="fas fa-play"></i></button>
+                                    <button onclick="resetOverviewPomodoro()" style="width:40px; height:32px; border-radius:12px; border:none; background:rgba(255,255,255,0.08); color:#fff; cursor:pointer;"><i class="fas fa-undo"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="ov-premium-card overview-card leaderboard-mini-module">
+                                <span class="card-label">RANK</span>
+                                <div class="mini-rank-body" style="display:flex; justify-content:center; align-items:center; height:70px;"> 
+                                    <span class="mini-rank-number" id="ov-live-rank-value">--</span>
+                                </div>
+                            </div>
+
+                            <div class="ov-premium-card ov-card-mood overview-card mood-mini-module">
+                                <span class="card-label" style="display:block; text-align:center; margin-bottom:12px;">MOOD TODAY</span>
+                                <div class="mini-mood-selectors" style="display:flex; justify-content:space-around; max-width:320px; margin:0 auto;">
+                                    <span class="mood-emoji ov-mood-btn" data-mood="sad" onclick="submitOverviewMood('sad', this)">😢</span>
+                                    <span class="mood-emoji ov-mood-btn" data-mood="neutral" onclick="submitOverviewMood('neutral', this)">😐</span>
+                                    <span class="mood-emoji ov-mood-btn" data-mood="happy" onclick="submitOverviewMood('happy', this)">🙂</span>
+                                    <span class="mood-emoji ov-mood-btn" data-mood="focus" onclick="submitOverviewMood('focus', this)">🧠</span>
+                                    <span class="mood-emoji ov-mood-btn" data-mood="energetic" onclick="submitOverviewMood('energetic', this)">⚡</span>
                                 </div>
                             </div>
                         </div>
@@ -1046,7 +1083,6 @@
                                         <circle class="pomodoro-ring-bg" cx="120" cy="120" r="104"></circle>
                                         <circle class="pomodoro-ring-progress" id="pomodoroRingProgress" cx="120" cy="120" r="104"></circle>
                                     </svg>
-                                    <div class="pomodoro-ring-dot" id="pomodoroRingDot"></div>
                                     <div class="pomodoro-ring-display">
                                         <div class="pomodoro-display-time" id="pomodoroTimerDisplay">00:25:00</div>
                                     </div>
@@ -1139,15 +1175,7 @@
                                 <div class="g2-component list-card">
                                     <span class="card-label">Today's Tasks</span>
                                     <div id="daily-task-list" class="task-items-container">
-                                        <div class="task-item-entry">
-                                            <div class="task-info">
-                                                <span class="dot-indicator" style="background: #007AFF;"></span>
-                                                <div class="text-group">
-                                                    <p class="t-name">Event Party</p>
-                                                    <p class="t-time">09:00 AM - 12:00 PM</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <div class="loading-state">Loading tasks...</div>
                                     </div>
                                 </div>
                             </div>
@@ -1164,11 +1192,11 @@
                             <div class="leaderboard-user-card g2-component">
                                 <div class="user-rank-display">
                                     <span class="rank-label">Your Rank</span>
-                                    <span class="rank-number" id="userRank">#3</span>
+                                    <span class="rank-number" id="userRank">--</span>
                                 </div>
                                 <div class="user-info-display">
-                                    <div class="user-avatar-large" id="leaderboardAvatar">U</div>
-                                    <span class="user-name-display" id="leaderboardUserName">User Name</span>
+                                    <div class="user-avatar-large" id="leaderboardAvatar">-</div>
+                                    <span class="user-name-display" id="leaderboardUserName">Loading...</span>
                                 </div>
                                 <button class="share-btn g2-btn" onclick="openShareModal()">
                                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -1240,6 +1268,20 @@
                 <input type="text" id="searchInput" class="search-input" placeholder="Search pages, tasks, features..." oninput="handleSearch(this.value)">
             </div>
             <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <div class="quick-add-backdrop" id="quickAddBackdrop" onclick="closeQuickAddTask()"></div>
+    <div class="quick-add-modal" id="quickAddModal" aria-hidden="true">
+        <div class="quick-add-modal-header">
+            <span class="modal-title">Quick Add Task</span>
+            <button class="modal-close-btn" type="button" onclick="closeQuickAddTask()" aria-label="Close">×</button>
+        </div>
+        <input type="text" id="quickTaskTitle" placeholder="Task title" autocomplete="off">
+        <input type="time" id="quickTaskTime" placeholder="Time">
+        <textarea id="quickTaskDescription" placeholder="Optional notes"></textarea>
+        <div class="modal-actions">
+            <button class="action-btn modal-submit-btn" type="button" onclick="submitQuickAddTask()">Add Task</button>
         </div>
     </div>
 
@@ -1370,9 +1412,9 @@
                 </button>
             </div>
             <div class="account-profile">
-                <div class="account-avatar" id="accountAvatar" onclick="changeAvatar()">U</div>
-                <div class="account-name" id="accountName">User Name</div>
-                <div class="account-email" id="accountEmail">user@example.com</div>
+                <div class="account-avatar" id="accountAvatar" onclick="changeAvatar()">-</div>
+                <div class="account-name" id="accountName">Loading...</div>
+                <div class="account-email" id="accountEmail">Loading...</div>
             </div>
             <div class="account-actions">
                 <button class="account-action-btn secondary" onclick="editProfile()">Edit Profile</button>
@@ -1404,6 +1446,10 @@
 
     <script src="js/particle.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/api-service.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/render-engine.js"></script>
+    <script src="js/app-init.js"></script>
 
     </body>
 </html>
