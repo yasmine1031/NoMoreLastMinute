@@ -917,37 +917,43 @@
                 <div id="view-dashboard" class="auth-view">
                     <div class="overview-dashboard-container ov-dashboard-wrapper">
                         <div class="overview-main-left ov-main-left-panel">
-                            <div class="g2-component tile-summary">
-                                <h4 class="section-label" id="user-greeting" style="margin:0; opacity: 0.6; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Quick Summary</h4>
+                            <div class="ov-premium-card overview-card tile-summary">
+                                <div class="card-header-row" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px;">
+                                    <span class="card-label" id="user-greeting">Quick Summary</span>
+                                    <span class="card-note">This month</span>
+                                </div>
                                 <div class="stats-subgrid">
                                     <div class="stat-item">
-                                        <span class="stat-value">0</span>
+                                        <span class="stat-value" id="ov-stat-total">0</span>
                                         <span class="stat-label">Total Task</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-value">0</span>
+                                        <span class="stat-value" id="ov-stat-completed">0</span>
                                         <span class="stat-label">Completed</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-value">0</span>
+                                        <span class="stat-value" id="ov-stat-pending">0</span>
                                         <span class="stat-label">Pending</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-value">0</span>
+                                        <span class="stat-value" id="ov-stat-minutes">0</span>
                                         <span class="stat-label">Minutes</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="g2-component tile-completion" style="display:flex; align-items:center; justify-content:space-between;">
+                            <div class="ov-premium-card overview-card tile-completion" style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
                                 <div>
                                     <span class="stat-label">Overall Completion</span>
-                                    <span class="stat-value" style="font-size: 32px;">0%</span>
+                                    <span class="stat-value" id="ov-completion-percent" style="font-size: 32px;">0%</span>
+                                    <div class="completion-text" id="ov-completion-text">0% completed this month</div>
                                 </div>
-                                <div class="mini-progress-ring"></div>
+                                <div class="mini-progress-ring" id="ov-completion-ring" style="--progress: 0%;">
+                                    <span id="ov-completion-ring-label">0%</span>
+                                </div>
                             </div>
 
-                            <div class="g2-component tile-chart">
+                            <div class="ov-premium-card overview-card tile-chart">
                                 <h4 class="section-label" style="margin:0; opacity: 0.6; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Recent Study Trend</h4>
                                 <div class="placeholder-chart">
                                     <p>Visualizing your productivity...</p>
@@ -1090,10 +1096,6 @@
                             </section>
                             <section class="pomodoro-section-right">
                                 <div class="pomodoro-control-block">
-                                    <div class="control-header">
-                                        <span class="control-label">Focus Time</span>
-                                        <span class="control-hint">Scroll to adjust</span>
-                                    </div>
                                     <div class="time-wheel-group">
                                         <div class="wheel-column">
                                             <label class="wheel-title">Hours</label>
@@ -1251,6 +1253,17 @@
     </div>
     <audio id="pomodoroEndAudio" preload="auto"></audio>
 
+    <div class="modal-backdrop" id="pomodoroAlarmBackdrop"></div>
+    <div class="modal-container" id="pomodoroAlarmModal">
+        <div class="modal-window" style="text-align:center; gap:12px;">
+            <div class="modal-header" style="justify-content:center; border-bottom:none; margin-bottom:8px; padding-bottom:0;">
+                <span>Pomodoro Finished</span>
+            </div>
+            <p style="margin:0; color:rgba(255,255,255,0.78); line-height:1.5;">Time is up. The alarm will keep playing until you stop it.</p>
+            <button id="stopPomodoroAlarmBtn" class="action-btn modal-submit-btn" type="button" onclick="stopPomodoroAlarm()">Stop Alarm</button>
+        </div>
+    </div>
+
     <!-- Search Modal -->
     <div class="modal-backdrop" id="searchBackdrop"></div>
     <div class="modal-container" id="searchModal">
@@ -1378,9 +1391,13 @@
                             <span class="settings-item-label">Language</span>
                             <span class="settings-item-value">English</span>
                         </div>
-                        <div class="settings-item">
-                            <span class="settings-item-label">Notifications</span>
-                            <span class="settings-item-value">Enabled</span>
+                        <div class="settings-item settings-notification-row">
+                            <div class="settings-notification-copy">
+                                <span class="settings-item-label">Notifications</span>
+                            </div>
+                            <button type="button" id="notificationsSwitch" class="notification-switch" aria-pressed="false" aria-label="Toggle website notifications" onclick="toggleNotificationPermission(event, this)">
+                                <span class="notification-switch-thumb"></span>
+                            </button>
                         </div>
                     </div>
                     <div id="settings-contact" class="settings-section">
@@ -1417,8 +1434,78 @@
                 <div class="account-email" id="accountEmail">Loading...</div>
             </div>
             <div class="account-actions">
-                <button class="account-action-btn secondary" onclick="editProfile()">Edit Profile</button>
-                <button class="account-action-btn secondary" onclick="switchAccount()">Switch Account</button>
+                <button class="account-action-btn secondary" onclick="openEditProfileModal()">Edit Profile</button>
+                <button class="account-action-btn secondary" onclick="openSwitchAccountModal()">Switch Account</button>
+                <button class="account-action-btn danger" onclick="openLogoutModal()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="editProfileBackdrop"></div>
+    <div class="modal-container" id="editProfileModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>Edit Profile</span>
+                <button class="modal-close-btn" onclick="closeModal('editProfile')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="account-form-card">
+                <label class="account-form-label" for="editProfileName">Display Name</label>
+                <input id="editProfileName" class="account-form-input" type="text" placeholder="Enter your name" />
+
+                <label class="account-form-label" for="editProfileEmail">Email</label>
+                <input id="editProfileEmail" class="account-form-input" type="email" placeholder="Enter your email" />
+            </div>
+            <div class="modal-actions">
+                <button class="account-action-btn secondary" onclick="closeModal('editProfile')">Cancel</button>
+                <button class="account-action-btn primary" onclick="saveProfileChanges()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="switchAccountBackdrop"></div>
+    <div class="modal-container" id="switchAccountModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>Switch Account</span>
+                <button class="modal-close-btn" onclick="closeModal('switchAccount')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="account-form-card">
+                <p class="account-dialog-note">Switch to a different account? You will need to sign in again to access your account.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="account-action-btn secondary" onclick="closeModal('switchAccount')">Cancel</button>
+                <button class="account-action-btn primary" onclick="confirmSwitchAccount()">Switch</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="logoutBackdrop"></div>
+    <div class="modal-container" id="logoutModal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <span>Confirm Logout</span>
+                <button class="modal-close-btn" onclick="closeModal('logout')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="account-form-card">
+                <p class="account-dialog-note">Are you sure you want to log out? You will need to sign in again to access your account.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="account-action-btn secondary" onclick="closeModal('logout')">Cancel</button>
                 <button class="account-action-btn danger" onclick="confirmLogout()">Logout</button>
             </div>
         </div>

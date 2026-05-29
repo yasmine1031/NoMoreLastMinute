@@ -11,11 +11,82 @@ let pendingEmail = '';
 const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"];
 
+const moodThemeMap = {
+    focus: 'theme-focused',
+    rational: 'theme-rational',
+    neutral: 'theme-relief',
+    energetic: 'theme-energy',
+    sad: 'theme-warmth',
+    happy: 'theme-recovery',
+    good: 'theme-recovery',
+    bad: 'theme-warmth'
+};
+
+function normalizeMoodKey(moodKey) {
+    return String(moodKey || '').toLowerCase().trim();
+}
+
+function applyMoodTheme(moodKey) {
+    const normalized = normalizeMoodKey(moodKey);
+    document.body.classList.remove(
+        'theme-focused', 'theme-rational', 'theme-relief',
+        'theme-energy', 'theme-warmth', 'theme-recovery'
+    );
+
+    const targetTheme = moodThemeMap[normalized] || 'theme-focused';
+    document.body.classList.add(targetTheme);
+    document.body.dataset.moodTheme = targetTheme;
+    console.log(`[Theme] Applied mood theme: ${targetTheme} (from ${normalized || 'default'})`);
+}
+
+async function initializeMoodTheme() {
+    const storageKey = `${getDateKey(new Date())}-dailyMood`;
+    const storedMood = localStorage.getItem(storageKey);
+
+    if (storedMood) {
+        applyMoodTheme(storedMood);
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/mood/today', { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const apiMood = data?.mood || data?.theme || '';
+        if (apiMood) {
+            localStorage.setItem(storageKey, apiMood);
+            applyMoodTheme(apiMood);
+            return;
+        }
+    } catch (error) {
+        console.warn('[Theme] /api/mood/today unavailable, using local mood fallback:', error);
+    }
+
+    applyMoodTheme('focus');
+}
+
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     renderCalendar(currentYear, currentMonth);
     setupColorPicker();
     initializeStats();
+    if (document.getElementById('view-dashboard')?.classList.contains('active')) {
+        renderOverviewDashboard();
+    }
+
+    // ================================================
+    // NEW: Restore user profile from localStorage (新增)
+    // ================================================
+    if (typeof renderUserIdentity === 'function') {
+        renderUserIdentity();
+    }
+    if (typeof displayUserProfileFromLocalStorage === 'function') {
+        displayUserProfileFromLocalStorage();
+    }
+    if (typeof checkAndRestoreSession === 'function') {
+        checkAndRestoreSession();
+    }
+    initializeMoodTheme();
 
     const hash = window.location.hash.slice(1);
     if (hash === 'pomodoro') {
@@ -31,6 +102,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function renderUserIdentity() {
+    const currentUserJson = localStorage.getItem('currentUser');
+    if (!currentUserJson) return;
+
+    try {
+        const currentUser = JSON.parse(currentUserJson);
+        const displayName = currentUser.fullname || currentUser.name || 'User';
+        const displayEmail = currentUser.email || '';
+        const avatarChar = (displayName || displayEmail || 'U').charAt(0).toUpperCase();
+
+        const accountNameEl = document.getElementById('accountName');
+        const accountEmailEl = document.getElementById('accountEmail');
+        const accountAvatarEl = document.getElementById('accountAvatar');
+        const leaderboardNameEl = document.getElementById('leaderboardUserName');
+        const leaderboardAvatarEl = document.getElementById('leaderboardAvatar');
+
+        if (accountNameEl) accountNameEl.textContent = displayName;
+        if (accountEmailEl) accountEmailEl.textContent = displayEmail;
+        if (accountAvatarEl) accountAvatarEl.textContent = avatarChar;
+        if (leaderboardNameEl) leaderboardNameEl.textContent = displayName;
+        if (leaderboardAvatarEl) leaderboardAvatarEl.textContent = avatarChar;
+    } catch (error) {
+        console.error('[App] renderUserIdentity failed:', error);
+    }
+}
+
 // 1. 渲染日历逻辑
 function renderCalendar(year, month) {
     const grid = document.getElementById('calendar-days-grid');
@@ -42,6 +139,9 @@ function renderCalendar(year, month) {
     const realDate = realToday.getDate();
     const realMonth = realToday.getMonth();
     const realYear = realToday.getFullYear();
+    const todayKey = `${realYear}-${String(realMonth + 1).padStart(2, '0')}-${String(realDate).padStart(2, '0')}`;
+    const selectedKey = selectedDate;
+    const shouldAutoSelectToday = !selectedDate && year === realYear && month === realMonth;
 
     grid.innerHTML = '';
     const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -57,23 +157,42 @@ function renderCalendar(year, month) {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const dayCell = document.createElement('div');
         dayCell.className = 'day-cell';
         dayCell.innerText = day;
 
-        // 核心：确定是否是“今天”并添加蓝色悬浮类名
-        if (day === realDate && month === realMonth && year === realYear) {
+        const isToday = day === realDate && month === realMonth && year === realYear;
+        const isPreviouslySelected = selectedKey === dateKey;
+        const shouldSelect = isPreviouslySelected || (shouldAutoSelectToday && isToday);
+
+        if (isToday) {
             dayCell.classList.add('is-today');
+        }
+        if (shouldSelect) {
+            dayCell.classList.add('active-date');
+            selectedDate = dateKey;
         }
 
         dayCell.onclick = function() {
             document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('active-date'));
             this.classList.add('active-date');
-            selectedDate = `${year}-${month + 1}-${day}`;
+            selectedDate = dateKey;
             updateTaskList();
-            // 这里可以触发加载当天任务的逻辑
+            if (typeof loadTasksForDate === 'function') {
+                loadTasksForDate(selectedDate);
+            }
         };
         grid.appendChild(dayCell);
+    }
+
+    // 如果首次渲染当前月，则自动选中今天并加载任务
+    if (shouldAutoSelectToday && selectedDate === todayKey) {
+        if (typeof loadTasksForDate === 'function') {
+            loadTasksForDate(todayKey);
+        } else {
+            updateTaskList();
+        }
     }
 }
 
@@ -189,29 +308,55 @@ function computeMonthlyTaskSummary(year, month) {
     return { total, completed, pending, minutes, percentage };
 }
 
-function refreshStats() {
-    updateStatsSummary();
+async function refreshStats() {
+    let summary = null;
+    if (window.api?.fetchStatsSummary) {
+        try {
+            summary = await window.api.fetchStatsSummary(statsMonth.year, statsMonth.month);
+        } catch (error) {
+            console.warn('[Stats] fetchStatsSummary failed, using local fallback:', error);
+        }
+    }
+    updateStatsSummary(summary);
     renderTrendChart();
     renderEmotionTrend();
     updatePomodoroUsage();
     refreshEmotionButtons();
 }
 
-function updateStatsSummary() {
-    const summary = computeMonthlyTaskSummary(statsMonth.year, statsMonth.month);
-    const totalEl = document.getElementById('statTotalTask');
-    const completedEl = document.getElementById('statCompletedTask');
-    const pendingEl = document.getElementById('statPendingTask');
-    const studyMinutesEl = document.getElementById('statStudyMinutes');
+function updateStatsSummary(remoteSummary) {
+    const computed = computeMonthlyTaskSummary(statsMonth.year, statsMonth.month);
+    const totalEl = document.getElementById('statTotalTask') || document.getElementById('ov-stat-total');
+    const completedEl = document.getElementById('statCompletedTask') || document.getElementById('ov-stat-completed');
+    const pendingEl = document.getElementById('statPendingTask') || document.getElementById('ov-stat-pending');
+    const studyMinutesEl = document.getElementById('statStudyMinutes') || document.getElementById('ov-stat-minutes');
     const completionFillEl = document.getElementById('completionFill');
-    const completionTextEl = document.getElementById('completionText');
+    const completionTextEl = document.getElementById('completionText') || document.getElementById('ov-completion-text');
+    const overviewRingEl = document.getElementById('ov-completion-ring');
+    const overviewRingLabelEl = document.getElementById('ov-completion-ring-label');
+    const overviewPercentEl = document.getElementById('ov-completion-percent');
     if (!totalEl || !completedEl || !pendingEl || !studyMinutesEl || !completionFillEl || !completionTextEl) return;
-    totalEl.textContent = summary.total;
-    completedEl.textContent = summary.completed;
-    pendingEl.textContent = summary.pending;
-    studyMinutesEl.textContent = summary.minutes;
-    completionFillEl.style.width = `${summary.percentage}%`;
-    completionTextEl.textContent = summary.percentage === 0 ? 'No tasks completed yet' : `${summary.percentage}% completed this month`;
+
+    const total = Number(remoteSummary?.total ?? computed.total ?? 0);
+    const completed = Number(remoteSummary?.completed ?? computed.completed ?? 0);
+    const pending = Number(remoteSummary?.pending ?? computed.pending ?? 0);
+    const minutes = Number(remoteSummary?.pomodoroMinutes ?? remoteSummary?.minutes ?? computed.minutes ?? 0);
+    const percentage = Number(remoteSummary?.completionPercentage ?? remoteSummary?.percentage ?? (total === 0 ? 0 : Math.round((completed / total) * 100)));
+
+    if (totalEl) totalEl.textContent = total;
+    if (completedEl) completedEl.textContent = completed;
+    if (pendingEl) pendingEl.textContent = pending;
+    if (studyMinutesEl) studyMinutesEl.textContent = minutes;
+    if (completionFillEl) {
+        completionFillEl.style.transition = 'width 0.45s ease';
+        completionFillEl.style.width = `${percentage}%`;
+    }
+    if (completionTextEl) {
+        completionTextEl.textContent = percentage === 0 ? 'No tasks completed yet' : `${percentage}% completed this month`;
+    }
+    if (overviewRingEl) overviewRingEl.style.setProperty('--progress', `${percentage}%`);
+    if (overviewRingLabelEl) overviewRingLabelEl.textContent = `${percentage}%`;
+    if (overviewPercentEl) overviewPercentEl.textContent = `${percentage}%`;
 }
 
 function renderTrendChart() {
@@ -378,6 +523,227 @@ const track = document.getElementById('pillTrack');
             }
         }
 
+        let overviewLastRank = null;
+
+        async function renderOverviewDashboard() {
+            syncOverviewUserProfile();
+            await Promise.all([
+                loadOverviewTasks(),
+                loadOverviewUserRank(),
+                loadOverviewStatsSummary(),
+                refreshOverviewMoodSelection(),
+            ]);
+            updateOverviewTimerButton();
+        }
+
+        async function initOverviewIsolatedDashboard() {
+            await renderOverviewDashboard();
+        }
+
+        function getCurrentLocalUser() {
+            try {
+                return JSON.parse(localStorage.getItem('currentUser') || 'null');
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function syncOverviewUserProfile() {
+            const user = getCurrentLocalUser();
+            const greeting = document.getElementById('user-greeting');
+            const rankElement = document.getElementById('ov-live-rank-value') || document.getElementById('overviewUserRank');
+
+            if (greeting) {
+                const displayName = user?.fullname || user?.name || 'Welcome back';
+                greeting.textContent = `Hi, ${displayName}`;
+            }
+
+            if (rankElement) {
+                if (user?.rank) {
+                    rankElement.textContent = `#${user.rank}`;
+                } else {
+                    rankElement.textContent = '';
+                }
+            }
+        }
+
+        async function loadOverviewUserRank() {
+            const rankElement = document.getElementById('ov-live-rank-value') || document.getElementById('overviewUserRank');
+            if (!rankElement) return;
+
+            try {
+                const rankData = await window.api.getUserRank?.();
+                if (rankData && rankData.rank && rankData.rank !== '--') {
+                    rankElement.textContent = `#${rankData.rank}`;
+                    const currentUser = getCurrentLocalUser() || {};
+                    if (rankData.rank !== currentUser.rank) {
+                        currentUser.rank = rankData.rank;
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    }
+                } else {
+                    rankElement.textContent = rankElement.textContent || '--';
+                }
+            } catch (error) {
+                console.warn('[Overview] loadOverviewUserRank failed:', error);
+                rankElement.textContent = rankElement.textContent || '--';
+            }
+        }
+
+        async function loadOverviewStatsSummary() {
+            try {
+                const summary = await window.api.fetchStatsSummary?.(statsMonth.year, statsMonth.month);
+                if (summary) {
+                    updateStatsSummary(summary);
+                } else {
+                    updateStatsSummary();
+                }
+            } catch (error) {
+                console.warn('[Overview] loadOverviewStatsSummary failed:', error);
+                updateStatsSummary();
+            }
+        }
+
+        async function loadOverviewTasks() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const container = document.getElementById('ov-tasks-stream-container') || document.getElementById('overview-tasks-container');
+            if (!container) return;
+
+            let taskItems = [];
+            try {
+                taskItems = await window.api.getTasksByDate(todayStr);
+                const todayKey = getDateKey(new Date());
+                tasks[todayKey] = taskItems;
+            } catch (error) {
+                console.warn('[Overview] loadOverviewTasks failed:', error);
+                taskItems = [];
+            }
+
+            renderOverviewTasks(taskItems);
+        }
+
+        function renderOverviewTasks(tasks) {
+            const container = document.getElementById('ov-tasks-stream-container') || document.getElementById('overview-tasks-container');
+            if (!container) return;
+
+            if (!Array.isArray(tasks) || tasks.length === 0) {
+                container.innerHTML = `
+                    <div class="ov-tasks-empty-state">
+                        <p>🎉 Great job — no overdue items in the mini view.</p>
+                        <button class="quick-add-btn" onclick="openQuickAddTaskModal()">+ Add a task</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedTasks = tasks.slice().sort((a, b) => {
+                const aValue = a.startTime || a.endTime || '';
+                const bValue = b.startTime || b.endTime || '';
+                return aValue.localeCompare(bValue);
+            });
+            const topTasks = sortedTasks.slice(0, 3);
+
+            container.innerHTML = topTasks.map(task => {
+                const completed = task.status === 'completed';
+                const timeLabel = `${task.startTime || ''}${task.startTime && task.endTime ? ' - ' : ''}${task.endTime || ''}`.trim() || '未设时间';
+                return `
+                    <div class="task-item-entry ${completed ? 'completed' : ''}">
+                        <button class="task-checkbox-btn" onclick="toggleOverviewTask(${JSON.stringify(task.id)}, ${JSON.stringify(task.status)})">
+                            <i class="${completed ? 'fas fa-check-circle' : 'far fa-circle'}"></i>
+                        </button>
+                        <div class="task-info">
+                            <p class="t-name">${escapeHtml(task.title || 'Untitled task')}</p>
+                            <p class="t-time">${escapeHtml(timeLabel)}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function toggleOverviewTask(taskId, currentStatus) {
+            if (!window.api?.toggleTaskStatus) return;
+            try {
+                await window.api.toggleTaskStatus(taskId);
+                await Promise.all([loadOverviewTasks(), loadOverviewStatsSummary()]);
+                if (typeof refreshStats === 'function') {
+                    refreshStats();
+                }
+            } catch (error) {
+                console.error('[Overview] toggleOverviewTask failed:', error);
+            }
+        }
+
+        function updateOverviewTimerButton() {
+            const startBtn = document.getElementById('ov-start-btn') || document.getElementById('overviewStartBtn');
+            if (!startBtn) return;
+            startBtn.innerHTML = pomodoroRunning && !pomodoroPaused ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        }
+
+        function toggleOverviewPomodoro() {
+            if (pomodoroRunning) {
+                togglePomodoroPause();
+            } else {
+                startPomodoro();
+            }
+            updateOverviewTimerButton();
+        }
+
+        function resetOverviewPomodoro() {
+            resetPomodoro();
+            updateOverviewTimerButton();
+        }
+
+        function openQuickAddTaskModal() {
+            openQuickAddTask();
+        }
+
+        async function submitMood(mood) {
+            const todayKey = getDateKey(new Date());
+            const normalized = normalizeMoodKey(mood);
+            localStorage.setItem(`${todayKey}-dailyMood`, normalized);
+            applyMoodTheme(normalized);
+            refreshOverviewMoodSelection();
+            if (window.api?.submitDailyMood) {
+                try {
+                    await window.api.submitDailyMood(mood, todayKey);
+                } catch (error) {
+                    console.warn('[Overview] submitMood failed:', error);
+                }
+            }
+            showNotification('success', 'Mood Sync success', `Mood recorded: ${mood}`);
+        }
+
+        async function submitOverviewMood(mood, element) {
+            if (element && element.closest) {
+                document.querySelectorAll('.ov-mood-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                element.classList.add('active');
+            }
+            await submitMood(mood);
+        }
+
+        async function refreshOverviewMoodSelection() {
+            const todayKey = getDateKey(new Date());
+            let selectedMood = localStorage.getItem(`${todayKey}-dailyMood`) || '';
+            if (window.api?.fetchDailyMood) {
+                try {
+                    const apiMood = await window.api.fetchDailyMood(todayKey);
+                    if (apiMood) {
+                        selectedMood = apiMood;
+                        localStorage.setItem(`${todayKey}-dailyMood`, apiMood);
+                    }
+                } catch (error) {
+                    console.warn('[Overview] refreshOverviewMoodSelection API fallback failed:', error);
+                }
+            }
+            document.querySelectorAll('.ov-mood-btn').forEach(button => {
+                button.classList.toggle('active', button.dataset.mood === selectedMood);
+            });
+            if (selectedMood) {
+                applyMoodTheme(selectedMood);
+            }
+        }
+
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
             const hamburger = document.getElementById('mobileMenuButton');
@@ -407,9 +773,23 @@ const track = document.getElementById('pillTrack');
         let pomodoroEndSoundSrc = '';
         let zenMusicEnabled = true;
         let zenMusicSources = [
-            'https://assets.mixkit.co/music/preview/mixkit-relaxing-meditation-291.mp3',
-            'https://assets.mixkit.co/music/preview/mixkit-romantic-piano-1481.mp3'
+            'assets/audio/pomodoro/audio_01.mpeg',
+            'assets/audio/pomodoro/audio_02.mpeg',
+            'assets/audio/pomodoro/audio_03.mpeg',
+            'assets/audio/pomodoro/audio_04.mpeg',
+            'assets/audio/pomodoro/audio_05.mpeg',
+            'assets/audio/pomodoro/audio_06.mpeg'
         ];
+        let currentZenTrackIndex = 0;
+        let zenTrackTransitioning = false;
+        let zenAudioContext = null;
+        let zenAnalyser = null;
+        let zenAudioSource = null;
+        let zenAudioDataArray = null;
+        let zenAudioAnimationId = null;
+        let isZenModeActive = false;
+        let pomodoroRingAnimationId = null;
+        let pomodoroCurrentVisualProgress = 1;
         const pomodoroRingCircumference = 2 * Math.PI * 104;
 
         // 番茄钟同步函数
@@ -580,21 +960,53 @@ const track = document.getElementById('pillTrack');
             return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
 
-        function updatePomodoroDisplay() {
-            const display = document.getElementById('pomodoroTimerDisplay');
+        function applyPomodoroRingProgress(progress) {
             const ring = document.getElementById('pomodoroRingProgress');
             const dot = document.getElementById('pomodoroRingDot');
-            const total = pomodoroTotalSeconds > 0 ? pomodoroTotalSeconds : 1;
-            const progress = pomodoroTotalSeconds > 0 ? Math.max(0, Math.min(1, pomodoroRemainingSeconds / total)) : 0;
-            const offset = pomodoroRingCircumference - pomodoroRingCircumference * progress;
+            const safeProgress = Math.max(0, Math.min(1, progress));
+            const offset = pomodoroRingCircumference - pomodoroRingCircumference * safeProgress;
             if (ring) {
-                ring.style.strokeDashoffset = offset;
+                ring.style.strokeDashoffset = `${offset}`;
             }
             if (dot) {
-                dot.style.transform = `rotate(${360 * (1 - progress)}deg)`;
+                dot.style.transform = `rotate(${360 * (1 - safeProgress)}deg)`;
             }
+        }
+
+        function animatePomodoroRingTo(targetProgress) {
+            if (pomodoroRingAnimationId) {
+                cancelAnimationFrame(pomodoroRingAnimationId);
+            }
+            const startProgress = pomodoroCurrentVisualProgress;
+            const target = Math.max(0, Math.min(1, targetProgress));
+            const startTime = performance.now();
+            const duration = 420;
+            const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
+
+            function tick(now) {
+                const elapsed = Math.min(1, (now - startTime) / duration);
+                const eased = easeOutCubic(elapsed);
+                pomodoroCurrentVisualProgress = startProgress + (target - startProgress) * eased;
+                applyPomodoroRingProgress(pomodoroCurrentVisualProgress);
+                if (elapsed < 1) {
+                    pomodoroRingAnimationId = requestAnimationFrame(tick);
+                }
+            }
+
+            pomodoroRingAnimationId = requestAnimationFrame(tick);
+        }
+
+        function updatePomodoroDisplay() {
+            const display = document.getElementById('pomodoroTimerDisplay');
+            const total = pomodoroTotalSeconds > 0 ? pomodoroTotalSeconds : 1;
+            const progress = pomodoroTotalSeconds > 0 ? Math.max(0, Math.min(1, pomodoroRemainingSeconds / total)) : 0;
+            animatePomodoroRingTo(progress);
             if (display) {
                 display.innerText = formatTime(pomodoroRemainingSeconds);
+            }
+            const overviewDisplay = document.getElementById('ov-timer-display') || document.getElementById('overviewPomodoroDisplay') || document.getElementById('overviewTimerDisplay');
+            if (overviewDisplay) {
+                overviewDisplay.innerText = formatTime(pomodoroRemainingSeconds);
             }
             updateZenTimerDisplay();
         }
@@ -631,6 +1043,7 @@ const track = document.getElementById('pillTrack');
 
         function startPomodoro() {
             if (pomodoroRunning) return;
+            stopPomodoroAlarm();
             pomodoroRunning = true;
             pomodoroPaused = false;
             syncPomodoroState();
@@ -712,6 +1125,7 @@ const track = document.getElementById('pillTrack');
             if (pomodoroIntervalId) {
                 clearInterval(pomodoroIntervalId);
             }
+            stopPomodoroAlarm();
             pomodoroRunning = false;
             pomodoroPaused = false;
             setWheelLockState();
@@ -739,6 +1153,7 @@ const track = document.getElementById('pillTrack');
         }
 
         function enableZenMode(active) {
+            isZenModeActive = active;
             document.body.classList.toggle('zen-mode-active', active);
             if (typeof setParticleTheme === 'function') {
                 setParticleTheme(active ? 'zen' : 'default');
@@ -747,8 +1162,10 @@ const track = document.getElementById('pillTrack');
                 if (zenMusicEnabled) {
                     playZenMusic();
                 }
+                startZenAudioAnalysis();
             } else {
                 pauseZenMusic();
+                stopZenAudioAnalysis();
             }
         }
 
@@ -760,44 +1177,201 @@ const track = document.getElementById('pillTrack');
             }
         }
 
+        function openPomodoroAlarmModal() {
+            const backdrop = document.getElementById('pomodoroAlarmBackdrop');
+            const modal = document.getElementById('pomodoroAlarmModal');
+            if (!backdrop || !modal) return;
+            backdrop.classList.add('open');
+            modal.classList.add('open');
+            backdrop.onclick = null;
+        }
+
+        function closePomodoroAlarmModal() {
+            const backdrop = document.getElementById('pomodoroAlarmBackdrop');
+            const modal = document.getElementById('pomodoroAlarmModal');
+            if (!backdrop || !modal) return;
+            backdrop.classList.remove('open');
+            modal.classList.remove('open');
+        }
+
+        function stopPomodoroAlarm() {
+            const endAudio = document.getElementById('pomodoroEndAudio');
+            if (endAudio) {
+                endAudio.pause();
+                endAudio.loop = false;
+                endAudio.currentTime = 0;
+            }
+            closePomodoroAlarmModal();
+        }
+
         function playPomodoroEndSound() {
             const endAudio = document.getElementById('pomodoroEndAudio');
-            if (!endAudio || !pomodoroEndSoundSrc) return;
-            if (endAudio.src !== pomodoroEndSoundSrc) {
-                endAudio.src = pomodoroEndSoundSrc;
+            const alarmUrl = '/assets/audio/alarm/alarm.mpeg';
+            if (!endAudio) return;
+
+            pomodoroEndSoundSrc = alarmUrl;
+            if (endAudio.src !== alarmUrl) {
+                endAudio.src = alarmUrl;
             }
-            endAudio.volume = 0.75;
+            endAudio.loop = true;
+            endAudio.volume = 0.9;
+            endAudio.currentTime = 0;
             endAudio.play().catch(() => {
-                console.warn('Pomodoro end sound blocked.');
+                console.warn('Pomodoro alarm playback blocked.');
             });
+            openPomodoroAlarmModal();
         }
 
         function setZenMusicSources(sources) {
             zenMusicSources = Array.isArray(sources) ? sources : [];
         }
 
-        function playZenMusic() {
+        function initializeZenAudioPlayer() {
             const audio = document.getElementById('zenAudio');
-            if (!audio || !zenMusicSources.length) return;
-            const nextTrack = zenMusicSources[Math.floor(Math.random() * zenMusicSources.length)];
-            if (audio.src !== nextTrack) {
-                audio.src = nextTrack;
-            }
-            audio.volume = 0.38;
-            audio.play().catch(() => {
-                console.warn('Zen music playback blocked.');
-            });
+            if (!audio) return;
+            audio.onended = null;
             audio.onended = () => {
-                if (zenMusicEnabled) {
-                    playZenMusic();
+                console.log('🎵 当前音乐播放完毕，正在平滑切换至下一首...');
+                if (zenMusicEnabled && isZenModeActive) {
+                    playNextZenTrack();
                 }
             };
+        }
+
+        function playZenMusic() {
+            const audio = document.getElementById('zenAudio');
+            if (!audio || !zenMusicSources.length || !zenMusicEnabled) return;
+            initializeZenAudioPlayer();
+
+            const targetSource = zenMusicSources[currentZenTrackIndex];
+            if (!audio.src || !audio.src.includes(targetSource)) {
+                audio.pause();
+                audio.src = targetSource;
+                audio.load();
+            }
+
+            audio.volume = 0.38;
+            resumeAudioContext();
+            const playPromise = audio.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+                playPromise.catch((error) => {
+                    console.warn('Zen music playback blocked.', error);
+                });
+            }
+            startZenAudioAnalysis();
+        }
+
+        function playNextZenTrack() {
+            if (!zenMusicSources.length || zenTrackTransitioning) return;
+            const audio = document.getElementById('zenAudio');
+            if (!audio) return;
+
+            zenTrackTransitioning = true;
+            currentZenTrackIndex = (currentZenTrackIndex + 1) % zenMusicSources.length;
+            audio.pause();
+            audio.src = zenMusicSources[currentZenTrackIndex];
+            audio.load();
+            initializeZenAudioPlayer();
+            audio.volume = 0.38;
+
+            const playPromise = audio.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+                playPromise
+                    .catch((error) => {
+                        console.warn('Zen next track playback blocked.', error);
+                    })
+                    .finally(() => {
+                        zenTrackTransitioning = false;
+                    });
+            } else {
+                zenTrackTransitioning = false;
+            }
         }
 
         function pauseZenMusic() {
             const audio = document.getElementById('zenAudio');
             if (!audio) return;
             audio.pause();
+        }
+
+        async function resumeAudioContext() {
+            if (!zenAudioContext) {
+                initZenAudioAnalyzer();
+            }
+            try {
+                if (zenAudioContext && zenAudioContext.state === 'suspended') {
+                    await zenAudioContext.resume();
+                }
+            } catch (error) {
+                console.warn('Unable to resume audio context:', error);
+            }
+        }
+
+        function initZenAudioAnalyzer() {
+            const audio = document.getElementById('zenAudio');
+            if (!audio || zenAudioContext) return;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                zenAudioContext = new AudioContext();
+                zenAudioSource = zenAudioContext.createMediaElementSource(audio);
+                zenAnalyser = zenAudioContext.createAnalyser();
+                zenAnalyser.fftSize = 128;
+                zenAudioSource.connect(zenAnalyser);
+                zenAudioSource.connect(zenAudioContext.destination);
+                zenAudioDataArray = new Uint8Array(zenAnalyser.frequencyBinCount);
+            } catch (error) {
+                console.warn('Unable to initialize zen audio analyzer:', error);
+                zenAudioContext = null;
+                zenAnalyser = null;
+                zenAudioSource = null;
+            }
+        }
+
+        function startZenAudioAnalysis() {
+            if (!isZenModeActive || !zenMusicEnabled) return;
+            if (!zenAnalyser) {
+                initZenAudioAnalyzer();
+            }
+            if (!zenAnalyser) return;
+            cancelAnimationFrame(zenAudioAnimationId);
+
+            function computeAverage(range) {
+                if (!range.length) return 0;
+                return range.reduce((sum, value) => sum + value, 0) / range.length;
+            }
+
+            function updateAudioLevel() {
+                zenAnalyser.getByteFrequencyData(zenAudioDataArray);
+                const bassBins = zenAudioDataArray.slice(0, Math.min(12, zenAudioDataArray.length));
+                const trebleStart = Math.max(zenAudioDataArray.length - 20, 0);
+                const trebleBins = zenAudioDataArray.slice(trebleStart);
+
+                const bassAverage = Math.min(1, computeAverage(bassBins) / 255);
+                const trebleAverage = Math.min(1, computeAverage(trebleBins) / 255);
+                const overallAverage = Math.min(1, zenAudioDataArray.reduce((sum, value) => sum + value, 0) / (zenAudioDataArray.length * 255));
+
+                if (typeof setParticleAudioState === 'function') {
+                    setParticleAudioState({
+                        bass: bassAverage,
+                        treble: trebleAverage,
+                        intensity: overallAverage,
+                    });
+                } else if (typeof setParticleAudioIntensity === 'function') {
+                    setParticleAudioIntensity(overallAverage);
+                }
+                zenAudioAnimationId = requestAnimationFrame(updateAudioLevel);
+            }
+
+            updateAudioLevel();
+        }
+
+        function stopZenAudioAnalysis() {
+            cancelAnimationFrame(zenAudioAnimationId);
+            if (typeof setParticleAudioState === 'function') {
+                setParticleAudioState({ bass: 0, treble: 0, intensity: 0 });
+            } else if (typeof setParticleAudioIntensity === 'function') {
+                setParticleAudioIntensity(0);
+            }
         }
 
         function toggleZenMusic() {
@@ -888,6 +1462,9 @@ const track = document.getElementById('pillTrack');
                 renderCalendar(currentYear, currentMonth);
             }
 
+            if (viewId === 'dashboard') {
+                renderOverviewDashboard();
+            }
             if (viewId === 'stats') {
                 refreshStats();
             }
@@ -913,6 +1490,23 @@ const track = document.getElementById('pillTrack');
                 });
                 const data = await response.json();
                 if (response.ok) {
+                    // ================================================
+                    // 1. Store user data in localStorage (新增)
+                    // ================================================
+                    localStorage.setItem('userId', data.user.id);
+                    localStorage.setItem('userEmail', data.user.email);
+                    localStorage.setItem('userName', data.user.fullname);
+                    // Store full user object for quick access
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        id: data.user.id,
+                        name: data.user.fullname,
+                        email: data.user.email
+                    }));
+                    // Store auth token if backend provides it
+                    if (data.token) {
+                        localStorage.setItem('authToken', data.token);
+                    }
+                    
                     document.getElementById('nav-pills').style.display = 'flex';
                     document.getElementById('nav-actions').style.display = 'flex';
                     
@@ -920,17 +1514,33 @@ const track = document.getElementById('pillTrack');
                     if (blueCircle) blueCircle.style.display = 'none';
 
                     document.getElementById('user-greeting').innerText = `Hello, ${data.user.fullname}`;
-                    
-                    // Set current user ID and load leaderboard
-                    currentUserId = data.user.id;
-                    // 设置 main.js 中的用户ID
-                    if (typeof setCurrentUser === 'function') {
-                        setCurrentUser(currentUserId);
+
+                    const currentUser = {
+                        id: data.user.id,
+                        fullname: data.user.fullname || data.user.name || 'User',
+                        name: data.user.fullname || data.user.name || 'User',
+                        email: data.user.email || ''
+                    };
+
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('userId', currentUser.id);
+                    localStorage.setItem('userEmail', currentUser.email);
+                    localStorage.setItem('userName', currentUser.fullname);
+
+                    if (typeof updateAccountModal === 'function') {
+                        updateAccountModal({
+                            name: currentUser.fullname,
+                            email: currentUser.email
+                        });
                     }
-                    loadLeaderboard();
-                    loadUserStats();
-                    
-                    showNotification('success', 'Welcome Back!', `Hello ${data.user.fullname}, you're now signed in.`);
+                    if (typeof renderUserIdentity === 'function') {
+                        renderUserIdentity();
+                    }
+                    if (typeof initAppData === 'function') {
+                        await initAppData(currentUser.id, false);
+                    }
+
+                    showNotification('success', 'Welcome Back!', `Hello ${currentUser.fullname}, you're now signed in.`);
                     setTimeout(() => {
                         showView('dashboard');
                     }, 1200);
@@ -1304,6 +1914,9 @@ const track = document.getElementById('pillTrack');
             timeEl.value = ''; // 清空时间选择
             
             updateTaskList();
+            if (typeof loadOverviewTasks === 'function') {
+                loadOverviewTasks();
+            }
         }
 
         // ==================== Modal Functions ====================
@@ -1317,6 +1930,10 @@ const track = document.getElementById('pillTrack');
                 backdrop.classList.add('open');
                 modal.classList.add('open');
                 backdrop.onclick = () => closeModal(type);
+            }
+
+            if (type === 'settings' && typeof syncNotificationToggleUI === 'function') {
+                syncNotificationToggleUI();
             }
         }
 
@@ -1382,6 +1999,85 @@ const track = document.getElementById('pillTrack');
             }).join('');
         }
 
+        function createNotificationRipple(button, event) {
+            const ripple = document.createElement('span');
+            ripple.className = 'notification-ripple-wave';
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height) * 1.4;
+            ripple.style.width = `${size}px`;
+            ripple.style.height = `${size}px`;
+            ripple.style.left = `${event.clientX - rect.left}px`;
+            ripple.style.top = `${event.clientY - rect.top}px`;
+            button.appendChild(ripple);
+            ripple.addEventListener('animationend', () => ripple.remove());
+        }
+
+        function syncNotificationToggleUI() {
+            const toggle = document.getElementById('notificationsSwitch');
+            if (!toggle) return;
+
+            const supported = 'Notification' in window;
+            const permissionGranted = supported && Notification.permission === 'granted';
+            const userEnabled = localStorage.getItem('nmlmNotificationsEnabled') === 'true';
+            const enabled = permissionGranted && userEnabled;
+
+            toggle.classList.toggle('enabled', enabled);
+            toggle.classList.toggle('disabled', !supported);
+            toggle.setAttribute('aria-pressed', String(enabled));
+            toggle.disabled = !supported;
+            toggle.classList.remove('is-pending');
+        }
+
+        function toggleNotificationPermission(event, button) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            createNotificationRipple(button, event);
+
+            if (!('Notification' in window)) {
+                showNotification('error', 'Notifications not supported', 'This browser does not support website notifications.');
+                return;
+            }
+
+            const currentlyEnabled = localStorage.getItem('nmlmNotificationsEnabled') === 'true';
+            if (currentlyEnabled) {
+                localStorage.setItem('nmlmNotificationsEnabled', 'false');
+                syncNotificationToggleUI();
+                showNotification('success', 'Notifications off', 'Website notifications are now turned off for this app.');
+                return;
+            }
+
+            button.classList.add('is-pending');
+            Notification.requestPermission().then((permission) => {
+                const enabled = permission === 'granted';
+                localStorage.setItem('nmlmNotificationsEnabled', String(enabled));
+                syncNotificationToggleUI();
+
+                if (enabled) {
+                    showNotification('success', 'Notifications enabled', 'Website notifications are now enabled.');
+                } else {
+                    showNotification('error', 'Permission denied', 'Please allow notifications in your browser settings if you want reminders.');
+                }
+            }).catch(() => {
+                syncNotificationToggleUI();
+                showNotification('error', 'Permission request failed', 'Unable to request notification permission right now.');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('notificationsSwitch');
+            if (!toggle) return;
+
+            ['pointerdown', 'mousedown'].forEach(type => {
+                toggle.addEventListener(type, () => toggle.classList.add('is-pressed'));
+            });
+            ['pointerup', 'pointerleave', 'pointercancel', 'mouseup'].forEach(type => {
+                toggle.addEventListener(type, () => toggle.classList.remove('is-pressed'));
+            });
+
+            syncNotificationToggleUI();
+        });
+
         // Switch Settings Tab
         function switchSettingsTab(event, tabName) {
             // Update active menu item
@@ -1398,32 +2094,92 @@ const track = document.getElementById('pillTrack');
             if (section) section.classList.add('active');
         }
 
-        // Edit Profile
-        function editProfile() {
-            const newName = prompt('Enter your new name:', document.getElementById('accountName').innerText);
-            if (newName && newName.trim()) {
-                document.getElementById('accountName').innerText = newName;
-            }
+        // Open Edit Profile Modal
+        function openEditProfileModal() {
+            const currentName = document.getElementById('accountName')?.textContent || localStorage.getItem('userName') || 'User';
+            const currentEmail = document.getElementById('accountEmail')?.textContent || localStorage.getItem('userEmail') || '';
+            const nameInput = document.getElementById('editProfileName');
+            const emailInput = document.getElementById('editProfileEmail');
+
+            if (nameInput) nameInput.value = currentName;
+            if (emailInput) emailInput.value = currentEmail;
+
+            openModal('editProfile');
         }
 
-        // Switch Account
-        function switchAccount() {
-            if (confirm('Are you sure you want to switch accounts?')) {
-                showView('signin');
-                closeModal('account');
-                closeMobileMenu();
+        function saveProfileChanges() {
+            const nameInput = document.getElementById('editProfileName');
+            const emailInput = document.getElementById('editProfileEmail');
+            const newName = nameInput?.value?.trim() || '';
+            const newEmail = emailInput?.value?.trim() || '';
+
+            if (!newName) {
+                showNotification('error', 'Name required', 'Please enter a display name.');
+                return;
             }
+
+            if (!newEmail) {
+                showNotification('error', 'Email required', 'Please enter your email address.');
+                return;
+            }
+
+            const nameEl = document.getElementById('accountName');
+            const emailEl = document.getElementById('accountEmail');
+            if (nameEl) nameEl.textContent = newName;
+            if (emailEl) emailEl.textContent = newEmail;
+
+            localStorage.setItem('userName', newName);
+            localStorage.setItem('userEmail', newEmail);
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            localStorage.setItem('currentUser', JSON.stringify({
+                ...currentUser,
+                name: newName,
+                fullname: newName,
+                email: newEmail
+            }));
+
+            if (typeof updateAccountModal === 'function') {
+                updateAccountModal({ name: newName, email: newEmail });
+            }
+
+            closeModal('editProfile');
+            showNotification('success', 'Profile updated', 'Your account details have been saved.');
+        }
+
+        // Open Switch Account Modal
+        function openSwitchAccountModal() {
+            openModal('switchAccount');
+        }
+
+        function confirmSwitchAccount() {
+            showView('signin');
+            closeModal('account');
+            closeModal('switchAccount');
+            closeMobileMenu();
         }
 
         // Logout
+        function openLogoutModal() {
+            openModal('logout');
+        }
+
         function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                showView('intro');
-                closeModal('account');
-                closeMobileMenu();
-                document.getElementById('nav-pills').style.display = 'none';
-                document.getElementById('nav-actions').style.display = 'none';
-            }
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('authToken');
+            currentUserId = null;
+
+            showView('intro');
+            closeModal('account');
+            closeModal('logout');
+            closeMobileMenu();
+
+            const navPills = document.getElementById('nav-pills');
+            const navActions = document.getElementById('nav-actions');
+            if (navPills) navPills.style.display = 'none';
+            if (navActions) navActions.style.display = 'none';
         }
 
         // Change Avatar
@@ -1452,9 +2208,6 @@ const track = document.getElementById('pillTrack');
 
         // ==================== Leaderboard Functions ====================
         
-        // Current user ID (set after login)
-        let currentUserId = null;
-
         // Fetch and display leaderboard data
         async function loadLeaderboard() {
             try {
