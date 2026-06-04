@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -779,11 +779,11 @@
                     </button>
 
                     <div class="pill-track" id="pillTrack">
-                        <div class="pill active" onclick="selectPill(this, 'dashboard')">Overview</div>
-                        <div class="pill" onclick="selectPill(this, 'task')">Task</div>
-                        <div class="pill" onclick="selectPill(this, 'leaderboard')">Leaderboard</div>
-                        <div class="pill" onclick="selectPill(this, 'stats')">Stats</div>
-                        <div class="pill" onclick="selectPill(this, 'pomodoro')">Pomodoro</div>
+                        <div class="pill active" data-i18n="overview" onclick="selectPill(this, 'dashboard')">Overview</div>
+                        <div class="pill" data-i18n="task" onclick="selectPill(this, 'task')">Task</div>
+                        <div class="pill" data-i18n="leaderboard" onclick="selectPill(this, 'leaderboard')">Leaderboard</div>
+                        <div class="pill" data-i18n="stats" onclick="selectPill(this, 'stats')">Stats</div>
+                        <div class="pill" data-i18n="pomodoro" onclick="selectPill(this, 'pomodoro')">Pomodoro</div>
                     </div>
 
                     <button class="pill-arrow-btn right" onclick="scrollPills('right')">
@@ -815,13 +815,13 @@
                 </div>
             </div>
         </div>
-        <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+            <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
             <div class="mobile-menu-section">
-                <div class="pill active" onclick="selectPill(this, 'dashboard')">Overview</div>
-                <div class="pill" onclick="selectPill(this, 'task')">Task</div>
-                <div class="pill" onclick="selectPill(this, 'leaderboard')">Leaderboard</div>
-                <div class="pill" onclick="selectPill(this, 'stats')">Stats</div>
-                <div class="pill" onclick="selectPill(this, 'pomodoro')">Pomodoro</div>
+                <div class="pill active" data-i18n="overview" onclick="selectPill(this, 'dashboard')">Overview</div>
+                <div class="pill" data-i18n="task" onclick="selectPill(this, 'task')">Task</div>
+                <div class="pill" data-i18n="leaderboard" onclick="selectPill(this, 'leaderboard')">Leaderboard</div>
+                <div class="pill" data-i18n="stats" onclick="selectPill(this, 'stats')">Stats</div>
+                <div class="pill" data-i18n="pomodoro" onclick="selectPill(this, 'pomodoro')">Pomodoro</div>
             </div>
             <div class="mobile-menu-section mobile-actions">
                 <button class="icon-circle" title="Search">
@@ -854,7 +854,7 @@
                 </div>
                 
                 <div id="view-intro" class="auth-view active">
-                    <h1 class="welcome-title">Sign In</h1>
+                    <h1 class="welcome-title" data-i18n="sign-in">Sign In</h1>
                     <button class="next-btn" onclick="showView('signin')">
                         <svg viewBox="0 0 24 24" width="24" height="24">
                             <path fill="currentColor" d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
@@ -863,21 +863,21 @@
                 </div>
 
                 <div id="view-signin" class="auth-view">
-                    <h1 class="welcome-title">Sign In</h1>
+                    <h1 class="welcome-title" data-i18n="sign-in">Sign In</h1>
                     <div class="input-stack">
-                        <input type="email" id="signin-email" placeholder="Email or Student ID" class="apple-input">
-                        <input type="password" id="signin-password" placeholder="Password" class="apple-input">
+                        <input type="email" id="signin-email" placeholder="Email or Student ID" class="apple-input" data-i18n="email-or-id">
+                        <input type="password" id="signin-password" placeholder="Password" class="apple-input" data-i18n="password">
                     </div>
-                    <button class="action-btn" onclick="handleSignIn()">Login</button>
-                    <p class="form-switch">Don't have an ID? <span onclick="showView('signup')">Create Yours</span></p>
+                    <button class="action-btn" onclick="handleSignIn()" data-i18n="login">Login</button>
+                    <p class="form-switch"><span data-i18n="dont-have-id">Don't have an ID?</span> <span onclick="showView('signup')" data-i18n="create-yours">Create Yours</span></p>
                 </div>
 
                 <div id="view-signup" class="auth-view">
-                    <h1 class="welcome-title">Sign Up</h1>
+                    <h1 class="welcome-title" data-i18n="sign-up">Sign Up</h1>
                     <div class="input-stack">
-                        <input type="text" id="signup-name" placeholder="Full Name" class="apple-input">
-                        <input type="email" id="signup-email" placeholder="Student Email" class="apple-input">
-                        <input type="password" id="signup-password" placeholder="Password" class="apple-input" oninput="checkPasswordStrength()">
+                        <input type="text" id="signup-name" placeholder="Full Name" class="apple-input" data-i18n="full-name">
+                        <input type="email" id="signup-email" placeholder="Student Email" class="apple-input" data-i18n="student-email">
+                        <input type="password" id="signup-password" placeholder="Password" class="apple-input" oninput="checkPasswordStrength()" data-i18n="password">
                         <div class="password-strength-container">
                             <div class="password-strength-bar">
                                 <div class="password-strength-fill" id="strength-fill"></div>
@@ -887,18 +887,18 @@
                                 <span class="strength-check" id="strength-check">✓</span>
                             </div>
                         </div>
-                        <input type="password" id="signup-confirm-password" placeholder="Confirm Password" class="apple-input">
+                        <input type="password" id="signup-confirm-password" placeholder="Confirm Password" class="apple-input" data-i18n="confirm-password">
                         <span class="confirm-error" id="confirm-error"></span>
                     </div>
-                    <button class="action-btn" onclick="handleSignUp()">Create Account</button>
-                    <p class="form-switch">Already have an ID? <span onclick="showView('signin')">Sign In</span></p>
+                    <button class="action-btn" onclick="handleSignUp()" data-i18n="create-account">Create Account</button>
+                    <p class="form-switch"><span data-i18n="already-have-id">Already have an ID?</span> <span onclick="showView('signin')" data-i18n="sign-in">Sign In</span></p>
                 </div>
 
                 <div id="view-otp" class="auth-view">
                     <div class="otp-container">
                         <div class="otp-header">
-                            <h1 class="welcome-title">Verify Email</h1>
-                            <p class="otp-subtitle">We sent a 6-digit code to your email</p>
+                            <h1 class="welcome-title" data-i18n="verify-email">Verify Email</h1>
+                            <p class="otp-subtitle" data-i18n="email-code-sent">We sent a 6-digit code to your email</p>
                         </div>
                         <div class="otp-input-container">
                             <input type="text" class="otp-input" maxlength="1" id="otp-1" oninput="handleOtpInput(this, 'otp-2')" onkeydown="handleOtpKeydown(event, this, null)">
@@ -908,9 +908,9 @@
                             <input type="text" class="otp-input" maxlength="1" id="otp-5" oninput="handleOtpInput(this, 'otp-6')" onkeydown="handleOtpKeydown(event, this, 'otp-4')">
                             <input type="text" class="otp-input" maxlength="1" id="otp-6" oninput="handleOtpInput(this, null)" onkeydown="handleOtpKeydown(event, this, 'otp-5')">
                         </div>
-                        <button class="action-btn" onclick="handleOtpVerify()">Verify</button>
-                        <p class="otp-resend">Didn't receive the code? <span onclick="resendOtp()">Resend</span></p>
-                        <p class="otp-footer">Back to <span onclick="showView('signup')">Sign Up</span></p>
+                        <button class="action-btn" onclick="handleOtpVerify()" data-i18n="verify">Verify</button>
+                        <p class="otp-resend"><span data-i18n="didnt-receive">Didn't receive the code?</span> <span onclick="resendOtp()" data-i18n="resend">Resend</span></p>
+                        <p class="otp-footer">Back to <span onclick="showView('signup')" data-i18n="sign-up">Sign Up</span></p>
                     </div>
                 </div>
 
@@ -963,14 +963,14 @@
                         <div class="ov-modules-grid-right">
                             <div class="ov-premium-card ov-card-tasks overview-card tasks-express-module">
                                 <div class="card-header-row" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px;">
-                                    <span class="card-label">TASKS</span>
-                                    <button class="quick-add-btn" onclick="openQuickAddTaskModal()">+ New Task</button>
+                                    <span class="card-label" data-i18n="tasks">TASKS</span>
+                                    <button class="quick-add-btn" onclick="openQuickAddTaskModal()" data-i18n="new-task">+ New Task</button>
                                 </div>
                                 <div id="ov-tasks-stream-container" class="mini-task-list"></div>
                             </div>
 
                             <div class="ov-premium-card overview-card pomodoro-mini-module">
-                                <span class="card-label">POMODORO</span>
+                                <span class="card-label" data-i18n="pomodoro">POMODORO</span>
                                 <div class="mini-timer-display" id="ov-timer-display">25:00</div>
                                 <div class="mini-timer-controls" style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
                                     <button id="ov-start-btn" onclick="toggleOverviewPomodoro()" style="width:40px; height:32px; border-radius:12px; border:none; background:rgba(255,255,255,0.08); color:#fff; cursor:pointer;"><i class="fas fa-play"></i></button>
@@ -979,14 +979,14 @@
                             </div>
 
                             <div class="ov-premium-card overview-card leaderboard-mini-module">
-                                <span class="card-label">RANK</span>
+                                <span class="card-label" data-i18n="rank">RANK</span>
                                 <div class="mini-rank-body" style="display:flex; justify-content:center; align-items:center; height:70px;"> 
                                     <span class="mini-rank-number" id="ov-live-rank-value">--</span>
                                 </div>
                             </div>
 
                             <div class="ov-premium-card ov-card-mood overview-card mood-mini-module">
-                                <span class="card-label" style="display:block; text-align:center; margin-bottom:12px;">MOOD TODAY</span>
+                                <span class="card-label" data-i18n="mood-today" style="display:block; text-align:center; margin-bottom:12px;">MOOD TODAY</span>
                                 <div class="mini-mood-selectors" style="display:flex; justify-content:space-around; max-width:320px; margin:0 auto;">
                                     <span class="mood-emoji ov-mood-btn" data-mood="sad" onclick="submitOverviewMood('sad', this)">😢</span>
                                     <span class="mood-emoji ov-mood-btn" data-mood="neutral" onclick="submitOverviewMood('neutral', this)">😐</span>
@@ -1051,7 +1051,7 @@
                                 <div class="pomodoro-meter">
                                     <div class="pomodoro-meter-fill" id="pomodoroMeterFill"></div>
                                 </div>
-                                <p class="pomodoro-note">Use this as the central interface for recording your pomodoro sessions.</p>
+                                <p class="pomodoro-note" data-i18n="use-as-interface">Use this as the central interface for recording your pomodoro sessions.</p>
                             </div>
 
                             <div class="g2-component stats-card emotion-card">
@@ -1061,10 +1061,10 @@
                                 </div>
                                 <p class="emotion-subtext">Tap a mood once an hour. You can change it if needed.</p>
                                 <div class="emotion-buttons">
-                                    <button class="mood-button mood-good" id="moodGoodBtn" onclick="handleMoodClick('good')">Good</button>
-                                    <button class="mood-button mood-bad" id="moodBadBtn" onclick="handleMoodClick('bad')">Bad</button>
+                                    <button class="mood-button mood-good" id="moodGoodBtn" onclick="handleMoodClick('good')" data-i18n="good">Good</button>
+                                    <button class="mood-button mood-bad" id="moodBadBtn" onclick="handleMoodClick('bad')" data-i18n="bad">Bad</button>
                                 </div>
-                                <div class="emotion-trend-label">Last 5 hours</div>
+                                <div class="emotion-trend-label" data-i18n="last-5-hours">Last 5 hours</div>
                                 <div class="hourly-emotion-row" id="emotionTrendRow"></div>
                             </div>
 
@@ -1074,7 +1074,7 @@
                                     <span class="card-note">Daily pomodoro minutes</span>
                                 </div>
                                 <div class="trend-scroll-container" id="trendScroll"></div>
-                                <div class="trend-footer">Swipe or scroll left / right for more days.</div>
+                                <div class="trend-footer" data-i18n="swipe-or-scroll">Swipe or scroll left / right for more days.</div>
                             </div>
                         </div>
                     </div>
@@ -1098,19 +1098,19 @@
                                 <div class="pomodoro-control-block">
                                     <div class="time-wheel-group">
                                         <div class="wheel-column">
-                                            <label class="wheel-title">Hours</label>
+                                            <label class="wheel-title" data-i18n="hours">Hours</label>
                                             <div class="wheel-container">
                                                 <div class="time-wheel" id="hourWheel" data-part="hours"></div>
                                             </div>
                                         </div>
                                         <div class="wheel-column">
-                                            <label class="wheel-title">Minutes</label>
+                                            <label class="wheel-title" data-i18n="minutes">Minutes</label>
                                             <div class="wheel-container">
                                                 <div class="time-wheel" id="minuteWheel" data-part="minutes"></div>
                                             </div>
                                         </div>
                                         <div class="wheel-column">
-                                            <label class="wheel-title">Seconds</label>
+                                            <label class="wheel-title" data-i18n="seconds">Seconds</label>
                                             <div class="wheel-container">
                                                 <div class="time-wheel" id="secondWheel" data-part="seconds"></div>
                                             </div>
@@ -1118,11 +1118,11 @@
                                     </div>
                                     <div class="pomodoro-actions">
                                         <div class="pomodoro-main-actions">
-                                            <button class="btn btn-primary btn-start" id="startPomodoroBtn" onclick="startPomodoro()">Start</button>
-                                            <button class="btn btn-secondary" id="pausePomodoroBtn" onclick="togglePomodoroPause()" style="display:none">Pause</button>
-                                            <button class="btn btn-secondary" id="resetPomodoroBtn" onclick="resetPomodoro()" style="display:none">Reset</button>
+                                            <button class="btn btn-primary btn-start" id="startPomodoroBtn" onclick="startPomodoro()" data-i18n="start">Start</button>
+                                            <button class="btn btn-secondary" id="pausePomodoroBtn" onclick="togglePomodoroPause()" style="display:none" data-i18n="pause">Pause</button>
+                                            <button class="btn btn-secondary" id="resetPomodoroBtn" onclick="resetPomodoro()" style="display:none" data-i18n="reset">Reset</button>
                                         </div>
-                                        <button class="btn btn-zen" id="enterZenBtn" type="button" onclick="enterZenMode()">ZEN Mode</button>
+                                        <button class="btn btn-zen" id="enterZenBtn" type="button" onclick="enterZenMode()" data-i18n="zen-mode">ZEN Mode</button>
                                     </div>
                                 </div>
                             </section>
@@ -1144,7 +1144,7 @@
                         <div class="task-content-grid">
                             <div class="g2-component calendar-card">
                                 <div class="weekday-labels">
-                                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thr</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                                    <span data-i18n="mon">Mon</span><span data-i18n="tue">Tue</span><span data-i18n="wed">Wed</span><span data-i18n="thu">Thr</span><span data-i18n="fri">Fri</span><span data-i18n="sat">Sat</span><span data-i18n="sun">Sun</span>
                                 </div>
                                 <div id="calendar-days-grid" class="days-grid">
                                     </div>
@@ -1152,12 +1152,12 @@
 
                             <div class="task-sidebar">
                                 <div class="g2-component input-card">
-                                    <span class="card-label">New Task</span>
-                                    <input type="text" id="task-title" placeholder="Title" class="task-input">
-                                    <textarea id="task-desc" placeholder="Description" class="task-input" rows="3"></textarea>
+                                    <span class="card-label" data-i18n="new-task-label">New Task</span>
+                                    <input type="text" id="task-title" placeholder="Title" class="task-input" data-i18n="title">
+                                    <textarea id="task-desc" placeholder="Description" class="task-input" rows="3" data-i18n="description"></textarea>
                                         
                                         <div class="time-picker-row">
-                                            <span class="input-sublabel">Execution Time:</span>
+                                            <span class="input-sublabel" data-i18n="execution-time">Execution Time:</span>
                                             <input type="time" id="task-time" class="task-input-time">
                                         </div>
 
@@ -1171,13 +1171,13 @@
                                         <div class="color-dot" style="background: #AF52DE;" onclick="selectColor(this, '#AF52DE')"></div>
                                     </div>
 
-                                    <button class="action-btn confirm-btn" onclick="saveTask()">Confirm</button>
+                                    <button class="action-btn confirm-btn" onclick="saveTask()" data-i18n="confirm">Confirm</button>
                                 </div>
 
                                 <div class="g2-component list-card">
-                                    <span class="card-label">Today's Tasks</span>
+                                    <span class="card-label" data-i18n="todays-tasks">Today's Tasks</span>
                                     <div id="daily-task-list" class="task-items-container">
-                                        <div class="loading-state">Loading tasks...</div>
+                                        <div class="loading-state" data-i18n="loading-tasks">Loading tasks...</div>
                                     </div>
                                 </div>
                             </div>
@@ -1193,14 +1193,14 @@
                             <!-- Left: User Rank & Share -->
                             <div class="leaderboard-user-card g2-component">
                                 <div class="user-rank-display">
-                                    <span class="rank-label">Your Rank</span>
+                                    <span class="rank-label" data-i18n="your-rank">Your Rank</span>
                                     <span class="rank-number" id="userRank">--</span>
                                 </div>
                                 <div class="user-info-display">
                                     <div class="user-avatar-large" id="leaderboardAvatar">-</div>
                                     <span class="user-name-display" id="leaderboardUserName">Loading...</span>
                                 </div>
-                                <button class="share-btn g2-btn" onclick="openShareModal()">
+                                <button class="share-btn g2-btn" onclick="openShareModal()" data-i18n="share">
                                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="18" cy="5" r="3"></circle>
                                         <circle cx="6" cy="12" r="3"></circle>
@@ -1214,7 +1214,7 @@
 
                             <!-- Right: Total Pomodoro Time -->
                             <div class="leaderboard-stats-card g2-component">
-                                <span class="stats-card-label">Total Pomodoro Time</span>
+                                <span class="stats-card-label" data-i18n="total-study-time">Total Pomodoro Time</span>
                                 <div class="total-time-display">
                                     <span class="time-value" id="totalPomodoroHours">0</span>
                                     <span class="time-unit">hours</span>
@@ -1230,8 +1230,8 @@
 
                         <!-- Bottom Section: Leaderboard List -->
                         <div class="leaderboard-bottom-section g2-component">
-                            <div class="leaderboard-header">
-                                <span class="leaderboard-title">Leaderboard</span>
+                                <div class="leaderboard-header">
+                                <span class="leaderboard-title" data-i18n="leaderboard">Leaderboard</span>
                             </div>
                             <div class="leaderboard-list" id="leaderboardList">
                                 <!-- Leaderboard items will be populated from database -->
@@ -1244,9 +1244,12 @@
     </main>
     <div class="zen-overlay-view" id="zenOverlayView">
         <div class="zen-console-card">
-            <div class="zen-tag">ZEN MODE</div>
+            <div class="zen-tag" data-i18n="zen-mode">ZEN MODE</div>
             <div class="zen-main-time" id="zenTimerDisplay">25:00</div>
             <div class="zen-controls">
+                <button class="zen-btn primary" id="zenStartBtn" onclick="startPomodoro()" data-i18n="start">Start</button>
+                <button class="zen-btn" id="zenPauseBtn" onclick="togglePomodoroPause()" style="display:none" data-i18n="pause">Pause</button>
+                <button class="zen-btn" id="zenResetBtn" onclick="resetPomodoro()" style="display:none" data-i18n="reset">Reset</button>
                 <button class="zen-btn exit" onclick="exitZenMode()" title="Exit Zen Mode">✕</button>
             </div>
         </div>
@@ -1257,10 +1260,10 @@
     <div class="modal-container" id="pomodoroAlarmModal">
         <div class="modal-window" style="text-align:center; gap:12px;">
             <div class="modal-header" style="justify-content:center; border-bottom:none; margin-bottom:8px; padding-bottom:0;">
-                <span>Pomodoro Finished</span>
+                <span data-i18n="pomodoro-finished">Pomodoro Finished</span>
             </div>
-            <p style="margin:0; color:rgba(255,255,255,0.78); line-height:1.5;">Time is up. The alarm will keep playing until you stop it.</p>
-            <button id="stopPomodoroAlarmBtn" class="action-btn modal-submit-btn" type="button" onclick="stopPomodoroAlarm()">Stop Alarm</button>
+            <p data-i18n="pomodoro-finished-desc" style="margin:0; color:rgba(255,255,255,0.78); line-height:1.5;">Time is up. The alarm will keep playing until you stop it.</p>
+            <button id="stopPomodoroAlarmBtn" class="action-btn modal-submit-btn" type="button" onclick="stopPomodoroAlarm()" data-i18n="stop-alarm">Stop Alarm</button>
         </div>
     </div>
 
@@ -1269,7 +1272,7 @@
     <div class="modal-container" id="searchModal">
         <div class="modal-window">
             <div class="modal-header">
-                <span>Search</span>
+                <span data-i18n="search">Search</span>
                 <button class="modal-close-btn" onclick="closeModal('search')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1278,7 +1281,7 @@
                 </button>
             </div>
             <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search pages, tasks, features..." oninput="handleSearch(this.value)">
+                <input type="text" id="searchInput" class="search-input" data-i18n="search-placeholder" placeholder="Search pages, tasks, features..." oninput="handleSearch(this.value)">
             </div>
             <div class="search-results" id="searchResults"></div>
         </div>
@@ -1287,14 +1290,14 @@
     <div class="quick-add-backdrop" id="quickAddBackdrop" onclick="closeQuickAddTask()"></div>
     <div class="quick-add-modal" id="quickAddModal" aria-hidden="true">
         <div class="quick-add-modal-header">
-            <span class="modal-title">Quick Add Task</span>
+            <span class="modal-title" data-i18n="quick-add-title">Quick Add Task</span>
             <button class="modal-close-btn" type="button" onclick="closeQuickAddTask()" aria-label="Close">×</button>
         </div>
-        <input type="text" id="quickTaskTitle" placeholder="Task title" autocomplete="off">
-        <input type="time" id="quickTaskTime" placeholder="Time">
-        <textarea id="quickTaskDescription" placeholder="Optional notes"></textarea>
+        <input type="text" id="quickTaskTitle" data-i18n="task-title-placeholder" placeholder="Task title" autocomplete="off">
+        <input type="time" id="quickTaskTime" data-i18n="task-time-placeholder" placeholder="Time">
+        <textarea id="quickTaskDescription" data-i18n="quick-notes-placeholder" placeholder="Optional notes"></textarea>
         <div class="modal-actions">
-            <button class="action-btn modal-submit-btn" type="button" onclick="submitQuickAddTask()">Add Task</button>
+            <button class="action-btn modal-submit-btn" type="button" onclick="submitQuickAddTask()" data-i18n="add-task">Add Task</button>
         </div>
     </div>
 
@@ -1303,7 +1306,7 @@
     <div class="modal-container" id="shareModal">
         <div class="modal-window">
             <div class="modal-header">
-                <span>Share Your Achievement</span>
+                <span data-i18n="share-your-achievement">Share Your Achievement</span>
                 <button class="modal-close-btn" onclick="closeShareModal()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1314,7 +1317,7 @@
             <div class="share-card-preview" id="shareCardPreview">
                 <div class="share-card-content">
                     <div class="share-card-header">
-                        <span class="share-card-title">My Ranking</span>
+                        <span class="share-card-title" data-i18n="my-ranking">My Ranking</span>
                     </div>
                     <div class="share-card-body">
                         <div class="share-user-rank">#<span id="shareRankNumber">3</span></div>
@@ -1351,7 +1354,7 @@
                     </svg>
                     X
                 </button>
-                <button class="share-social-btn download" onclick="downloadShareCard()">
+                <button class="share-social-btn download" onclick="downloadShareCard()" data-i18n="download">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
@@ -1368,7 +1371,7 @@
     <div class="modal-container" id="settingsModal">
         <div class="modal-window">
             <div class="modal-header">
-                <span>Settings</span>
+                <span data-i18n="settings">Settings</span>
                 <button class="modal-close-btn" onclick="closeModal('settings')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1378,22 +1381,36 @@
             </div>
             <div class="settings-layout">
                 <div class="settings-sidebar">
-                    <div class="settings-menu-item active" onclick="switchSettingsTab(event, 'general')">General</div>
-                    <div class="settings-menu-item" onclick="switchSettingsTab(event, 'contact')">Contact</div>
+                    <div class="settings-menu-item active" onclick="switchSettingsTab(event, 'general')" data-i18n="general">General</div>
+                    <div class="settings-menu-item" onclick="switchSettingsTab(event, 'contact')" data-i18n="contact">Contact</div>
                 </div>
                 <div class="settings-content">
                     <div id="settings-general" class="settings-section active">
                         <div class="settings-item">
-                            <span class="settings-item-label">Theme</span>
-                            <span class="settings-item-value">Dark Mode</span>
+                            <span class="settings-item-label" data-i18n="theme">Theme</span>
+                            <span class="settings-item-value" data-i18n="dark-mode">Dark Mode</span>
                         </div>
                         <div class="settings-item">
-                            <span class="settings-item-label">Language</span>
-                            <span class="settings-item-value">English</span>
+                            <span class="settings-item-label" data-i18n="language">Language</span>
+                            <div class="language-selector-wrapper" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <button class="language-btn" data-lang="en" onclick="changeLanguage('en')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">English</button>
+                                <button class="language-btn" data-lang="zh" onclick="changeLanguage('zh')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">中文</button>
+                                <button class="language-btn" data-lang="ms" onclick="changeLanguage('ms')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">Melayu</button>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-item-label" data-i18n="cursor-style">Cursor Style</span>
+                            <div class="cursor-selector-wrapper" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <button class="cursor-selector-btn" data-cursor="0" data-i18n="cursor-default" onclick="setCursor(0)" title="Default Cursor" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">Default</button>
+                                <button class="cursor-selector-btn" data-cursor="1" data-i18n-title="cursor-1" onclick="setCursor(1)" title="Cursor 1" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">💫</button>
+                                <button class="cursor-selector-btn" data-cursor="2" data-i18n-title="cursor-2" onclick="setCursor(2)" title="Cursor 2" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">💎</button>
+                                <button class="cursor-selector-btn" data-cursor="3" data-i18n-title="cursor-3" onclick="setCursor(3)" title="Cursor 3" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">🖊️</button>
+                                <button class="cursor-selector-btn" data-cursor="4" data-i18n-title="cursor-4" onclick="setCursor(4)" title="Cursor 4" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">🖌️</button>
+                            </div>
                         </div>
                         <div class="settings-item settings-notification-row">
                             <div class="settings-notification-copy">
-                                <span class="settings-item-label">Notifications</span>
+                                <span class="settings-item-label" data-i18n="notifications">Notifications</span>
                             </div>
                             <button type="button" id="notificationsSwitch" class="notification-switch" aria-pressed="false" aria-label="Toggle website notifications" onclick="toggleNotificationPermission(event, this)">
                                 <span class="notification-switch-thumb"></span>
@@ -1402,11 +1419,11 @@
                     </div>
                     <div id="settings-contact" class="settings-section">
                         <div class="settings-item">
-                            <span class="settings-item-label">Email</span>
+                            <span class="settings-item-label" data-i18n="email">Email</span>
                             <span class="settings-item-value" onclick="openMailClient('JOAN.CHAI.WAN@student.mmu.edu.my')">JOAN.CHAI.WAN@student.mmu.edu.my</span>
                         </div>
                         <div class="settings-item">
-                            <span class="settings-item-label">Phone</span>
+                            <span class="settings-item-label" data-i18n="phone">Phone</span>
                             <span class="settings-item-value">+60 11-5870 3858</span>
                         </div>
                     </div>
@@ -1420,7 +1437,7 @@
     <div class="modal-container" id="accountModal">
         <div class="modal-window">
             <div class="modal-header">
-                <span>Account</span>
+                <span data-i18n="account">Account</span>
                 <button class="modal-close-btn" onclick="closeModal('account')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1434,9 +1451,9 @@
                 <div class="account-email" id="accountEmail">Loading...</div>
             </div>
             <div class="account-actions">
-                <button class="account-action-btn secondary" onclick="openEditProfileModal()">Edit Profile</button>
-                <button class="account-action-btn secondary" onclick="openSwitchAccountModal()">Switch Account</button>
-                <button class="account-action-btn danger" onclick="openLogoutModal()">Logout</button>
+                <button class="account-action-btn secondary" onclick="openEditProfileModal()" data-i18n="edit-profile">Edit Profile</button>
+                <button class="account-action-btn secondary" onclick="openSwitchAccountModal()" data-i18n="switch-account">Switch Account</button>
+                <button class="account-action-btn danger" onclick="openLogoutModal()" data-i18n="logout">Logout</button>
             </div>
         </div>
     </div>
@@ -1445,7 +1462,7 @@
     <div class="modal-container" id="editProfileModal">
         <div class="modal-window">
             <div class="modal-header">
-                <span>Edit Profile</span>
+                <span data-i18n="edit-profile">Edit Profile</span>
                 <button class="modal-close-btn" onclick="closeModal('editProfile')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1454,15 +1471,15 @@
                 </button>
             </div>
             <div class="account-form-card">
-                <label class="account-form-label" for="editProfileName">Display Name</label>
-                <input id="editProfileName" class="account-form-input" type="text" placeholder="Enter your name" />
+                <label class="account-form-label" for="editProfileName" data-i18n="display-name">Display Name</label>
+                <input id="editProfileName" class="account-form-input" type="text" placeholder="Enter your name" data-i18n="enter-your-name" />
 
-                <label class="account-form-label" for="editProfileEmail">Email</label>
-                <input id="editProfileEmail" class="account-form-input" type="email" placeholder="Enter your email" />
+                <label class="account-form-label" for="editProfileEmail" data-i18n="email">Email</label>
+                <input id="editProfileEmail" class="account-form-input" type="email" placeholder="Enter your email" data-i18n="enter-your-email" />
             </div>
             <div class="modal-actions">
-                <button class="account-action-btn secondary" onclick="closeModal('editProfile')">Cancel</button>
-                <button class="account-action-btn primary" onclick="saveProfileChanges()">Save</button>
+                <button class="account-action-btn secondary" onclick="closeModal('editProfile')" data-i18n="cancel">Cancel</button>
+                <button class="account-action-btn primary" onclick="saveProfileChanges()" data-i18n="save">Save</button>
             </div>
         </div>
     </div>
@@ -1471,7 +1488,7 @@
     <div class="modal-container" id="switchAccountModal">
         <div class="modal-window">
             <div class="modal-header">
-                <span>Switch Account</span>
+                <span data-i18n="switch-account">Switch Account</span>
                 <button class="modal-close-btn" onclick="closeModal('switchAccount')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1480,11 +1497,11 @@
                 </button>
             </div>
             <div class="account-form-card">
-                <p class="account-dialog-note">Switch to a different account? You will need to sign in again to access your account.</p>
+                <p class="account-dialog-note" data-i18n="switch-to-different">Switch to a different account? You will need to sign in again to access your account.</p>
             </div>
             <div class="modal-actions">
-                <button class="account-action-btn secondary" onclick="closeModal('switchAccount')">Cancel</button>
-                <button class="account-action-btn primary" onclick="confirmSwitchAccount()">Switch</button>
+                <button class="account-action-btn secondary" onclick="closeModal('switchAccount')" data-i18n="cancel">Cancel</button>
+                <button class="account-action-btn primary" onclick="confirmSwitchAccount()" data-i18n="switch-account">Switch</button>
             </div>
         </div>
     </div>
@@ -1493,7 +1510,7 @@
     <div class="modal-container" id="logoutModal">
         <div class="modal-window">
             <div class="modal-header">
-                <span>Confirm Logout</span>
+                <span data-i18n="confirm-logout">Confirm Logout</span>
                 <button class="modal-close-btn" onclick="closeModal('logout')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1502,18 +1519,18 @@
                 </button>
             </div>
             <div class="account-form-card">
-                <p class="account-dialog-note">Are you sure you want to log out? You will need to sign in again to access your account.</p>
+                <p class="account-dialog-note" data-i18n="sure-logout">Are you sure you want to log out? You will need to sign in again to access your account.</p>
             </div>
             <div class="modal-actions">
-                <button class="account-action-btn secondary" onclick="closeModal('logout')">Cancel</button>
-                <button class="account-action-btn danger" onclick="confirmLogout()">Logout</button>
+                <button class="account-action-btn secondary" onclick="closeModal('logout')" data-i18n="cancel">Cancel</button>
+                <button class="account-action-btn danger" onclick="confirmLogout()" data-i18n="logout">Logout</button>
             </div>
         </div>
     </div>
 
     <footer class="icloud-footer">
         <div class="footer-content">
-            <p>© 2026 NMLM Project. Multimedia University Student Work.</p>
+            <p data-i18n="footer-copy">© 2026 NMLM Project. Multimedia University Student Work.</p>
         </div>
     </footer>
 
@@ -1530,6 +1547,736 @@
             <p class="notification-message" id="notificationMessage"></p>
         </div>
     </div>
+
+    <!-- ==================== 多语言系统 (I18N System) ==================== -->
+    <script>
+        // 翻译数据对象 - Translation Data Object
+        const translations = {
+            en: {
+                // Navigation and Main
+                'overview': 'Overview',
+                'task': 'Task',
+                'leaderboard': 'Leaderboard',
+                'stats': 'Stats',
+                'pomodoro': 'Pomodoro',
+                'search': 'Search',
+                'settings': 'Settings',
+                'account': 'Account',
+                
+                // Settings
+                'theme': 'Theme',
+                'dark-mode': 'Dark Mode',
+                'language': 'Language',
+                'cursor-style': 'Cursor Style',
+                'cursor-default': 'Default',
+                'cursor-1': 'Cursor 1',
+                'cursor-2': 'Cursor 2',
+                'cursor-3': 'Cursor 3',
+                'cursor-4': 'Cursor 4',
+                'notifications': 'Notifications',
+                'general': 'General',
+                'contact': 'Contact',
+                
+                // Sign In/Up
+                'sign-in': 'Sign In',
+                'sign-up': 'Sign Up',
+                'email-or-id': 'Email or Student ID',
+                'password': 'Password',
+                'login': 'Login',
+                'dont-have-id': "Don't have an ID?",
+                'create-yours': 'Create Yours',
+                'full-name': 'Full Name',
+                'student-email': 'Student Email',
+                'confirm-password': 'Confirm Password',
+                'create-account': 'Create Account',
+                'already-have-id': 'Already have an ID?',
+                'verify-email': 'Verify Email',
+                'email-code-sent': 'We sent a 6-digit code to your email',
+                'verify': 'Verify',
+                'didnt-receive': "Didn't receive the code?",
+                'resend': 'Resend',
+                'back-to-signup': 'Back to Sign Up',
+                
+                // Dashboard
+                'quick-summary': 'Quick Summary',
+                'this-month': 'This month',
+                'total-task': 'Total Task',
+                'completed': 'Completed',
+                'pending': 'Pending',
+                'minutes': 'Minutes',
+                'overall-completion': 'Overall Completion',
+                'completion-text': 'completed this month',
+                'recent-study-trend': 'Recent Study Trend',
+                'visualizing': 'Visualizing your productivity...',
+                'tasks': 'TASKS',
+                'new-task': '+ New Task',
+                'rank': 'RANK',
+                'mood-today': 'MOOD TODAY',
+                'total-tasks': 'Total Tasks',
+                'study-minutes': 'Study Minutes',
+                'task-completion': 'Task Completion',
+                
+                // Stats Page
+                'pomodoro-usage': 'Pomodoro Usage',
+                'today': 'Today',
+                'minutes-today': 'Minutes today',
+                'sessions': 'Sessions',
+                'use-as-interface': 'Use this as the central interface for recording your pomodoro sessions.',
+                'emotion-check-in': 'Emotion Check-In',
+                'current-hour-mood': 'Current hour mood',
+                'tap-mood': 'Tap a mood once an hour. You can change it if needed.',
+                'good': 'Good',
+                'bad': 'Bad',
+                'last-5-hours': 'Last 5 hours',
+                'trend': 'Recent Study Trend',
+                'daily-pomodoro': 'Daily pomodoro minutes',
+                'swipe-or-scroll': 'Swipe or scroll left / right for more days.',
+                
+                // Pomodoro
+                'hours': 'Hours',
+                'minutes': 'Minutes',
+                'seconds': 'Seconds',
+                'start': 'Start',
+                'pause': 'Pause',
+                'reset': 'Reset',
+                'zen-mode': 'ZEN Mode',
+                
+                // Task Page
+                'new-task-label': 'New Task',
+                'title': 'Title',
+                'description': 'Description',
+                'execution-time': 'Execution Time:',
+                'confirm': 'Confirm',
+                'todays-tasks': "Today's Tasks",
+                'loading-tasks': 'Loading tasks...',
+                'may': 'May',
+                'mon': 'Mon',
+                'tue': 'Tue',
+                'wed': 'Wed',
+                'thu': 'Thu',
+                'fri': 'Fri',
+                'sat': 'Sat',
+                'sun': 'Sun',
+                
+                // Leaderboard
+                'your-rank': 'Your Rank',
+                'total-study-time': 'Total Study Time',
+                'hours': 'hours',
+                'leaderboard': 'Leaderboard',
+                'rank': 'Rank',
+                'user': 'User',
+                'study-time': 'Study Time',
+                
+                // Account
+                'display-name': 'Display Name',
+                'email': 'Email',
+                'phone': 'Phone',
+                'edit-profile': 'Edit Profile',
+                'switch-account': 'Switch Account',
+                'logout': 'Logout',
+                'cancel': 'Cancel',
+                'save': 'Save',
+                'enter-your-name': 'Enter your name',
+                'enter-your-email': 'Enter your email',
+                'switch-to-different': 'Switch to a different account? You will need to sign in again to access your account.',
+                'confirm-logout': 'Confirm Logout',
+                'sure-logout': 'Are you sure you want to log out? You will need to sign in again to access your account.',
+                'enter-zen': 'Enter Zen',
+                'download': 'Download',
+                'contact-us': 'Contact Us',
+                
+                // Additional
+                'edit-profile': 'Edit Profile',
+                'switch-account': 'Switch Account',
+                'logout': 'Logout',
+                'profile': 'Profile',
+                // New keys added for modal and UI pieces
+                'pomodoro-finished': 'Pomodoro Finished',
+                'pomodoro-finished-desc': 'Time is up. The alarm will keep playing until you stop it.',
+                'stop-alarm': 'Stop Alarm',
+                'search-placeholder': 'Search pages, tasks, features...',
+                'quick-add-title': 'Quick Add Task',
+                'task-title-placeholder': 'Task title',
+                'task-time-placeholder': 'Time',
+                'quick-notes-placeholder': 'Optional notes',
+                'add-task': 'Add Task',
+                'share-your-achievement': 'Share Your Achievement',
+                'my-ranking': 'My Ranking',
+                'share': 'Share',
+                'footer-copy': '© 2026 NMLM Project. Multimedia University Student Work.',
+            },
+            zh: {
+                // Navigation and Main
+                'overview': '概览',
+                'task': '任务',
+                'leaderboard': '排行榜',
+                'stats': '统计',
+                'pomodoro': '番茄钟',
+                'search': '搜索',
+                'settings': '设置',
+                'account': '账户',
+                
+                // Settings
+                'theme': '主题',
+                'dark-mode': '深色模式',
+                'language': '语言',
+                'cursor-style':'鼠标样式',
+                'cursor-default': '默认',
+                'cursor-1': '光标 1',
+                'cursor-2': '光标 2',
+                'cursor-3': '光标 3',
+                'cursor-4': '光标 4',
+                'notifications': '通知',
+                'general': '常规',
+                'contact': '联系',
+                
+                // Sign In/Up
+                'sign-in': '登录',
+                'sign-up': '注册',
+                'email-or-id': '邮箱或学生ID',
+                'password': '密码',
+                'login': '登录',
+                'dont-have-id': '没有ID？',
+                'create-yours': '创建您的ID',
+                'full-name': '全名',
+                'student-email': '学生邮箱',
+                'confirm-password': '确认密码',
+                'create-account': '创建账户',
+                'already-have-id': '已有ID？',
+                'verify-email': '验证邮箱',
+                'email-code-sent': '我们向您的邮箱发送了一个6位数代码',
+                'verify': '验证',
+                'didnt-receive': '没有收到代码？',
+                'resend': '重新发送',
+                'back-to-signup': '返回注册',
+                
+                // Dashboard
+                'quick-summary': '快速总结',
+                'this-month': '本月',
+                'total-task': '总任务数',
+                'completed': '已完成',
+                'pending': '待处理',
+                'minutes': '分钟',
+                'overall-completion': '总体完成度',
+                'completion-text': '本月已完成',
+                'recent-study-trend': '最近学习趋势',
+                'visualizing': '可视化您的生产力...',
+                'tasks': '任务',
+                'new-task': '+ 新任务',
+                'rank': '排名',
+                'mood-today': '今日心情',
+                'total-tasks': '总任务数',
+                'study-minutes': '学习分钟数',
+                'task-completion': '任务完成度',
+                
+                // Stats Page
+                'pomodoro-usage': '番茄钟使用情况',
+                'today': '今天',
+                'minutes-today': '今天的分钟数',
+                'sessions': '场次',
+                'use-as-interface': '将此用作记录番茄钟会话的中央界面。',
+                'emotion-check-in': '情绪签到',
+                'current-hour-mood': '当前小时心情',
+                'tap-mood': '每小时点击一次心情。如果需要，您可以更改它。',
+                'good': '好',
+                'bad': '不好',
+                'last-5-hours': '最后5小时',
+                'trend': '最近学习趋势',
+                'daily-pomodoro': '每日番茄钟分钟数',
+                'swipe-or-scroll': '向左/向右滑动或滚动以查看更多天数。',
+                
+                // Pomodoro
+                'hours': '小时',
+                'minutes': '分钟',
+                'seconds': '秒',
+                'start': '开始',
+                'pause': '暂停',
+                'reset': '重置',
+                'zen-mode': '禅模式',
+                
+                // Task Page
+                'new-task-label': '新任务',
+                'title': '标题',
+                'description': '描述',
+                'execution-time': '执行时间：',
+                'confirm': '确认',
+                'todays-tasks': '今天的任务',
+                'loading-tasks': '加载任务中...',
+                'may': '五月',
+                'mon': '周一',
+                'tue': '周二',
+                'wed': '周三',
+                'thu': '周四',
+                'fri': '周五',
+                'sat': '周六',
+                'sun': '周日',
+                
+                // Leaderboard
+                'your-rank': '您的排名',
+                'total-study-time': '总学习时间',
+                'hours': '小时',
+                'leaderboard': '排行榜',
+                'rank': '排名',
+                'user': '用户',
+                'study-time': '学习时间',
+                
+                // Account
+                'display-name': '显示名称',
+                'email': '邮箱',
+                'phone': '电话',
+                'edit-profile': '编辑资料',
+                'switch-account': '切换账户',
+                'logout': '登出',
+                'cancel': '取消',
+                'save': '保存',
+                'enter-your-name': '输入您的名字',
+                'enter-your-email': '输入您的邮箱',
+                'switch-to-different': '切换到不同的账户？您需要重新登录才能访问您的账户。',
+                'confirm-logout': '确认登出',
+                'sure-logout': '您确定要登出吗？您需要重新登录才能访问您的账户。',
+                'enter-zen': '进入禅模式',
+                'download': '下载',
+                'contact-us': '联系我们',
+                
+                // Additional
+                'edit-profile': '编辑资料',
+                'switch-account': '切换账户',
+                'logout': '登出',
+                'profile': '资料',
+                // 新增键（模态和界面）
+                'pomodoro-finished': '番茄钟结束',
+                'pomodoro-finished-desc': '时间到。闹钟会持续播放，直到你停止它。',
+                'stop-alarm': '停止闹钟',
+                'search-placeholder': '搜索页面、任务、功能...',
+                'quick-add-title': '快速添加任务',
+                'task-title-placeholder': '任务标题',
+                'task-time-placeholder': '时间',
+                'quick-notes-placeholder': '可选备注',
+                'add-task': '添加任务',
+                'share-your-achievement': '分享你的成就',
+                'my-ranking': '我的排名',
+                'share': '分享',
+                'footer-copy': '© 2026 NMLM 项目。多媒体大学学生作品。',
+            },
+            ms: {
+                // Navigation and Main
+                'overview': 'Ikhtisar',
+                'task': 'Tugas',
+                'leaderboard': 'Papan Peringkat',
+                'stats': 'Statistik',
+                'pomodoro': 'Pomodoro',
+                'search': 'Cari',
+                'settings': 'Pengaturan',
+                'account': 'Akun',
+                
+                // Settings
+                'theme': 'Tema',
+                'dark-mode': 'Mode Gelap',
+                'language': 'Bahasa',
+                'cursor-style':'Gaya Kursor',
+                'cursor-default': 'Asal',
+                'cursor-1': 'Kursor 1',
+                'cursor-2': 'Kursor 2',
+                'cursor-3': 'Kursor 3',
+                'cursor-4': 'Kursor 4',
+                'notifications': 'Pemberitahuan',
+                'general': 'Umum',
+                'contact': 'Hubungi',
+                
+                // Sign In/Up
+                'sign-in': 'Masuk',
+                'sign-up': 'Daftar',
+                'email-or-id': 'Email atau ID Pelajar',
+                'password': 'Kata Sandi',
+                'login': 'Masuk',
+                'dont-have-id': 'Tidak memiliki ID?',
+                'create-yours': 'Buat Milik Anda',
+                'full-name': 'Nama Lengkap',
+                'student-email': 'Email Pelajar',
+                'confirm-password': 'Konfirmasi Kata Sandi',
+                'create-account': 'Buat Akun',
+                'already-have-id': 'Sudah memiliki ID?',
+                'verify-email': 'Verifikasi Email',
+                'email-code-sent': 'Kami mengirimkan kode 6 digit ke email Anda',
+                'verify': 'Verifikasi',
+                'didnt-receive': 'Tidak menerima kode?',
+                'resend': 'Kirim Ulang',
+                'back-to-signup': 'Kembali ke Daftar',
+                
+                // Dashboard
+                'quick-summary': 'Ringkasan Cepat',
+                'this-month': 'Bulan ini',
+                'total-task': 'Total Tugas',
+                'completed': 'Selesai',
+                'pending': 'Menunggu',
+                'minutes': 'Menit',
+                'overall-completion': 'Penyelesaian Keseluruhan',
+                'completion-text': 'selesai bulan ini',
+                'recent-study-trend': 'Tren Belajar Terbaru',
+                'visualizing': 'Memvisualisasikan produktivitas Anda...',
+                'tasks': 'TUGAS',
+                'new-task': '+ Tugas Baru',
+                'rank': 'PERINGKAT',
+                'mood-today': 'SUASANA HATI HARI INI',
+                'total-tasks': 'Total Tugas',
+                'study-minutes': 'Menit Belajar',
+                'task-completion': 'Penyelesaian Tugas',
+                
+                // Stats Page
+                'pomodoro-usage': 'Penggunaan Pomodoro',
+                'today': 'Hari Ini',
+                'minutes-today': 'Menit hari ini',
+                'sessions': 'Sesi',
+                'use-as-interface': 'Gunakan ini sebagai antarmuka pusat untuk merekam sesi pomodoro Anda.',
+                'emotion-check-in': 'Pemeriksaan Emosi',
+                'current-hour-mood': 'Suasana hati jam sekarang',
+                'tap-mood': 'Ketuk suasana hati sekali per jam. Anda dapat mengubahnya jika diperlukan.',
+                'good': 'Baik',
+                'bad': 'Buruk',
+                'last-5-hours': '5 Jam Terakhir',
+                'trend': 'Tren Belajar Terbaru',
+                'daily-pomodoro': 'Menit pomodoro harian',
+                'swipe-or-scroll': 'Usap atau gulir ke kiri/kanan untuk melihat lebih banyak hari.',
+                
+                // Pomodoro
+                'hours': 'Jam',
+                'minutes': 'Menit',
+                'seconds': 'Detik',
+                'start': 'Mulai',
+                'pause': 'Jeda',
+                'reset': 'Atur Ulang',
+                'zen-mode': 'Mode Zen',
+                
+                // Task Page
+                'new-task-label': 'Tugas Baru',
+                'title': 'Judul',
+                'description': 'Deskripsi',
+                'execution-time': 'Waktu Eksekusi:',
+                'confirm': 'Konfirmasi',
+                'todays-tasks': 'Tugas Hari Ini',
+                'loading-tasks': 'Memuat tugas...',
+                'may': 'Mei',
+                'mon': 'Sen',
+                'tue': 'Sel',
+                'wed': 'Rab',
+                'thu': 'Kam',
+                'fri': 'Jum',
+                'sat': 'Sab',
+                'sun': 'Min',
+                
+                // Leaderboard
+                'your-rank': 'Peringkat Anda',
+                'total-study-time': 'Total Waktu Belajar',
+                'hours': 'jam',
+                'leaderboard': 'Papan Peringkat',
+                'rank': 'Peringkat',
+                'user': 'Pengguna',
+                'study-time': 'Waktu Belajar',
+                
+                // Account
+                'display-name': 'Nama Tampilan',
+                'email': 'Email',
+                'phone': 'Telepon',
+                'edit-profile': 'Edit Profil',
+                'switch-account': 'Ganti Akun',
+                'logout': 'Keluar',
+                'cancel': 'Batal',
+                'save': 'Simpan',
+                'enter-your-name': 'Masukkan nama Anda',
+                'enter-your-email': 'Masukkan email Anda',
+                'switch-to-different': 'Beralih ke akun berbeda? Anda perlu masuk kembali untuk mengakses akun Anda.',
+                'confirm-logout': 'Konfirmasi Keluar',
+                'sure-logout': 'Apakah Anda yakin ingin keluar? Anda perlu masuk kembali untuk mengakses akun Anda.',
+                'enter-zen': 'Masuk Zen',
+                'download': 'Unduh',
+                'contact-us': 'Hubungi Kami',
+                
+                // Additional
+                'edit-profile': 'Edit Profil',
+                'switch-account': 'Ganti Akun',
+                'logout': 'Keluar',
+                'profile': 'Profil',
+                // New keys for UI
+                'pomodoro-finished': 'Pomodoro Selesai',
+                'pomodoro-finished-desc': 'Masa tamat. Penggera akan terus berbunyi sehingga anda menghentikannya.',
+                'stop-alarm': 'Hentikan Penggera',
+                'search-placeholder': 'Cari halaman, tugas, ciri...',
+                'quick-add-title': 'Tambah Tugas Cepat',
+                'task-title-placeholder': 'Tajuk tugas',
+                'task-time-placeholder': 'Masa',
+                'quick-notes-placeholder': 'Nota pilihan',
+                'add-task': 'Tambah Tugas',
+                'share-your-achievement': 'Kongsi Pencapaian Anda',
+                'my-ranking': 'Kedudukan Saya',
+                'share': 'Kongsi',
+                'footer-copy': '© 2026 Projek NMLM. Kerja Pelajar Multimedia University.',
+            }
+        };
+
+        // 当前语言 - Current Language
+        let currentLanguage = localStorage.getItem('appLanguage') || 'en';
+
+        // 获取翻译文本 - Get Translation
+        function i18n(key) {
+            return translations[currentLanguage]?.[key] || translations['en']?.[key] || key;
+        }
+
+        // 应用翻译 - Apply Translations
+        function applyTranslations() {
+            // 翻译所有具有 data-i18n 属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                    // For input/textarea elements, set the placeholder
+                    element.placeholder = i18n(key);
+                } else {
+                    // For elements that include SVG/icons, preserve children and update/insert a trailing text span
+                    if (element.querySelector && element.querySelector('svg')) {
+                        // remove existing raw text nodes to avoid duplication
+                        Array.from(element.childNodes).forEach(n => {
+                            if (n.nodeType === Node.TEXT_NODE) n.remove();
+                        });
+                        let textSpan = element.querySelector('.i18n-text');
+                        if (!textSpan) {
+                            textSpan = document.createElement('span');
+                            textSpan.className = 'i18n-text';
+                            textSpan.style.marginLeft = '8px';
+                            element.appendChild(textSpan);
+                        }
+                        textSpan.textContent = i18n(key);
+                    } else {
+                        // For other elements, set the text content
+                        element.textContent = i18n(key);
+                    }
+                }
+            });
+
+            // 更新特定的UI文本（不需要data-i18n属性的）
+            const uiUpdates = {
+                'pill-overview': { el: '.pill[onclick*="dashboard"]', key: 'overview' },
+                'pill-task': { el: '.pill[onclick*="task"]', key: 'task' },
+                'pill-leaderboard': { el: '.pill[onclick*="leaderboard"]', key: 'leaderboard' },
+                'pill-stats': { el: '.pill[onclick*="stats"]', key: 'stats' },
+                'pill-pomodoro': { el: '.pill[onclick*="pomodoro"]', key: 'pomodoro' },
+            };
+
+            // 更新导航中的按钮文本
+            document.querySelectorAll('.pill').forEach(pill => {
+                const onclick = pill.getAttribute('onclick');
+                if (onclick?.includes('dashboard')) pill.textContent = i18n('overview');
+                else if (onclick?.includes('task')) pill.textContent = i18n('task');
+                else if (onclick?.includes('leaderboard')) pill.textContent = i18n('leaderboard');
+                else if (onclick?.includes('stats')) pill.textContent = i18n('stats');
+                else if (onclick?.includes('pomodoro')) pill.textContent = i18n('pomodoro');
+            });
+
+            // 更新移动菜单中的按钮文本
+            document.querySelectorAll('.mobile-menu-section .pill').forEach(pill => {
+                const onclick = pill.getAttribute('onclick');
+                if (onclick?.includes('dashboard')) pill.textContent = i18n('overview');
+                else if (onclick?.includes('task')) pill.textContent = i18n('task');
+                else if (onclick?.includes('leaderboard')) pill.textContent = i18n('leaderboard');
+                else if (onclick?.includes('stats')) pill.textContent = i18n('stats');
+                else if (onclick?.includes('pomodoro')) pill.textContent = i18n('pomodoro');
+            });
+
+            // 更新具体视图中的文本
+            // Dashboard/Overview
+            const userGreeting = document.getElementById('user-greeting');
+            if (userGreeting) userGreeting.textContent = i18n('quick-summary');
+            
+            const cardLabels = document.querySelectorAll('.card-label');
+            cardLabels.forEach(label => {
+                if (label.textContent === 'TASKS') label.textContent = i18n('tasks');
+                else if (label.textContent === 'POMODORO') label.textContent = i18n('pomodoro');
+                else if (label.textContent === 'RANK') label.textContent = i18n('rank');
+                else if (label.textContent === 'MOOD TODAY') label.textContent = i18n('mood-today');
+                else if (label.textContent === 'Quick Summary') label.textContent = i18n('quick-summary');
+            });
+
+            // Task labels
+            document.querySelectorAll('.stat-label').forEach(label => {
+                if (label.textContent === 'Total Task') label.textContent = i18n('total-task');
+                else if (label.textContent === 'Completed') label.textContent = i18n('completed');
+                else if (label.textContent === 'Pending') label.textContent = i18n('pending');
+                else if (label.textContent === 'Minutes') label.textContent = i18n('minutes');
+                else if (label.textContent === 'Total Tasks') label.textContent = i18n('total-tasks');
+                else if (label.textContent === 'Study Minutes') label.textContent = i18n('study-minutes');
+                else if (label.textContent === 'Minutes today') label.textContent = i18n('minutes-today');
+                else if (label.textContent === 'Sessions') label.textContent = i18n('sessions');
+            });
+
+            // Section labels
+            document.querySelectorAll('.section-label').forEach(label => {
+                if (label.textContent === 'Quick Summary') label.textContent = i18n('quick-summary');
+                else if (label.textContent === 'Pomodoro Usage') label.textContent = i18n('pomodoro-usage');
+                else if (label.textContent === 'Emotion Check-In') label.textContent = i18n('emotion-check-in');
+                else if (label.textContent === 'Recent Study Trend') label.textContent = i18n('recent-study-trend');
+                else if (label.textContent === 'Task Completion') label.textContent = i18n('task-completion');
+            });
+
+            // 更新快速加任务按钮
+            const quickAddBtn = document.querySelector('.quick-add-btn');
+            if (quickAddBtn) quickAddBtn.textContent = i18n('new-task');
+
+            // 更新输入框的标签
+            const taskTitleInput = document.getElementById('task-title');
+            if (taskTitleInput) taskTitleInput.placeholder = i18n('title');
+            
+            const taskDescInput = document.getElementById('task-desc');
+            if (taskDescInput) taskDescInput.placeholder = i18n('description');
+
+            // 更新卡片标题和按钮
+            document.querySelectorAll('.card-note').forEach(note => {
+                if (note.textContent === 'This month') note.textContent = i18n('this-month');
+                else if (note.textContent === 'Today') note.textContent = i18n('today');
+                else if (note.textContent === 'Current hour mood') note.textContent = i18n('current-hour-mood');
+                else if (note.textContent === 'Daily pomodoro minutes') note.textContent = i18n('daily-pomodoro');
+            });
+
+            // 更新Pomodoro标签
+            document.querySelectorAll('.pomodoro-label').forEach(label => {
+                if (label.textContent === 'Minutes today') label.textContent = i18n('minutes-today');
+                else if (label.textContent === 'Sessions') label.textContent = i18n('sessions');
+            });
+
+            // 更新情绪相关标签
+            document.querySelectorAll('[data-mood]').forEach(el => {
+                if (el.getAttribute('data-mood') === 'sad') el.title = i18n('bad');
+                else if (el.getAttribute('data-mood') === 'happy') el.title = i18n('good');
+            });
+
+
+            // 更新情绪检查标签
+            const emotionTrendLabel = document.querySelector('.emotion-trend-label');
+            if (emotionTrendLabel && emotionTrendLabel.textContent === 'Last 5 hours') {
+                emotionTrendLabel.textContent = i18n('last-5-hours');
+            }
+
+            // 通用按钮/可交互元素翻译：优先使用 data-i18n，否则尝试匹配常见英文词
+            document.querySelectorAll('button, a, .modal-close-btn').forEach(btn => {
+                try {
+                    const key = btn.getAttribute && btn.getAttribute('data-i18n');
+                    if (key) {
+                        btn.textContent = i18n(key);
+                        return;
+                    }
+                    const txt = (btn.textContent || '').trim();
+                    if (!txt) return;
+                    if (txt === 'Save') btn.textContent = i18n('save');
+                    else if (txt === 'Cancel') btn.textContent = i18n('cancel');
+                    else if (txt === 'Confirm') btn.textContent = i18n('confirm');
+                    else if (txt === 'Logout') btn.textContent = i18n('logout');
+                    else if (txt === 'Download') btn.textContent = i18n('download');
+                    else if (txt === 'Share') btn.textContent = i18n('share') || txt;
+                } catch(e) { /* ignore translation errors for individual nodes */ }
+            });
+
+            // 更新具有data-i18n-title属性的元素的title属性（用于cursor按钮）
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (key) {
+                    el.title = i18n(key);
+                }
+            });
+
+            // 更新modal的文本
+            document.querySelectorAll('.modal-header span').forEach(span => {
+                if (span.textContent === 'Settings') span.textContent = i18n('settings');
+                else if (span.textContent === 'Account') span.textContent = i18n('account');
+                else if (span.textContent === 'Edit Profile') span.textContent = i18n('edit-profile');
+                else if (span.textContent === 'Switch Account') span.textContent = i18n('switch-account');
+                else if (span.textContent === 'Confirm Logout') span.textContent = i18n('confirm-logout');
+            });
+
+            // 更新设置菜单项
+            document.querySelectorAll('.settings-menu-item').forEach(item => {
+                if (item.textContent === 'General') item.textContent = i18n('general');
+                else if (item.textContent === 'Contact') item.textContent = i18n('contact');
+            });
+
+            // 更新语言按钮的活动状态
+            updateLanguageButtons();
+        }
+
+        // 更新语言按钮状态 - Update Language Buttons
+        function updateLanguageButtons() {
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                if (btn.dataset.lang === currentLanguage) {
+                    btn.style.background = 'rgba(0, 122, 255, 0.3)';
+                    btn.style.borderColor = 'rgba(0, 122, 255, 0.6)';
+                    btn.style.fontWeight = '600';
+                } else {
+                    btn.style.background = 'rgba(255, 255, 255, 0.08)';
+                    btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                    btn.style.fontWeight = '400';
+                }
+            });
+        }
+
+        // Cursor Options
+        const cursors = {
+            1: "url('https://www.rw-designer.com/cursor-view/108235.png'), auto",
+            2: "url('https://www.rw-designer.com/cursor-view/120490.png'), auto",
+            3: "url('https://www.rw-designer.com/cursor-view/162752.png'), auto",
+            4: "url('https://www.rw-designer.com/cursor-view/162979.png'), auto"
+        };
+
+        function setCursor(id) {
+            if (id === 0) {
+                document.body.style.cursor = 'auto';
+                localStorage.setItem("selectedCursor", '0');
+                updateCursorButtonStates(0);
+                return;
+            }
+
+            if (cursors[id]) {
+                document.body.style.cursor = cursors[id];
+                localStorage.setItem("selectedCursor", id);
+                updateCursorButtonStates(id);
+            }
+        }
+
+        function updateCursorButtonStates(activeId) {
+            document.querySelectorAll('.cursor-selector-btn').forEach((btn) => {
+                const id = btn.getAttribute('data-cursor');
+                if (id === String(activeId)) {
+                    btn.style.background = 'rgba(255, 255, 255, 0.25)';
+                    btn.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                } else {
+                    btn.style.background = 'rgba(255, 255, 255, 0.08)';
+                    btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }
+            });
+        }
+
+        // 改变语言 - Change Language
+        function changeLanguage(lang) {
+            if (lang === 'en' || lang === 'zh' || lang === 'ms') {
+                currentLanguage = lang;
+                localStorage.setItem('appLanguage', lang);
+                applyTranslations();
+                console.log(`Language changed to: ${lang}`);
+            }
+        }
+
+        // 初始化翻译系统 - Initialize Translation System
+        function initializeTranslations() {
+            applyTranslations();
+        }
+
+        // 在页面加载后初始化翻译和cursor
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTranslations();
+            // Restore saved cursor
+            const savedCursor = localStorage.getItem("selectedCursor");
+            if (savedCursor === '0') {
+                setCursor(0);
+            } else if (savedCursor && cursors[savedCursor]) {
+                setCursor(parseInt(savedCursor));
+            }
+        }, { once: true });
+    </script>
 
     <script src="js/particle.js"></script>
     <script src="js/main.js"></script>

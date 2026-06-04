@@ -293,7 +293,7 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     border-radius: var(--g2-radius);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
     display: flex;
     flex-direction: column;
@@ -2563,9 +2563,9 @@ body.zen-mode-active .pomodoro-ring-placeholder {
 }
 
 .zen-btn {
-    width: 58px;
-    height: 58px;
-    padding: 0;
+    min-width: 58px;
+    min-height: 58px;
+    padding: 0 18px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.08);
@@ -2574,12 +2574,15 @@ body.zen-mode-active .pomodoro-ring-placeholder {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     pointer-events: auto;
     position: relative;
     z-index: 10001;
     overflow: visible;
+    white-space: nowrap;
 }
 
 .zen-btn:hover {
