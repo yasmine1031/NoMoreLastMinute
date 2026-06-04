@@ -1009,6 +1009,7 @@ const track = document.getElementById('pillTrack');
                 overviewDisplay.innerText = formatTime(pomodoroRemainingSeconds);
             }
             updateZenTimerDisplay();
+            updateZenControls();
         }
 
         function updateZenTimerDisplay() {
@@ -1018,12 +1019,32 @@ const track = document.getElementById('pillTrack');
             }
         }
 
+        function updateZenControls() {
+            const startBtn = document.getElementById('zenStartBtn');
+            const pauseBtn = document.getElementById('zenPauseBtn');
+            const resetBtn = document.getElementById('zenResetBtn');
+
+            if (pomodoroRunning) {
+                if (startBtn) startBtn.style.display = 'none';
+                if (pauseBtn) {
+                    pauseBtn.style.display = 'inline-flex';
+                    pauseBtn.innerText = pomodoroPaused ? 'Continue' : 'Pause';
+                }
+                if (resetBtn) resetBtn.style.display = 'inline-flex';
+            } else {
+                if (startBtn) startBtn.style.display = 'inline-flex';
+                if (pauseBtn) pauseBtn.style.display = 'none';
+                if (resetBtn) resetBtn.style.display = 'none';
+            }
+        }
+
         function renderPomodoroView() {
             restorePomodoroState();
             initPomodoroWidgets();
             setWheelLockState();
             updatePomodoroDisplay();
             updateZenTimerDisplay();
+            updateZenControls();
             const startBtn = document.getElementById('startPomodoroBtn');
             const pauseBtn = document.getElementById('pausePomodoroBtn');
             const resetBtn = document.getElementById('resetPomodoroBtn');
@@ -1057,6 +1078,7 @@ const track = document.getElementById('pillTrack');
                 pauseBtn.innerText = 'Pause';
             }
             if (resetBtn) resetBtn.style.display = 'inline-flex';
+            updateZenControls();
 
             if (pomodoroTotalSeconds === 0) {
                 pomodoroRemainingSeconds = 0;
@@ -1114,6 +1136,7 @@ const track = document.getElementById('pillTrack');
             if (zenPlayPauseBtn) {
                 zenPlayPauseBtn.innerHTML = pomodoroPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
             }
+            updateZenControls();
             showNotification('success', pomodoroPaused ? 'Paused' : 'Resumed', pomodoroPaused ? 'Timer paused.' : 'Timer resumed.');
         }
 
@@ -1141,6 +1164,7 @@ const track = document.getElementById('pillTrack');
             if (pauseBtn) pauseBtn.style.display = 'none';
             if (resetBtn) resetBtn.style.display = 'none';
             if (zenPlayPauseBtn) zenPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            updateZenControls();
         }
 
         function enterZenMode() {
@@ -1163,6 +1187,7 @@ const track = document.getElementById('pillTrack');
                     playZenMusic();
                 }
                 startZenAudioAnalysis();
+                updateZenControls();
             } else {
                 pauseZenMusic();
                 stopZenAudioAnalysis();
