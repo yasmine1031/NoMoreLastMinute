@@ -335,13 +335,13 @@ function updateStatsSummary(remoteSummary) {
     const overviewRingEl = document.getElementById('ov-completion-ring');
     const overviewRingLabelEl = document.getElementById('ov-completion-ring-label');
     const overviewPercentEl = document.getElementById('ov-completion-percent');
-    if (!totalEl || !completedEl || !pendingEl || !studyMinutesEl || !completionFillEl || !completionTextEl) return;
+    if (!totalEl || !completedEl || !pendingEl || !studyMinutesEl || !completionTextEl) return;
 
-    const total = Number(remoteSummary?.total ?? computed.total ?? 0);
-    const completed = Number(remoteSummary?.completed ?? computed.completed ?? 0);
-    const pending = Number(remoteSummary?.pending ?? computed.pending ?? 0);
-    const minutes = Number(remoteSummary?.pomodoroMinutes ?? remoteSummary?.minutes ?? computed.minutes ?? 0);
-    const percentage = Number(remoteSummary?.completionPercentage ?? remoteSummary?.percentage ?? (total === 0 ? 0 : Math.round((completed / total) * 100)));
+    const total = Number(remoteSummary?.total ?? remoteSummary?.totalTasks ?? remoteSummary?.total_tasks ?? computed.total ?? 0);
+    const completed = Number(remoteSummary?.completed ?? remoteSummary?.completedTasks ?? remoteSummary?.completed_tasks ?? computed.completed ?? 0);
+    const pending = Number(remoteSummary?.pending ?? remoteSummary?.pendingTasks ?? remoteSummary?.pending_tasks ?? computed.pending ?? 0);
+    const minutes = Number(remoteSummary?.pomodoroMinutes ?? remoteSummary?.pomodoro_minutes ?? remoteSummary?.minutes ?? remoteSummary?.totalMinutes ?? remoteSummary?.total_minutes ?? computed.minutes ?? 0);
+    const percentage = Number(remoteSummary?.completionPercentage ?? remoteSummary?.completion_percentage ?? remoteSummary?.percentage ?? (total === 0 ? 0 : Math.round((completed / total) * 100)));
 
     if (totalEl) totalEl.textContent = total;
     if (completedEl) completedEl.textContent = completed;
@@ -1611,6 +1611,7 @@ const track = document.getElementById('pillTrack');
                 if (response.ok) {
                     pendingEmail = email;
                     localStorage.setItem('pendingEmail', email);
+                    clearOtpInputs();
                     // Show the embedded OTP verification view
                     showView('otp');
                     setTimeout(() => {

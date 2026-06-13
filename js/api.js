@@ -16,7 +16,7 @@ async function safeApiFetch(endpoint, options = {}) {
         return await apiFetch(endpoint, options);
     }
 
-    const API_BASE_URL = window.location.origin || 'http://127.0.0.1:5000';
+    const API_BASE_URL = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'http://127.0.0.1:5000';
     const API_TIMEOUT = 10000;
     const defaultHeaders = {
         'Content-Type': 'application/json',
