@@ -894,25 +894,7 @@
                     <p class="form-switch"><span data-i18n="already-have-id">Already have an ID?</span> <span onclick="showView('signin')" data-i18n="sign-in">Sign In</span></p>
                 </div>
 
-                <div id="view-otp" class="auth-view">
-                    <div class="otp-container">
-                        <div class="otp-header">
-                            <h1 class="welcome-title" data-i18n="verify-email">Verify Email</h1>
-                            <p class="otp-subtitle" data-i18n="email-code-sent">We sent a 6-digit code to your email</p>
-                        </div>
-                        <div class="otp-input-container">
-                            <input type="text" class="otp-input" maxlength="1" id="otp-1" oninput="handleOtpInput(this, 'otp-2')" onkeydown="handleOtpKeydown(event, this, null)">
-                            <input type="text" class="otp-input" maxlength="1" id="otp-2" oninput="handleOtpInput(this, 'otp-3')" onkeydown="handleOtpKeydown(event, this, 'otp-1')">
-                            <input type="text" class="otp-input" maxlength="1" id="otp-3" oninput="handleOtpInput(this, 'otp-4')" onkeydown="handleOtpKeydown(event, this, 'otp-2')">
-                            <input type="text" class="otp-input" maxlength="1" id="otp-4" oninput="handleOtpInput(this, 'otp-5')" onkeydown="handleOtpKeydown(event, this, 'otp-3')">
-                            <input type="text" class="otp-input" maxlength="1" id="otp-5" oninput="handleOtpInput(this, 'otp-6')" onkeydown="handleOtpKeydown(event, this, 'otp-4')">
-                            <input type="text" class="otp-input" maxlength="1" id="otp-6" oninput="handleOtpInput(this, null)" onkeydown="handleOtpKeydown(event, this, 'otp-5')">
-                        </div>
-                        <button class="action-btn" onclick="handleOtpVerify()" data-i18n="verify">Verify</button>
-                        <p class="otp-resend"><span data-i18n="didnt-receive">Didn't receive the code?</span> <span onclick="resendOtp()" data-i18n="resend">Resend</span></p>
-                        <p class="otp-footer">Back to <span onclick="showView('signup')" data-i18n="sign-up">Sign Up</span></p>
-                    </div>
-                </div>
+                
 
                 <div id="view-dashboard" class="auth-view">
                     <div class="overview-dashboard-container ov-dashboard-wrapper">
@@ -920,33 +902,32 @@
                             <div class="ov-premium-card overview-card tile-summary">
                                 <div class="card-header-row" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px;">
                                     <span class="card-label" id="user-greeting">Quick Summary</span>
-                                    <span class="card-note">This month</span>
                                 </div>
                                 <div class="stats-subgrid">
                                     <div class="stat-item">
-                                        <span class="stat-value" id="ov-stat-total">0</span>
-                                        <span class="stat-label">Total Task</span>
+                                        <span class="stat-value" id="statTotalTask"></span>
+                                        <span class="stat-label" data-i18n="total-tasks">Total Task</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-value" id="ov-stat-completed">0</span>
-                                        <span class="stat-label">Completed</span>
+                                        <span class="stat-value" id="statCompletedTask">0</span>
+                                        <span class="stat-label" data-i18n="completed">Completed</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-value" id="ov-stat-pending">0</span>
-                                        <span class="stat-label">Pending</span>
+                                        <span class="stat-value" id="statPendingTask">0</span>
+                                        <span class="stat-label" data-i18n="pending">Pending</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-value" id="ov-stat-minutes">0</span>
-                                        <span class="stat-label">Minutes</span>
+                                        <span class="stat-value" id="statMinutes">0</span>
+                                        <span class="stat-label" data-i18n="minutes">Minutes</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="ov-premium-card overview-card tile-completion" style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
                                 <div>
-                                    <span class="stat-label">Overall Completion</span>
+                                    <span class="stat-label" data-i18n="overall-completion">Overall Completion</span>
                                     <span class="stat-value" id="ov-completion-percent" style="font-size: 32px;">0%</span>
-                                    <div class="completion-text" id="ov-completion-text">0% completed this month</div>
+                                    <div class="completion-text" id="ov-completion-text" data-i18n="completion-text">0% completed this month</div>
                                 </div>
                                 <div class="mini-progress-ring" id="ov-completion-ring" style="--progress: 0%;">
                                     <span id="ov-completion-ring-label">0%</span>
@@ -954,9 +935,9 @@
                             </div>
 
                             <div class="ov-premium-card overview-card tile-chart">
-                                <h4 class="section-label" style="margin:0; opacity: 0.6; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Recent Study Trend</h4>
+                                <h4 class="section-label" style="margin:0; opacity: 0.6; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;"data-i18n="recent-study-trend">Recent Study Trend</h4>
                                 <div class="placeholder-chart">
-                                    <p>Visualizing your productivity...</p>
+                                    <p data-i18n="visualizing-productivity">Visualizing your productivity...</p>
                                 </div>
                             </div>
                         </div>
@@ -964,7 +945,11 @@
                             <div class="ov-premium-card ov-card-tasks overview-card tasks-express-module">
                                 <div class="card-header-row" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px;">
                                     <span class="card-label" data-i18n="tasks">TASKS</span>
-                                    <button class="quick-add-btn" onclick="openQuickAddTaskModal()" data-i18n="new-task">+ New Task</button>
+                                    <button class="quick-add-btn" onclick="toggleOverviewQuickAddRow()" data-i18n="new-task">+ New Task</button>
+                                </div>
+                                <div id="overviewQuickAddRow" style="display:none; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+                                    <input id="overviewQuickTaskTitle" type="text" class="task-input" placeholder="Quick task title" data-i18n="quick-task-title" style="flex:1; min-width:0; padding:10px 12px; font-size:0.95rem;" />
+                                    <button class="action-btn confirm-btn" type="button" onclick="saveTask('overview')" data-i18n="confirm">Confirm</button>
                                 </div>
                                 <div id="ov-tasks-stream-container" class="mini-task-list"></div>
                             </div>
@@ -973,8 +958,9 @@
                                 <span class="card-label" data-i18n="pomodoro">POMODORO</span>
                                 <div class="mini-timer-display" id="ov-timer-display">25:00</div>
                                 <div class="mini-timer-controls" style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
-                                    <button id="ov-start-btn" onclick="toggleOverviewPomodoro()" style="width:40px; height:32px; border-radius:12px; border:none; background:rgba(255,255,255,0.08); color:#fff; cursor:pointer;"><i class="fas fa-play"></i></button>
-                                    <button onclick="resetOverviewPomodoro()" style="width:40px; height:32px; border-radius:12px; border:none; background:rgba(255,255,255,0.08); color:#fff; cursor:pointer;"><i class="fas fa-undo"></i></button>
+                                    <button class="btn btn-primary btn-start" id="startPomodoroBtn" onclick="startPomodoro()" data-i18n="start">Start</button>
+                                    <button class="btn btn-secondary" id="pausePomodoroBtn" onclick="togglePomodoroPause()" style="display:none" data-i18n="pause">Pause</button>
+                                    <button class="btn btn-secondary" id="resetPomodoroBtn" onclick="resetPomodoro()" style="display:none" data-i18n="reset">Reset</button>
                                 </div>
                             </div>
 
@@ -998,54 +984,55 @@
                         </div>
                     </div>
                 </div>
+                
                 <div id="view-stats" class="auth-view">
                     <div class="dashboard-layout">
                         <div class="stats-grid">
                             <div class="g2-component stats-card summary-card">
                                 <div class="card-header">
-                                    <h4 class="section-label">Quick Summary</h4>
-                                    <span class="card-note">This month</span>
+                                    <h4 class="section-label" data-i18n="quick-summary">Quick Summary</h4>
+                                    <span class="card-note" data-i18n="this-month">This month</span>
                                 </div>
                                 <div class="stats-subgrid">
                                     <div class="stat-item">
                                         <span class="stat-value" id="statTotalTask">0</span>
-                                        <span class="stat-label">Total Tasks</span>
+                                        <span class="stat-label" data-i18n="total-task">Total Tasks</span>
                                     </div>
                                     <div class="stat-item">
                                         <span class="stat-value" id="statCompletedTask">0</span>
-                                        <span class="stat-label">Completed</span>
+                                        <span class="stat-label" data-i18n="completed">Completed</span>
                                     </div>
                                     <div class="stat-item">
                                         <span class="stat-value" id="statPendingTask">0</span>
-                                        <span class="stat-label">Pending</span>
+                                        <span class="stat-label" data-i18n="pending">Pending</span>
                                     </div>
                                     <div class="stat-item">
                                         <span class="stat-value" id="statStudyMinutes">0</span>
-                                        <span class="stat-label">Study Minutes</span>
+                                        <span class="stat-label" data-i18n="minutes">Study Minutes</span>
                                     </div>
                                 </div>
                                 <div class="completion-block">
-                                    <div class="completion-title">Task Completion</div>
+                                    <div class="completion-title" data-i18n="overall-completion">Task Completion</div>
                                     <div class="completion-bar">
                                         <div class="completion-fill" id="completionFill"></div>
                                     </div>
-                                    <div class="completion-text" id="completionText">0% completed</div>
+                                    <div class="completion-text" data-i18n="completion-text" id="completionText">0% completed</div>
                                 </div>
                             </div>
 
                             <div class="g2-component stats-card pomodoro-card">
                                 <div class="card-header">
-                                    <h4 class="section-label">Pomodoro Usage</h4>
-                                    <span class="card-note">Today</span>
+                                    <h4 class="section-label" data-i18n="pomodoro-usage">Pomodoro Usage</h4>
+                                    <span class="card-note" data-i18n="today">Today</span>
                                 </div>
                                 <div class="pomodoro-dashboard">
                                     <div class="pomodoro-stat">
                                         <span class="pomodoro-value" id="dailyPomodoroMinutes">0</span>
-                                        <span class="pomodoro-label">Minutes today</span>
+                                        <span class="pomodoro-label" data-i18n="minutes-today">Minutes today</span>
                                     </div>
                                     <div class="pomodoro-stat">
                                         <span class="pomodoro-value" id="todayPomodoroSessions">0</span>
-                                        <span class="pomodoro-label">Sessions</span>
+                                        <span class="pomodoro-label" data-i18n="sessions">Sessions</span>
                                     </div>
                                 </div>
                                 <div class="pomodoro-meter">
@@ -1056,10 +1043,10 @@
 
                             <div class="g2-component stats-card emotion-card">
                                 <div class="card-header">
-                                    <h4 class="section-label">Emotion Check-In</h4>
-                                    <span class="card-note">Current hour mood</span>
+                                    <h4 class="section-label" data-i18n="emotion-check-in">Emotion Check-In</h4>
+                                    <span class="card-note" data-i18n="current-hour-mood">Current hour mood</span>
                                 </div>
-                                <p class="emotion-subtext">Tap a mood once an hour. You can change it if needed.</p>
+                                <p class="emotion-subtext" data-i18n="tap-mood">Tap a mood once an hour. You can change it if needed.</p>
                                 <div class="emotion-buttons">
                                     <button class="mood-button mood-good" id="moodGoodBtn" onclick="handleMoodClick('good')" data-i18n="good">Good</button>
                                     <button class="mood-button mood-bad" id="moodBadBtn" onclick="handleMoodClick('bad')" data-i18n="bad">Bad</button>
@@ -1070,8 +1057,8 @@
 
                             <div class="g2-component stats-card trend-card">
                                 <div class="card-header">
-                                    <h4 class="section-label">Recent Study Trend</h4>
-                                    <span class="card-note">Daily pomodoro minutes</span>
+                                    <h4 class="section-label" data-i18n="recent-study-trend">Recent Study Trend</h4>
+                                    <span class="card-note" data-i18n="daily-pomodoro-minutes">Daily pomodoro minutes</span>
                                 </div>
                                 <div class="trend-scroll-container" id="trendScroll"></div>
                                 <div class="trend-footer" data-i18n="swipe-or-scroll">Swipe or scroll left / right for more days.</div>
@@ -1135,7 +1122,7 @@
                             <button class="cal-arrow" onclick="changeMonth(-1)">
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
                             </button>
-                            <h2 id="current-month-display">May 2026</h2>
+                            <h2 id="current-month-display" data-i18n="current-month-display">May 2026</h2>
                             <button class="cal-arrow" onclick="changeMonth(1)">
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
                             </button>
@@ -1217,7 +1204,7 @@
                                 <span class="stats-card-label" data-i18n="total-study-time">Total Pomodoro Time</span>
                                 <div class="total-time-display">
                                     <span class="time-value" id="totalPomodoroHours">0</span>
-                                    <span class="time-unit">hours</span>
+                                    <span class="time-unit" data-i18n="hours">hours</span>
                                 </div>
                                 <div class="pomodoro-icon-large">
                                     <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1396,6 +1383,7 @@
                                 <button class="language-btn" data-lang="en" onclick="changeLanguage('en')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">English</button>
                                 <button class="language-btn" data-lang="zh" onclick="changeLanguage('zh')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">中文</button>
                                 <button class="language-btn" data-lang="ms" onclick="changeLanguage('ms')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">Melayu</button>
+                                <button class="language-btn" data-lang="tamil" onclick="changeLanguage('tamil')" style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer; transition: all 0.3s ease;">Tamil</button>
                             </div>
                         </div>
                         <div class="settings-item">
@@ -1548,9 +1536,7 @@
         </div>
     </div>
 
-    <!-- ==================== 多语言系统 (I18N System) ==================== -->
     <script>
-        // 翻译数据对象 - Translation Data Object
         const translations = {
             en: {
                 // Navigation and Main
@@ -1562,7 +1548,44 @@
                 'search': 'Search',
                 'settings': 'Settings',
                 'account': 'Account',
-                
+                'contact-us': 'Contact Us',
+                'footer-copy': '© 2026 NMLM Project. Multimedia University Student Work.',
+                'search-placeholder': 'Search pages, tasks, features...',
+                'month-1': 'January',
+                'month-2': 'February',
+                'month-3': 'March',
+                'month-4': 'April',
+                'month-5': 'May',
+                'month-6': 'June',
+                'month-7': 'July',
+                'month-8': 'August',
+                'month-9': 'September',
+                'month-10': 'October',
+                'month-11': 'November',
+                'month-12': 'December',
+                'quick-add-title': 'Quick Add Task',
+                'quick-task-title': 'Quick task title',
+                'visualizing-productivity': 'Visualizing your productivity...',
+                'overview-no-overdue': '🎉 Great job — no overdue items in the mini view.',
+                'all-caught-up-today': '🎉 All caught up for today!',
+                'leaderboard-no-data': 'No leaderboard data available',
+                'no-mood': 'No mood',
+                'continue': 'Continue',
+                'task-title-placeholder': 'Task title',
+                'task-time-placeholder': 'Time',
+                'quick-notes-placeholder': 'Optional notes',
+                'add-task': 'Add Task',
+                'pomodoro-finished': 'Pomodoro Finished',
+                'pomodoro-finished-desc': 'Time is up. The alarm will keep playing until you stop it.',
+                'stop-alarm': 'Stop Alarm',
+                'share-your-achievement': 'Share Your Achievement',
+                'my-ranking': 'My Ranking',
+                'emotion-check-in': 'Emotion Check-In',
+                'current-hour-mood': 'Current hour mood',
+                'tap-mood': 'Tap a mood once an hour. You can change it if needed.',
+                'daily-pomodoro-minutes': 'Daily pomodoro minutes',
+                'hours': 'hours',
+
                 // Settings
                 'theme': 'Theme',
                 'dark-mode': 'Dark Mode',
@@ -1576,6 +1599,8 @@
                 'notifications': 'Notifications',
                 'general': 'General',
                 'contact': 'Contact',
+                'timer-paused': 'Timer paused. Take a short break!',
+                'timer-resumed': 'Timer resumed. Back to focus!',
                 
                 // Sign In/Up
                 'sign-in': 'Sign In',
@@ -1596,7 +1621,23 @@
                 'didnt-receive': "Didn't receive the code?",
                 'resend': 'Resend',
                 'back-to-signup': 'Back to Sign Up',
-                
+                'welcome-back': 'Welcome Back!',
+                'signed-in': "you're now signed in.",
+                'sign-out': 'Sign Out',
+                'invalid-credentials': 'Invalid credentials, please try again.',
+                'verification-code-sent': 'Verification code sent to your email.',
+                'verification-code-invalid': 'Invalid verification code, please try again.',
+                'account-created': 'Account created successfully! Please sign in.',
+                'account-creation-failed': 'Account creation failed. Please try again.',
+                'email-already-in-use': 'Email already in use. Please use a different email or sign in.',
+                'passwords-do-not-match': 'Passwords do not match. Please try again.',
+                'enter-email': 'Please enter your email.',
+                'enter-password': 'Please enter your password.',
+                'enter-full-name': 'Please enter your full name.',
+                'enter-confirm-password': 'Please confirm your password.',
+                'verification-code-sent': 'Verification code sent to your email.',
+                'verification-code-invalid': 'Invalid verification code, please try again.',
+
                 // Dashboard
                 'quick-summary': 'Quick Summary',
                 'this-month': 'This month',
@@ -1615,7 +1656,17 @@
                 'total-tasks': 'Total Tasks',
                 'study-minutes': 'Study Minutes',
                 'task-completion': 'Task Completion',
-                
+                'total-task': 'Total Task',
+                'completed': 'Completed',
+                'pending': 'Pending',
+                'minutes': 'Minutes',
+                'overall-completion': 'Overall Completion',
+                'completion-text': 'completed this month',
+                'recent-study-trend': 'Recent Study Trend',
+                'visualizing': 'Visualizing your productivity...',
+                'tasks': 'TASKS',
+                'new-task': '+ New Task',
+
                 // Stats Page
                 'pomodoro-usage': 'Pomodoro Usage',
                 'today': 'Today',
@@ -1640,7 +1691,14 @@
                 'pause': 'Pause',
                 'reset': 'Reset',
                 'zen-mode': 'ZEN Mode',
+                'paused': 'Paused',
+                'session-complete': 'Session Complete',
+                'resume': 'Resume',
+                'reset-pomodoro': 'Reset Pomodoro',
+                'paused': 'Paused',
+                'continue': 'Continue',
                 
+
                 // Task Page
                 'new-task-label': 'New Task',
                 'title': 'Title',
@@ -1684,7 +1742,9 @@
                 'enter-zen': 'Enter Zen',
                 'download': 'Download',
                 'contact-us': 'Contact Us',
-                
+                'no-tasks-completed': 'No tasks completed yet. Start your first task!',
+                'completed-this-month': 'completed this month',
+
                 // Additional
                 'edit-profile': 'Edit Profile',
                 'switch-account': 'Switch Account',
@@ -1703,6 +1763,12 @@
                 'share-your-achievement': 'Share Your Achievement',
                 'my-ranking': 'My Ranking',
                 'share': 'Share',
+                
+                // Notifications
+                'welcome-title': 'Welcome!',
+                'load-error-title': 'Load Error',
+                'load-error-message': 'Some data failed to load. Please refresh if needed.',
+                
                 'footer-copy': '© 2026 NMLM Project. Multimedia University Student Work.',
             },
             zh: {
@@ -1715,7 +1781,42 @@
                 'search': '搜索',
                 'settings': '设置',
                 'account': '账户',
-                
+                'contact-us': '联系我们',
+                'footer-copy': '© 2026 NMLM 项目。多媒体大学学生作品。',
+                'search-placeholder': '搜索页面、任务、功能...',
+                'month-1': '一月',
+                'month-2': '二月',
+                'month-3': '三月',
+                'month-4': '四月',
+                'month-5': '五月',
+                'month-6': '六月',
+                'month-7': '七月',
+                'month-8': '八月',
+                'month-9': '九月',
+                'month-10': '十月',
+                'month-11': '十一月',
+                'month-12': '十二月',
+                'quick-add-title': '快速添加任务',
+                'quick-task-title': '快速任务标题',
+                'visualizing-productivity': '正在将你的生产力可视化...',
+                'overview-no-overdue': '🎉 干得好 — 迷你视图中没有逾期事项。',
+                'task-title-placeholder': '任务标题',
+                'task-time-placeholder': '时间',
+                'quick-notes-placeholder': '可选备注',
+                'add-task': '添加任务',
+                'pomodoro-finished': '番茄钟结束',
+                'pomodoro-finished-desc': '时间到。闹钟会一直响，直到你停止它。',
+                'stop-alarm': '停止闹钟',
+                'share-your-achievement': '分享你的成就',
+                'my-ranking': '我的排名',
+                'emotion-check-in': '情绪签到',
+                'current-hour-mood': '当前小时心情',
+                'tap-mood': '每小时点击一次心情。如果需要，您可以更改它。',
+                'daily-pomodoro-minutes': '每日番茄钟分钟数',
+                'hours': '小时',
+                'timer-paused': '计时器已暂停。休息一下吧！',
+                'timer-resumed': '计时器已继续。回到专注吧！',
+
                 // Settings
                 'theme': '主题',
                 'dark-mode': '深色模式',
@@ -1749,6 +1850,25 @@
                 'didnt-receive': '没有收到代码？',
                 'resend': '重新发送',
                 'back-to-signup': '返回注册',
+                'welcome-back': '欢迎回来！',
+                'signed-in': '您已登录。',
+                'sign-out': '登出',
+                'invalid-credentials': '凭证无效，请重试。',
+                'verification-code-sent': '验证码已发送到您的邮箱。',
+                'verification-code-invalid': '验证码无效，请重试。',
+                'account-created': '账户创建成功！请登录。',
+                'account-creation-failed': '账户创建失败。请重试。',
+                'email-already-in-use': '邮箱已被使用。请使用不同的邮箱或登录。',
+                'passwords-do-not-match': '密码不匹配。请重试。',
+                'enter-email': '请输入您的邮箱。',
+                'enter-password': '请输入您的密码。',
+                'enter-full-name': '请输入您的全名。',
+                'enter-confirm-password': '请确认您的密码。',
+                'verification-code-sent': '验证码已发送到您的邮箱。',
+                'verification-code-invalid': '验证码无效，请重试。',
+                'paused': '已暂停',
+                'continue': '继续',
+                'resume': '继续',
                 
                 // Dashboard
                 'quick-summary': '快速总结',
@@ -1768,6 +1888,19 @@
                 'total-tasks': '总任务数',
                 'study-minutes': '学习分钟数',
                 'task-completion': '任务完成度',
+                'total-task': '总任务数',
+                'completed': '已完成',
+                'pending': '待处理',
+                'minutes': '分钟',
+                'overall-completion': '总体完成度',
+                'completion-text': '本月已完成',
+                'recent-study-trend': '最近学习趋势',
+                'visualizing': '可视化您的生产力...',
+                'tasks': '任务',
+                'new-task': '+ 新任务',
+                'no-tasks-completed': '还没有完成的任务。开始你的第一个任务吧！',
+                'completed-this-month': '本月已完成',
+
                 
                 // Stats Page
                 'pomodoro-usage': '番茄钟使用情况',
@@ -1791,8 +1924,15 @@
                 'seconds': '秒',
                 'start': '开始',
                 'pause': '暂停',
+                'continue': '继续',
+                'all-caught-up-today': '🎉 今天已全部完成！',
+                'leaderboard-no-data': '暂无排行榜数据',
+                'no-mood': '无心情',
                 'reset': '重置',
                 'zen-mode': '禅模式',
+                'pause': '暂停',
+                'continue': '继续',
+                'resume': '继续',
                 
                 // Task Page
                 'new-task-label': '新任务',
@@ -1856,6 +1996,12 @@
                 'share-your-achievement': '分享你的成就',
                 'my-ranking': '我的排名',
                 'share': '分享',
+                
+                // Notifications
+                'welcome-title': '欢迎！',
+                'load-error-title': '加载错误',
+                'load-error-message': '部分数据加载失败。如需要，请刷新。',
+                
                 'footer-copy': '© 2026 NMLM 项目。多媒体大学学生作品。',
             },
             ms: {
@@ -1868,7 +2014,33 @@
                 'search': 'Cari',
                 'settings': 'Pengaturan',
                 'account': 'Akun',
-                
+                'contact-us': 'Hubungi Kami',
+                'footer-copy': '© 2026 Proyek NMLM. Karya Mahasiswa Universitas Multimedia.',
+                'search-placeholder': 'Cari halaman, tugas, fitur...',
+                'month-1': 'Januari',
+                'month-2': 'Februari',
+                'month-3': 'Mac',
+                'month-4': 'April',
+                'month-5': 'Mei',
+                'month-6': 'Jun',
+                'month-7': 'Julai',
+                'month-8': 'Ogos',
+                'month-9': 'September',
+                'month-10': 'Oktober',
+                'month-11': 'November',
+                'month-12': 'Disember',
+                'quick-add-title': 'Tambah Tugas Cepat',
+                'task-title-placeholder': 'Judul tugas',
+                'quick-task-title': 'Judul tugas cepat',
+                'visualizing-productivity': 'Memvisualkan produktiviti anda...',
+                'overview-no-overdue': '🎉 Bagus — tiada item tertunggak dalam paparan mini.',
+                'task-time-placeholder': 'Waktu',
+                'quick-notes-placeholder': 'Catatan opsional',
+                'add-task': 'Tambah Tugas',
+                'pomodoro-finished': 'Pomodoro Selesai',
+                'pomodoro-finished-desc': 'Waktu habis. Alarm akan terus berbunyi hingga Anda menghentikannya.',
+                'stop-alarm': 'Hentikan Alarm',
+
                 // Settings
                 'theme': 'Tema',
                 'dark-mode': 'Mode Gelap',
@@ -1902,7 +2074,24 @@
                 'didnt-receive': 'Tidak menerima kode?',
                 'resend': 'Kirim Ulang',
                 'back-to-signup': 'Kembali ke Daftar',
+                'welcome-back': 'Selamat Datang Kembali!',
+                'signed-in': "Anda sekarang masuk.",
+                'sign-out': 'Keluar',
+                'invalid-credentials': 'Kredensial tidak valid, silakan coba lagi.',
+                'verification-code-sent': 'Kode verifikasi telah dikirim ke email Anda.',
+                'verification-code-invalid': 'Kode verifikasi tidak valid, silakan coba lagi.',
+                'account-created': 'Akun berhasil dibuat! Silakan masuk.',
+                'account-creation-failed': 'Pembuatan akun gagal. Silakan coba lagi.',
+                'email-already-in-use': 'Email sudah digunakan. Silakan gunakan email lain atau masuk.',
+                'passwords-do-not-match': 'Kata sandi tidak cocok. Silakan coba lagi.',
+                'enter-email': 'Silakan masukkan email Anda.',
+                'enter-password': 'Silakan masukkan kata sandi Anda.',
+                'enter-full-name': 'Silakan masukkan nama lengkap Anda.',
+                'enter-confirm-password': 'Silakan konfirmasi kata sandi Anda.',
+                'verification-code-sent': 'Kode verifikasi telah dikirim ke email Anda.',
+                'verification-code-invalid': 'Kode verifikasi tidak valid, silakan coba lagi.',
                 
+
                 // Dashboard
                 'quick-summary': 'Ringkasan Cepat',
                 'this-month': 'Bulan ini',
@@ -1921,7 +2110,16 @@
                 'total-tasks': 'Total Tugas',
                 'study-minutes': 'Menit Belajar',
                 'task-completion': 'Penyelesaian Tugas',
-                
+                'total-task': 'Total Tugas',
+                'completed': 'Selesai',
+                'pending': 'Menunggu',
+                'minutes': 'Menit',
+                'paused': 'Jeda',
+                'continue': 'Lanjutkan',
+                'resume': 'Lanjutkan',
+                'timer-paused': 'Pengatur waktu dijeda. Istirahat sebentar!',
+                'timer-resumed': 'Pengatur waktu dilanjutkan. Kembali fokus!',
+
                 // Stats Page
                 'pomodoro-usage': 'Penggunaan Pomodoro',
                 'today': 'Hari Ini',
@@ -1944,8 +2142,17 @@
                 'seconds': 'Detik',
                 'start': 'Mulai',
                 'pause': 'Jeda',
+                'continue': 'Teruskan',
+                'all-caught-up-today': '🎉 Semua telah selesai untuk hari ini!',
+                'leaderboard-no-data': 'Tiada data papan pendahulu tersedia',
+                'no-mood': 'Tiada mood',
                 'reset': 'Atur Ulang',
                 'zen-mode': 'Mode Zen',
+                'timer': 'Pengatur Waktu',
+                'zen-mode': 'Mode Zen',
+                'paused': 'Jeda',
+                'running': 'Berjalan',
+                'no-task-completed': 'Belum ada tugas yang diselesaikan. Mulailah sesi pomodoro untuk menyelesaikan tugas!',
                 
                 // Task Page
                 'new-task-label': 'Tugas Baru',
@@ -1956,13 +2163,13 @@
                 'todays-tasks': 'Tugas Hari Ini',
                 'loading-tasks': 'Memuat tugas...',
                 'may': 'Mei',
-                'mon': 'Sen',
+                'mon': 'Isn',
                 'tue': 'Sel',
                 'wed': 'Rab',
-                'thu': 'Kam',
+                'thu': 'Kha',
                 'fri': 'Jum',
                 'sat': 'Sab',
-                'sun': 'Min',
+                'sun': 'Aha',
                 
                 // Leaderboard
                 'your-rank': 'Peringkat Anda',
@@ -2009,30 +2216,273 @@
                 'share-your-achievement': 'Kongsi Pencapaian Anda',
                 'my-ranking': 'Kedudukan Saya',
                 'share': 'Kongsi',
+                'timer': 'Penggera',
+                'zen-mode': 'Mod Zen',
+                'all-caught-up-today': '🎉 Semua sudah selesai untuk hari ini!',
+                
+                // Notifications
+                'welcome-title': 'Selamat Datang!',
+                'load-error-title': 'Ralat Pemuatan',
+                'load-error-message': 'Beberapa data gagal memuatkan. Sila segarkan jika diperlukan.',
+                
                 'footer-copy': '© 2026 Projek NMLM. Kerja Pelajar Multimedia University.',
+            },
+            tamil: {
+                // Navigation and Main
+                'overview': 'மேலோக்கம்',
+                'task': 'பணி',
+                'leaderboard': 'தரவரிசை',
+                'stats': 'புள்ளிவிவரங்கள்',
+                'pomodoro': 'பொமோடோரோ',
+                'search': 'தேடல்',
+                'settings': 'அமைப்புகள்',
+                'account': 'கணக்கு',
+                'contact-us': 'எங்களை தொடர்பு கொள்ள',
+                'footer-copy': '© 2026 NMLM திட்டம். மல்டிமீடியா பல்கலைக்கழக மாணவர் வேலை.',
+                'search-placeholder': 'பக்கங்கள், பணிகள், அம்சங்களை தேடவும்...',
+                'quick-add-title': 'விரைவு பணி சேர்க்க',
+                'task-title-placeholder': 'பணி தலைப்பு',
+                'quick-task-title': 'விரைவு பணி தலைப்பு',
+                'visualizing-productivity': 'உங்கள் செயல்திறனைக் காட்சியமைக்கிறது...',
+                'overview-no-overdue': '🎉 நன்று — சிறு பார்வையில் எந்த காலாவதியான உருப்படிகளும் இல்லை.',
+                'task-time-placeholder': 'நேரம்',
+                'quick-notes-placeholder': 'விருப்பமான குறிப்புகள்',
+                'add-task': 'பணி சேர்க்க',
+                'pomodoro-finished': 'பொமோடோரோ முடிந்தது',
+                'pomodoro-finished-desc': 'நேரம் முடிந்தது. அலாரம் அதை நிறுத்தும் வரை தொடர்ந்து ஒலிக்கிறது.',
+                'stop-alarm': 'அலாரம் நிறுத்து',
+                'share-your-achievement': 'உங்கள் சாதனையை பகிரவும்',
+                'my-ranking': 'என் தரவரிசை',
+                'emotion-check-in': 'உணர்வு பதிவு',
+                'current-hour-mood': 'தற்போதைய மணிநேர மனநிலை',
+                'tap-mood': 'ஒரு மணிநேரத்திற்கு ஒருமுறை மனநிலையைத் தட்டவும். தேவையானால், நீங்கள் அதை மாற்றலாம்.',
+                'daily-pomodoro-minutes': 'தினசரி பொமோடோரோ நிமிடங்கள்',
+                'hours': 'மணி நேரங்கள்',
+                
+                
+                // Settings
+                'theme': 'தீம்',
+                'dark-mode': 'இருண்ட பயன்முறை',
+                'language': 'மொழி',
+                'cursor-style': 'கர்சர் பாணி',
+                'cursor-default': 'முன்னிருப்பு',
+                'cursor-1': 'கர்சர் 1',
+                'cursor-2': 'கர்சர் 2',
+                'cursor-3': 'கர்சர் 3',
+                'cursor-4': 'கர்சர் 4',
+                'notifications': 'அறிவிப்புகள்',
+                'general': 'பொதுவான',
+                'contact': 'தொடர்பு',
+                'timer-paused': 'டைமர் இடைநிறுத்தப்பட்டது. சிறிது ஓய்வெடுக்கவும்!',
+                'timer-resumed': 'டைமர் மீண்டும் தொடங்கியது. மீண்டும் கவனம் செலுத்துங்கள்!',
+                
+                // Sign In/Up
+                'sign-in': 'உள்நுழைக',
+                'sign-up': 'பதிவு செய்க',
+                'email-or-id': 'மின்னஞ்சல் அல்லது மாணவர் ID',
+                'password': 'கடவுச்சொல்',
+                'login': 'உள்நுழைக',
+                'dont-have-id': 'ID இல்லையா?',
+                'create-yours': 'உங்களை உருவாக்கவும்',
+                'full-name': 'முழு பெயர்',
+                'student-email': 'மாணவர் மின்னஞ்சல்',
+                'confirm-password': 'கடவுச்சொல்லை உறுதிசெய்க',
+                'create-account': 'கணக்கை உருவாக்கவும்',
+                'already-have-id': 'ஆல்ரெடி ID உள்ளதா?',
+                'verify-email': 'மின்னஞ்சலை சரிபார்க்க',
+                'email-code-sent': 'நாங்கள் உங்கள் மின்னஞ்சலுக்கு 6 இலக்க குறியீட்டை அனுப்பினோம்',
+                'verify': 'சரிபார்க்க',
+                'didnt-receive': 'குறியீட்டைப் பெறவில்லையா?',
+                'resend': 'மீண்டும் அனுப்பவும்',
+                'back-to-signup': 'பதிவு செய்ய திரும்பவும்',
+                'welcome-back': 'திரும்ப வரவேற்கிறோம்!',
+                'signed-in': 'நீங்கள் தற்போது உள்நுழைந்துள்ளீர்கள்.',
+                'sign-out': 'வெளியேறு',
+                'invalid-credentials': 'தரவு தவறானது, தயவுசெய்து மீண்டும் முயற்சிக்கவும்.',
+                'verification-code-sent': 'சரிபார்ப்பு குறியீடு உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டது.',
+                'verification-code-invalid': 'சரிபார்ப்பு குறியீடு தவறானது, தயவுசெய்து மீண்டும் முயற்சிக்கவும்.',
+                'account-created': 'கணக்கு வெற்றிகரமாக உருவாக்கப்பட்டது! தயவுசெய்து உள்நுழைக.',
+                'account-creation-failed': 'கணக்கு உருவாக்கம் தோல்வியடைந்தது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.',
+                'email-already-in-use': 'மின்னஞ்சல் ஏற்கனவே பயன்படுத்தப்படுகிறது. தயவுசெய்து வேறு மின்னஞ்சலை பயன்படுத்தவும் அல்லது உள்நுழைக.',
+                'passwords-do-not-match': 'கடவுச்சொற்கள் பொருந்தவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.',
+                'enter-email': 'தயவுசெய்து உங்கள் மின்னஞ்சலை உள்ளிடவும்.',
+                'enter-password': 'தயவுசெய்து உங்கள் கடவுச்சொல்லை உள்ளிடவும்.',
+                'enter-full-name': 'தயவுசெய்து உங்கள் முழு பெயரை உள்ளிடவும்.',
+                'enter-confirm-password': 'தயவுசெய்து உங்கள் கடவுச்சொல்லை உறுதிசெய்க.',
+                'verification-code-sent': 'சரிபார்ப்பு குறியீடு உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டது.',
+                'verification-code-invalid': 'சரிபார்ப்பு குறியீடு தவறானது, தயவுசெய்து மீண்டும் முயற்சிக்கவும்.',
+                
+                // Dashboard
+                'quick-summary': 'விரைவு சுருக்கம்',
+                'this-month': 'இந்த மாதம்',
+                'total-task': 'மொத்த பணி',
+                'completed': 'முடிந்தது',
+                'pending': 'நிலுவையில் உள்ள',
+                'minutes': 'நிமிடங்கள்',
+                'overall-completion': 'ஒட்டுமொத்த முடிப்பு',
+                'completion-text': 'இந்த மாதம் முடிந்தது',
+                'recent-study-trend': 'சமீபத்திய ஆய்வு போக்கு',
+                'visualizing': 'உங்கள் உற்பத்தியை காட்சிப்படுத்துகிறது...',
+                'tasks': 'பணிகள்',
+                'new-task': '+ புதிய பணி',
+                'rank': 'தரவரிசை',
+                'mood-today': 'இன்றைய மனநிலை',
+                'total-tasks': 'மொத்த பணிகள்',
+                'study-minutes': 'ஆய்வு நிமிடங்கள்',
+                'task-completion': 'பணி முடிப்பு',
+                'total-task': 'மொத்த பணி',
+                'completed': 'முடிந்தது',
+                'pending': 'நிலுவையில் உள்ள',
+                'minutes': 'நிமிடங்கள்',
+                'overall-completion': 'ஒட்டுமொத்த முடிப்பு',
+                'completion-text': 'இந்த மாதம் முடிந்தது',
+                'recent-study-trend': 'சமீபத்திய ஆய்வு போக்கு',
+                'visualizing': 'உங்கள் உற்பத்தியை காட்சிப்படுத்துகிறது...',
+                'tasks': 'பணிகள்',
+                'new-task': '+ புதிய பணி',
+                'no-tasks-completed': 'இன்னும் முடிந்த பணிகள் இல்லை. உங்கள் முதல் பணியை தொடங்குங்கள்!',
+                'completed-this-month': 'இந்த மாதம் முடிந்தது',
+
+                // Stats Page
+                'pomodoro-usage': 'பொமோடோரோ பயன்பாடு',
+                'today': 'இன்று',
+                'minutes-today': 'இன்று நிமிடங்கள்',
+                'sessions': 'அமர்வுகள்',
+                'use-as-interface': 'உங்கள் பொமோடோரோ அமர்வுகளைப் பதிவு செய்வதற்கு மையப் இடமாகப் பயன்படுத்தவும்',
+                'emotion-check-in': 'உணர்வு பரிசோதனை',
+                'current-hour-mood': 'தற்போதைய மணிநேர மனநிலை',
+                'tap-mood': 'ஒரு மணிநேரத்திற்கு ஒருமுறை மனநிலையைத் தட்டவும்',
+                'good': 'நல்ல',
+                'bad': 'மோசம்',
+                'last-5-hours': 'கடந்த 5 மணி நேரம்',
+                'trend': 'சமீபத்திய ஆய்வு போக்கு',
+                'daily-pomodoro': 'தினசரி பொமோடோரோ நிமிடங்கள்',
+                'swipe-or-scroll': 'மேலும் நாட்களுக்கு இடம் / வலம் ஸ்வைப் அல்லது ஸ்கிரோல் செய்க',
+                
+                // Pomodoro
+                'hours': 'மணி நேரங்கள்',
+                'minutes': 'நிமிடங்கள்',
+                'seconds': 'விநாடிகள்',
+                'start': 'தொடங்க',
+                'pause': 'இடைநிறுத்த',
+                'continue': 'தொடர',
+                'all-caught-up-today': '🎉 இன்று அனைத்தும் முடிந்துவிட்டது!',
+                'leaderboard-no-data': 'போரறைத் தரவு இல்லை',
+                'no-mood': 'முடிவு இல்லை',
+                'reset': 'மீட்டமை',
+                'zen-mode': 'ZEN பயன்முறை',
+                'continue': 'தொடர',
+                'resume': 'தொடர',
+                'paused': 'இடைநிறுத்தப்பட்டது',
+                'running': 'ஓடுகிறது',
+                
+                // Task Page
+                'new-task-label': 'புதிய பணி',
+                'title': 'தலைப்பு',
+                'description': 'விளக்கம்',
+                'execution-time': 'செயல்பாட்டு நேரம்:',
+                'confirm': 'உறுதிசெய்க',
+                'todays-tasks': 'இன்றைய பணிகள்',
+                'loading-tasks': 'பணிகளை ஏற்றுகிறது...',
+                'may': 'மே',
+                'mon': 'திங்',
+                'tue': 'செ',
+                'wed': 'பு',
+                'thu': 'வி',
+                'fri': 'வெ',
+                'sat': 'ச',
+                'sun': 'நா',
+                
+                // Leaderboard
+                'your-rank': 'உங்கள் தரவரிசை',
+                'total-study-time': 'மொத்த ஆய்வு நேரம்',
+                'hours': 'மணி நேரங்கள்',
+                'leaderboard': 'தரவரிசை',
+                'rank': 'தரவரிசை',
+                'user': 'பயனர்',
+                'study-time': 'ஆய்வு நேரம்',
+                
+                
+                // Account
+                'display-name': 'காட்ட பெயர்',
+                'email': 'மின்னஞ்சல்',
+                'phone': 'தொலைபேசி',
+                'edit-profile': 'சுயவிவரத்தைத் திருத்தவும்',
+                'switch-account': 'கணக்கை மாற்றவும்',
+                'logout': 'வெளியேறவும்',
+                'cancel': 'ரத்து செய்க',
+                'save': 'சேமி',
+                'enter-your-name': 'உங்கள் பெயரை உள்ளிடவும்',
+                'enter-your-email': 'உங்கள் மின்னஞ்சலை உள்ளிடவும்',
+                'switch-to-different': 'வேறு கணக்கில் மாற்ற விரும்புகிறீர்களா? உங்கள் கணக்கைப் பயன்படுத்த மீண்டும் உள்நுழைய வேண்டும்',
+                'confirm-logout': 'வெளியேறுவதை உறுதிசெய்க',
+                'sure-logout': 'நீங்கள் உண்மாகவே வெளியேற விரும்புகிறீர்களா? உங்கள் கணக்கைப் பயன்படுத்த மீண்டும் உள்நுழைய வேண்டும்',
+                'enter-zen': 'Zen-ஐ உள்ளிடவும்',
+                'download': 'பதிவிறக்கம்',
+                'contact-us': 'எங்களை தொடர்பு கொள்ளவும்',
+                
+                // Additional
+                'edit-profile': 'சுயவிவரத்தைத் திருத்தவும்',
+                'switch-account': 'கணக்கை மாற்றவும்',
+                'logout': 'வெளியேறவும்',
+                'profile': 'சுயவிவரம்',
+                'pomodoro-finished': 'பொமோடோரோ முடிந்துவிட்டது',
+                'pomodoro-finished-desc': 'நேரம் முடிந்துவிட்டது. அலாரம் நிறுத்தும் வரை பிளேபாக் செய்ய கொண்டு செல்லும்',
+                'stop-alarm': 'அலாரத்தை நிறுத்தவும்',
+                'search-placeholder': 'பக்கங்கள், பணிகள், அம்சங்கள் தேடவும்...',
+                'month-1': 'ஜனவரி',
+                'month-2': 'பிப்ரவரி',
+                'month-3': 'மார்ச்',
+                'month-4': 'ஏப்ரல்',
+                'month-5': 'மே',
+                'month-6': 'ஜூன்',
+                'month-7': 'ஜூலை',
+                'month-8': 'ஆகஸ்ட்',
+                'month-9': 'செப்டம்பர்',
+                'month-10': 'அக்டோபர்',
+                'month-11': 'நவம்பர்',
+                'month-12': 'டிசம்பர்',
+                'quick-add-title': 'விரைவு பணி சேர்க்கவும்',
+                'task-title-placeholder': 'பணி தலைப்பு',
+                'task-time-placeholder': 'நேரம்',
+                'quick-notes-placeholder': 'விரும்பினால் குறிப்புகள்',
+                'add-task': 'பணியைச் சேர்க்கவும்',
+                'share-your-achievement': 'உங்கள் சாதனையைப் பகிரவும்',
+                'my-ranking': 'எனது தரவரிசை',
+                'share': 'பகிரவும்',
+                'timer': 'டைமர்',
+                'pause': 'இடைநிறுத்து',
+                'resume': 'தொடரவும்',
+                
+                // Notifications
+                'welcome-title': 'வரவேற்கிறோம்!',
+                'load-error-title': 'ஏற்றுவதில் பிழை',
+                'load-error-message': 'சில தரவு ஏற்றுவதில் தோல்வியுற்றது. தேவைப்பட்டால் புதுப்பிக்கவும்.',
+                
+                'footer-copy': '© 2026 NMLM திட்டம். மல்டிமீடியா பல்கலைக்கழக மாணவர் பணி',
             }
         };
 
-        // 当前语言 - Current Language
         let currentLanguage = localStorage.getItem('appLanguage') || 'en';
 
-        // 获取翻译文本 - Get Translation
         function i18n(key) {
             return translations[currentLanguage]?.[key] || translations['en']?.[key] || key;
         }
 
-        // 应用翻译 - Apply Translations
         function applyTranslations() {
-            // 翻译所有具有 data-i18n 属性的元素
+            window.i18nKeyMap = window.i18nKeyMap || {};
+            
             document.querySelectorAll('[data-i18n]').forEach(element => {
                 const key = element.getAttribute('data-i18n');
+                if (!key) return;
+                if (element.id === 'current-month-display') return;
+                
+                window.i18nKeyMap[element.id || Math.random().toString()] = key;
+                
                 if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                    // For input/textarea elements, set the placeholder
                     element.placeholder = i18n(key);
                 } else {
-                    // For elements that include SVG/icons, preserve children and update/insert a trailing text span
                     if (element.querySelector && element.querySelector('svg')) {
-                        // remove existing raw text nodes to avoid duplication
                         Array.from(element.childNodes).forEach(n => {
                             if (n.nodeType === Node.TEXT_NODE) n.remove();
                         });
@@ -2045,161 +2495,98 @@
                         }
                         textSpan.textContent = i18n(key);
                     } else {
-                        // For other elements, set the text content
                         element.textContent = i18n(key);
                     }
                 }
             });
 
-            // 更新特定的UI文本（不需要data-i18n属性的）
-            const uiUpdates = {
-                'pill-overview': { el: '.pill[onclick*="dashboard"]', key: 'overview' },
-                'pill-task': { el: '.pill[onclick*="task"]', key: 'task' },
-                'pill-leaderboard': { el: '.pill[onclick*="leaderboard"]', key: 'leaderboard' },
-                'pill-stats': { el: '.pill[onclick*="stats"]', key: 'stats' },
-                'pill-pomodoro': { el: '.pill[onclick*="pomodoro"]', key: 'pomodoro' },
-            };
-
-            // 更新导航中的按钮文本
-            document.querySelectorAll('.pill').forEach(pill => {
-                const onclick = pill.getAttribute('onclick');
-                if (onclick?.includes('dashboard')) pill.textContent = i18n('overview');
-                else if (onclick?.includes('task')) pill.textContent = i18n('task');
-                else if (onclick?.includes('leaderboard')) pill.textContent = i18n('leaderboard');
-                else if (onclick?.includes('stats')) pill.textContent = i18n('stats');
-                else if (onclick?.includes('pomodoro')) pill.textContent = i18n('pomodoro');
+            document.querySelectorAll('.pill[data-i18n]').forEach(pill => {
+                const key = pill.getAttribute('data-i18n');
+                if (key) pill.textContent = i18n(key);
             });
 
-            // 更新移动菜单中的按钮文本
-            document.querySelectorAll('.mobile-menu-section .pill').forEach(pill => {
-                const onclick = pill.getAttribute('onclick');
-                if (onclick?.includes('dashboard')) pill.textContent = i18n('overview');
-                else if (onclick?.includes('task')) pill.textContent = i18n('task');
-                else if (onclick?.includes('leaderboard')) pill.textContent = i18n('leaderboard');
-                else if (onclick?.includes('stats')) pill.textContent = i18n('stats');
-                else if (onclick?.includes('pomodoro')) pill.textContent = i18n('pomodoro');
-            });
-
-            // 更新具体视图中的文本
-            // Dashboard/Overview
             const userGreeting = document.getElementById('user-greeting');
             if (userGreeting) userGreeting.textContent = i18n('quick-summary');
             
-            const cardLabels = document.querySelectorAll('.card-label');
+            const cardLabels = document.querySelectorAll('.card-label[data-i18n]');
             cardLabels.forEach(label => {
-                if (label.textContent === 'TASKS') label.textContent = i18n('tasks');
-                else if (label.textContent === 'POMODORO') label.textContent = i18n('pomodoro');
-                else if (label.textContent === 'RANK') label.textContent = i18n('rank');
-                else if (label.textContent === 'MOOD TODAY') label.textContent = i18n('mood-today');
-                else if (label.textContent === 'Quick Summary') label.textContent = i18n('quick-summary');
+                const key = label.getAttribute('data-i18n');
+                if (key) label.textContent = i18n(key);
             });
 
-            // Task labels
-            document.querySelectorAll('.stat-label').forEach(label => {
-                if (label.textContent === 'Total Task') label.textContent = i18n('total-task');
-                else if (label.textContent === 'Completed') label.textContent = i18n('completed');
-                else if (label.textContent === 'Pending') label.textContent = i18n('pending');
-                else if (label.textContent === 'Minutes') label.textContent = i18n('minutes');
-                else if (label.textContent === 'Total Tasks') label.textContent = i18n('total-tasks');
-                else if (label.textContent === 'Study Minutes') label.textContent = i18n('study-minutes');
-                else if (label.textContent === 'Minutes today') label.textContent = i18n('minutes-today');
-                else if (label.textContent === 'Sessions') label.textContent = i18n('sessions');
+            const statLabels = document.querySelectorAll('.stat-label[data-i18n]');
+            statLabels.forEach(label => {
+                const key = label.getAttribute('data-i18n');
+                if (key) label.textContent = i18n(key);
             });
 
-            // Section labels
-            document.querySelectorAll('.section-label').forEach(label => {
-                if (label.textContent === 'Quick Summary') label.textContent = i18n('quick-summary');
-                else if (label.textContent === 'Pomodoro Usage') label.textContent = i18n('pomodoro-usage');
-                else if (label.textContent === 'Emotion Check-In') label.textContent = i18n('emotion-check-in');
-                else if (label.textContent === 'Recent Study Trend') label.textContent = i18n('recent-study-trend');
-                else if (label.textContent === 'Task Completion') label.textContent = i18n('task-completion');
+            const sectionLabels = document.querySelectorAll('.section-label[data-i18n]');
+            sectionLabels.forEach(label => {
+                const key = label.getAttribute('data-i18n');
+                if (key) label.textContent = i18n(key);
             });
 
-            // 更新快速加任务按钮
-            const quickAddBtn = document.querySelector('.quick-add-btn');
-            if (quickAddBtn) quickAddBtn.textContent = i18n('new-task');
-
-            // 更新输入框的标签
-            const taskTitleInput = document.getElementById('task-title');
-            if (taskTitleInput) taskTitleInput.placeholder = i18n('title');
-            
-            const taskDescInput = document.getElementById('task-desc');
-            if (taskDescInput) taskDescInput.placeholder = i18n('description');
-
-            // 更新卡片标题和按钮
-            document.querySelectorAll('.card-note').forEach(note => {
-                if (note.textContent === 'This month') note.textContent = i18n('this-month');
-                else if (note.textContent === 'Today') note.textContent = i18n('today');
-                else if (note.textContent === 'Current hour mood') note.textContent = i18n('current-hour-mood');
-                else if (note.textContent === 'Daily pomodoro minutes') note.textContent = i18n('daily-pomodoro');
-            });
-
-            // 更新Pomodoro标签
-            document.querySelectorAll('.pomodoro-label').forEach(label => {
-                if (label.textContent === 'Minutes today') label.textContent = i18n('minutes-today');
-                else if (label.textContent === 'Sessions') label.textContent = i18n('sessions');
-            });
-
-            // 更新情绪相关标签
-            document.querySelectorAll('[data-mood]').forEach(el => {
-                if (el.getAttribute('data-mood') === 'sad') el.title = i18n('bad');
-                else if (el.getAttribute('data-mood') === 'happy') el.title = i18n('good');
-            });
-
-
-            // 更新情绪检查标签
-            const emotionTrendLabel = document.querySelector('.emotion-trend-label');
-            if (emotionTrendLabel && emotionTrendLabel.textContent === 'Last 5 hours') {
-                emotionTrendLabel.textContent = i18n('last-5-hours');
+            const quickAddBtn = document.querySelector('.quick-add-btn[data-i18n]');
+            if (quickAddBtn) {
+                const key = quickAddBtn.getAttribute('data-i18n');
+                quickAddBtn.textContent = i18n(key);
             }
 
-            // 通用按钮/可交互元素翻译：优先使用 data-i18n，否则尝试匹配常见英文词
-            document.querySelectorAll('button, a, .modal-close-btn').forEach(btn => {
+            const taskTitleInput = document.getElementById('task-title[data-i18n]');
+            if (taskTitleInput) {
+                const key = taskTitleInput.getAttribute('data-i18n');
+                if (key) taskTitleInput.placeholder = i18n(key);
+            }
+            
+            const taskDescInput = document.getElementById('task-desc[data-i18n]');
+            if (taskDescInput) {
+                const key = taskDescInput.getAttribute('data-i18n');
+                if (key) taskDescInput.placeholder = i18n(key);
+            }
+
+            document.querySelectorAll('.card-note[data-i18n]').forEach(note => {
+                const key = note.getAttribute('data-i18n');
+                if (key) note.textContent = i18n(key);
+            });
+
+            document.querySelectorAll('.pomodoro-label[data-i18n]').forEach(label => {
+                const key = label.getAttribute('data-i18n');
+                if (key) label.textContent = i18n(key);
+            });
+
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (key) el.title = i18n(key);
+            });
+
+            document.querySelectorAll('.modal-header span[data-i18n]').forEach(span => {
+                const key = span.getAttribute('data-i18n');
+                if (key) span.textContent = i18n(key);
+            });
+
+            document.querySelectorAll('.settings-menu-item[data-i18n]').forEach(item => {
+                const key = item.getAttribute('data-i18n');
+                if (key) item.textContent = i18n(key);
+            });
+
+            document.querySelectorAll('button, a').forEach(btn => {
                 try {
                     const key = btn.getAttribute && btn.getAttribute('data-i18n');
                     if (key) {
                         btn.textContent = i18n(key);
-                        return;
                     }
-                    const txt = (btn.textContent || '').trim();
-                    if (!txt) return;
-                    if (txt === 'Save') btn.textContent = i18n('save');
-                    else if (txt === 'Cancel') btn.textContent = i18n('cancel');
-                    else if (txt === 'Confirm') btn.textContent = i18n('confirm');
-                    else if (txt === 'Logout') btn.textContent = i18n('logout');
-                    else if (txt === 'Download') btn.textContent = i18n('download');
-                    else if (txt === 'Share') btn.textContent = i18n('share') || txt;
                 } catch(e) { /* ignore translation errors for individual nodes */ }
             });
 
-            // 更新具有data-i18n-title属性的元素的title属性（用于cursor按钮）
-            document.querySelectorAll('[data-i18n-title]').forEach(el => {
-                const key = el.getAttribute('data-i18n-title');
-                if (key) {
-                    el.title = i18n(key);
-                }
-            });
+            const currentMonthDisplay = document.getElementById('current-month-display');
+            if (currentMonthDisplay && typeof currentMonth !== 'undefined' && typeof currentYear !== 'undefined') {
+                const monthKey = `month-${currentMonth + 1}`;
+                currentMonthDisplay.textContent = `${i18n(monthKey)} ${currentYear}`;
+            }
 
-            // 更新modal的文本
-            document.querySelectorAll('.modal-header span').forEach(span => {
-                if (span.textContent === 'Settings') span.textContent = i18n('settings');
-                else if (span.textContent === 'Account') span.textContent = i18n('account');
-                else if (span.textContent === 'Edit Profile') span.textContent = i18n('edit-profile');
-                else if (span.textContent === 'Switch Account') span.textContent = i18n('switch-account');
-                else if (span.textContent === 'Confirm Logout') span.textContent = i18n('confirm-logout');
-            });
-
-            // 更新设置菜单项
-            document.querySelectorAll('.settings-menu-item').forEach(item => {
-                if (item.textContent === 'General') item.textContent = i18n('general');
-                else if (item.textContent === 'Contact') item.textContent = i18n('contact');
-            });
-
-            // 更新语言按钮的活动状态
             updateLanguageButtons();
         }
 
-        // 更新语言按钮状态 - Update Language Buttons
         function updateLanguageButtons() {
             document.querySelectorAll('.language-btn').forEach(btn => {
                 if (btn.dataset.lang === currentLanguage) {
@@ -2214,7 +2601,6 @@
             });
         }
 
-        // Cursor Options
         const cursors = {
             1: "url('https://www.rw-designer.com/cursor-view/108235.png'), auto",
             2: "url('https://www.rw-designer.com/cursor-view/120490.png'), auto",
@@ -2250,25 +2636,24 @@
             });
         }
 
-        // 改变语言 - Change Language
         function changeLanguage(lang) {
-            if (lang === 'en' || lang === 'zh' || lang === 'ms') {
+            if (lang === 'en' || lang === 'zh' || lang === 'ms' || lang === 'tamil') {
                 currentLanguage = lang;
                 localStorage.setItem('appLanguage', lang);
                 applyTranslations();
+                updateLanguageButtons();
                 console.log(`Language changed to: ${lang}`);
+            } else {
+                console.warn(`Unsupported language: ${lang}`);
             }
         }
 
-        // 初始化翻译系统 - Initialize Translation System
         function initializeTranslations() {
             applyTranslations();
         }
 
-        // 在页面加载后初始化翻译和cursor
         document.addEventListener('DOMContentLoaded', function() {
             initializeTranslations();
-            // Restore saved cursor
             const savedCursor = localStorage.getItem("selectedCursor");
             if (savedCursor === '0') {
                 setCursor(0);

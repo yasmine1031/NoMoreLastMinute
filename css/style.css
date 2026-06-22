@@ -450,7 +450,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     background: rgba(255, 255, 255, 0.12);
 }
 
-/* Password Strength Indicator */
 .password-strength-container {
     margin-top: 8px;
     margin-bottom: 4px;
@@ -504,7 +503,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     transform: scale(1);
 }
 
-/* Confirm Password Error */
 .confirm-error {
     color: #ff6b6b;
     font-size: 12px;
@@ -520,7 +518,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     opacity: 1;
 }
 
-/* OTP Verification Styles */
 .otp-subtitle {
     text-align: center;
     color: rgba(255, 255, 255, 0.6);
@@ -620,7 +617,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     transition: transform 0.1s ease;
 }
 
-/* Overview 专属隔离样式 */
 .ov-dashboard-wrapper {
     display: flex;
     gap: 15px;
@@ -1474,9 +1470,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     text-align: center;
 }
 
-/* --- Task View 专用样式 --- */
-
-/* 布局控制 */
 .task-page-layout {
     display: flex;
     flex-direction: column;
@@ -1489,7 +1482,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     animation: authIn 0.6s cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 
-/* 防止任务区域子项超出父容器并被遮挡 */
 .task-content-grid,
 .calendar-card,
 .task-sidebar,
@@ -1498,7 +1490,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     min-width: 0;
 }
 
-/* 顶部月份切换 */
 .calendar-header {
     display: flex;
     align-items: center;
@@ -1543,11 +1534,10 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     gap: 20px;
     align-items: stretch;
     flex: none;
-    min-height: 0;    /* 关键：允许子元素（如任务列表）在高度受限时缩小 */
+    min-height: 0;  
     overflow: visible;
 }
 
-/* 日历卡片样式 */
 .calendar-card {
     display: flex;
     flex-direction: column;
@@ -1568,11 +1558,10 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
 .days-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    /* 核心修复：限制行高，防止在内容多时无限向下拉长 */
     grid-template-rows: repeat(6, minmax(0, 1fr)); 
     gap: 10px; 
     flex: 1;  
-    min-height: 0; /* 允许在高度受限时缩小格子 */
+    min-height: 0; 
     height: 100%;
     padding-bottom: 5px;
 }
@@ -1581,10 +1570,10 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     aspect-ratio: auto;
     width: 100%;
     height: 100%; 
-    min-height: 45px; /* 设定最小高度，保证触控体验 */
+    min-height: 45px; 
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 14px; /* 增加圆角，更符合 Apple G2 风格 */
+    border-radius: 14px; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1603,7 +1592,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     transition: transform 0.1s ease;
 }
 
-/* 手稿要求的：点击选择该日期，浅蓝色提示 */
 .day-cell.active-date {
     background: rgba(255, 255, 255, 0.15) !important;
     border: 1px solid white;
@@ -1614,8 +1602,8 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     background: var(--apple-blue) !important;
     color: white;
     font-weight: 700;
-    box-shadow: 0 10px 20px rgba(0, 122, 255, 0.4); /* 蓝色悬浮阴影 */
-    transform: translateY(-2px); /* 悬浮位移 */
+    box-shadow: 0 10px 20px rgba(0, 122, 255, 0.4); 
+    transform: translateY(-2px);
     border: none;
 }
 
@@ -1624,7 +1612,7 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     flex-direction: column;
     height: auto;
     overflow: visible;
-    gap: 16px; /* 减少组件间的外部间距 */
+    gap: 16px; 
 }
 
 .new-task-card {
@@ -1661,7 +1649,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-/* 7色标记 */
 .color-picker {
     display: flex;
     justify-content: space-between;
@@ -1688,14 +1675,12 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
 }
 
 .task-items-container {
-    flex: 1;         /* 自动占据侧边栏剩下的所有空间 */
+    flex: 1; 
     display: flex;
     flex-direction: column;
     gap: 12px;
-    overflow-y: auto; /* 只有这里可以滚动 */
-    padding-right: 5px; /* 为滚动条留点呼吸感 */
-    
-    /* 隐藏滚动条但保留功能 */
+    overflow-y: auto; 
+    padding-right: 5px;
     scrollbar-width: none; 
     scroll-behavior: smooth;
     min-height: 100px;
@@ -1737,7 +1722,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
 .t-name { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
 .t-time { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
 
-/* 适配小屏幕 */
 @media (max-width: 1100px) {
     .task-content-grid { grid-template-columns: 1fr; }
     .task-sidebar { order: -1; }
@@ -1849,9 +1833,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     }
 }
 
-/* --- 时间选择器组件样式 --- */
-
-/* 容器布局 */
 .time-picker-row {
     display: flex;
     align-items: center;
@@ -1875,7 +1856,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     font-weight: 400;
 }
 
-/* 核心 Input 样式 */
 .task-input-time {
     background: transparent;
     border: none;
@@ -1889,9 +1869,8 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     width: 100px;
 }
 
-/* 移除 Chrome 的原生时钟图标，保持 Apple 的纯净感 */
 .task-input-time::-webkit-calendar-picker-indicator {
-    filter: invert(1); /* 变成白色 */
+    filter: invert(1); 
     opacity: 0.5;
     cursor: pointer;
     transition: 0.3s;
@@ -1902,19 +1881,16 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     transform: scale(1.1);
 }
 
-/* 确保 Confirm 按钮在输入框下方有足够呼吸感 */
 .confirm-btn {
     margin-top: 10px;
 }
 
-/* --- 任务列表显示优化 --- */
 .task-item-entry .t-time {
     display: flex;
     align-items: center;
     gap: 5px;
 }
 
-/* 如果你想在任务列表里给时间加个小图标 */
 .task-item-entry .t-time::before {
     content: '';
     display: inline-block;
@@ -1924,9 +1900,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     background-size: contain;
 }
 
-/* ==================== Leaderboard View Styles ==================== */
-
-/* Layout control */
 .leaderboard-page-layout {
     display: flex;
     flex-direction: column;
@@ -1941,7 +1914,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     animation: authIn 0.6s cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 
-/* Top Section - Desktop/Tablet: side by side */
 .leaderboard-top-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1950,7 +1922,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     width: 100%;
 }
 
-/* User Card */
 .leaderboard-user-card {
     background: linear-gradient(135deg, rgba(0, 122, 255, 0.15) 0%, rgba(88, 86, 214, 0.15) 100%);
     border: 1px solid rgba(0, 122, 255, 0.3);
@@ -2045,7 +2016,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     transition: transform 0.1s ease;
 }
 
-/* Stats Card */
 .leaderboard-stats-card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2110,7 +2080,6 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     margin-top: 12px;
 }
 
-/* Bottom Section - Leaderboard List */
 .leaderboard-bottom-section {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2730,8 +2699,6 @@ body.zen-mode-active::before {
     text-align: right;
 }
 
-/* ==================== Share Modal Styles ==================== */
-
 #shareBackdrop {
     position: fixed;
     top: 0;
@@ -2812,7 +2779,6 @@ body.zen-mode-active::before {
     color: white;
 }
 
-/* Share Card Preview */
 .share-card-preview {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     border-radius: 16px;
@@ -2877,7 +2843,6 @@ body.zen-mode-active::before {
     color: white;
 }
 
-/* Share Buttons */
 .share-buttons {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -2929,7 +2894,6 @@ body.zen-mode-active::before {
     border-color: #007AFF;
 }
 
-/* Responsive - Tablet */
 @media (max-width: 900px) {
     .leaderboard-top-section {
         grid-template-columns: 1fr 1fr;
@@ -2955,7 +2919,6 @@ body.zen-mode-active::before {
     }
 }
 
-/* Responsive - Mobile */
 @media (max-width: 768px) {
     .leaderboard-top-section {
         grid-template-columns: 1fr;
