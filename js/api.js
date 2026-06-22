@@ -12,15 +12,13 @@ window.api.getCurrentUser = function() {
 };
 
 async function safeApiFetch(endpoint, options = {}) {
-    if (typeof apiFetch === 'function') {
-        return await apiFetch(endpoint, options);
-    }
-
-    const API_BASE_URL = (window.location.origin && window.location.origin.startsWith('http')) ? window.location.origin : 'http://127.0.0.1:5000';
+    const API_BASE_URL = 'http://127.0.0.1:5000'; 
     const API_TIMEOUT = 10000;
+    
     const defaultHeaders = {
         'Content-Type': 'application/json',
     };
+    
     const token = localStorage.getItem('authToken');
     if (token) {
         defaultHeaders['Authorization'] = `Bearer ${token}`;
@@ -28,21 +26,24 @@ async function safeApiFetch(endpoint, options = {}) {
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+    
     try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const response = await fetch(url, {
             headers: defaultHeaders,
             signal: controller.signal,
             ...options,
         });
         clearTimeout(timeoutId);
+        
         if (!response.ok) {
             const errorText = await response.text().catch(() => response.statusText);
-            throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
         }
+        
         return await response.json();
     } catch (error) {
-        clearTimeout(timeoutId);
-        console.error(`API Error [${endpoint}]:`, error.message || error);
+        console.error(`[API Fetch Error] Endpoint: ${endpoint}`, error);
         throw error;
     }
 }

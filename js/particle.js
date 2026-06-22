@@ -178,13 +178,9 @@ function init() {
 function renderBackground() {
     if (!canvas) return;
     ctx.globalCompositeOperation = 'source-over';
-
-    // Strong canvas reset before drawing to avoid residual glow/shadow artifacts.
     ctx.shadowBlur = 0;
     ctx.shadowColor = 'transparent';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Low-opacity overlay for smooth, non-greasy trail effect.
     ctx.fillStyle = isZenMode
         ? 'rgba(10, 10, 12, 0.08)'
         : 'rgba(5, 14, 35, 0.08)';

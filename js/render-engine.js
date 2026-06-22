@@ -1,13 +1,4 @@
 /**
- * ================================================================
- * RENDERING FUNCTIONS - Dynamic Content Rendering Module
- * ================================================================
- * These functions take API data and render it using the exact
- * same HTML structure as the original hardcoded versions.
- * Must be loaded AFTER main.js
- */
-
-/**
  * Render today's tasks with API data
  * Maintains exact CSS structure from original HTML
  * @param {Array} tasksData Array of task objects from API
@@ -15,19 +6,14 @@
 function renderDailyTasks(tasksData) {
     const container = document.getElementById('daily-task-list');
     if (!container) return;
-
-    // Preserve the existing loading placeholder when data has not returned or loading failed
     if (tasksData === null) {
         return;
     }
-
-    // Show empty state when there are no tasks
     if (!Array.isArray(tasksData) || tasksData.length === 0) {
-        container.innerHTML = '<div class="empty-task-state">🎉 All caught up for today!</div>';
+        container.innerHTML = '<div class="empty-task-state">' + (window.i18n ? window.i18n('all-caught-up-today') : '🎉 All caught up for today!') + '</div>';
         return;
     }
 
-    // Render tasks using template literal (100% structure match)
     container.innerHTML = tasksData.map(task => {
         const timeText = task.startTime && task.endTime
             ? `${task.startTime} - ${task.endTime}`
@@ -45,7 +31,6 @@ function renderDailyTasks(tasksData) {
     `;
     }).join('');
 
-    // Re-attach event listeners for task items
     container.querySelectorAll('.task-item-entry').forEach(item => {
         item.addEventListener('click', function(e) {
             if (e.target.classList.contains('task-complete-toggle')) return;
@@ -86,7 +71,6 @@ function updateUserInfo(userData) {
     }
 
     if (avatarElement) {
-        // Use first letter of name, or fallback to first letter of email
         const initial = (userData.name || userData.email || 'U').charAt(0).toUpperCase();
         avatarElement.textContent = initial;
     }
@@ -102,23 +86,17 @@ function updateAccountModal(userData) {
     const accountName = document.getElementById('accountName');
     const accountEmail = document.getElementById('accountEmail');
     const accountAvatar = document.getElementById('accountAvatar');
-
-    // Handle both 'name' and 'fullname' fields for backend compatibility
     const displayName = userData.name || userData.fullname || 'User';
     const displayEmail = userData.email || '';
 
     if (accountName) accountName.textContent = displayName;
     if (accountEmail) accountEmail.textContent = displayEmail;
     if (accountAvatar) {
-        // Generate avatar from first character of name or email
         const avatarChar = (displayName || displayEmail || 'U').charAt(0).toUpperCase();
         accountAvatar.textContent = avatarChar;
     }
 }
 
-/**
- * Helper function to escape HTML special characters
- */
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -133,7 +111,6 @@ function escapeHtml(text) {
 async function handleTaskToggle(event, taskId) {
     event.stopPropagation();
     try {
-        // Find current task status
         let currentTask = null;
         for (const dayTasks of Object.values(tasks)) {
             const found = dayTasks.find(t => t.id === taskId);
@@ -145,7 +122,6 @@ async function handleTaskToggle(event, taskId) {
 
         if (!currentTask) return;
 
-        // Call API to toggle completion
         const updated = await toggleTaskCompletion(taskId, !currentTask.completed);
         if (updated) {
             currentTask.completed = !currentTask.completed;
@@ -158,9 +134,6 @@ async function handleTaskToggle(event, taskId) {
     }
 }
 
-/**
- * Load and render leaderboard data
- */
 async function loadLeaderboardData() {
     try {
         const leaderboardList = document.getElementById('leaderboardList');
@@ -169,7 +142,7 @@ async function loadLeaderboardData() {
         const leaderboardData = await fetchLeaderboard(20);
         
         if (!leaderboardData || leaderboardData.length === 0) {
-            leaderboardList.innerHTML = '<div class="empty-state">No leaderboard data available</div>';
+            leaderboardList.innerHTML = '<div class="empty-state">' + (window.i18n ? window.i18n('leaderboard-no-data') : 'No leaderboard data available') + '</div>';
             return;
         }
 

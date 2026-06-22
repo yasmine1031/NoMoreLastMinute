@@ -1,8 +1,7 @@
-// 全局变量
 let selectedDate = null;
 let currentYear = 2026;
-let currentMonth = 4; // JS月份从0开始，4代表5月
-let tasks = {}; // 存储任务的对象，键为日期字符串
+let currentMonth = 4; 
+let tasks = {}; 
 let pomodoroHistory = {};
 let emotionHistory = {};
 let statsMonth = { year: new Date().getFullYear(), month: new Date().getMonth() };
@@ -65,7 +64,6 @@ async function initializeMoodTheme() {
     applyMoodTheme('focus');
 }
 
-// 初始化
 document.addEventListener('DOMContentLoaded', () => {
     renderCalendar(currentYear, currentMonth);
     setupColorPicker();
@@ -74,9 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderOverviewDashboard();
     }
 
-    // ================================================
-    // NEW: Restore user profile from localStorage (新增)
-    // ================================================
     if (typeof renderUserIdentity === 'function') {
         renderUserIdentity();
     }
@@ -97,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showView('pomodoro');
         enableZenMode(true);
     } else if (location.pathname.endsWith('index.html') && !hash) {
-        // Default to intro page (nav bar will be hidden by showView)
         showView('intro');
     }
 });
@@ -128,13 +122,11 @@ function renderUserIdentity() {
     }
 }
 
-// 1. 渲染日历逻辑
 function renderCalendar(year, month) {
     const grid = document.getElementById('calendar-days-grid');
     const monthDisplay = document.getElementById('current-month-display');
     if (!grid || !monthDisplay) return;
 
-    // 获取当前真实时间用于对比
     const realToday = new Date();
     const realDate = realToday.getDate();
     const realMonth = realToday.getMonth();
@@ -144,8 +136,20 @@ function renderCalendar(year, month) {
     const shouldAutoSelectToday = !selectedDate && year === realYear && month === realMonth;
 
     grid.innerHTML = '';
-    const monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"];
+    const monthNames = [
+        i18n('month-1'),
+        i18n('month-2'),
+        i18n('month-3'),
+        i18n('month-4'),
+        i18n('month-5'),
+        i18n('month-6'),
+        i18n('month-7'),
+        i18n('month-8'),
+        i18n('month-9'),
+        i18n('month-10'),
+        i18n('month-11'),
+        i18n('month-12')
+    ];
     
     monthDisplay.innerText = `${monthNames[month]} ${year}`;
 
@@ -186,7 +190,6 @@ function renderCalendar(year, month) {
         grid.appendChild(dayCell);
     }
 
-    // 如果首次渲染当前月，则自动选中今天并加载任务
     if (shouldAutoSelectToday && selectedDate === todayKey) {
         if (typeof loadTasksForDate === 'function') {
             loadTasksForDate(todayKey);
@@ -196,7 +199,6 @@ function renderCalendar(year, month) {
     }
 }
 
-// 2. 月份切换逻辑
 function changeMonth(step) {
     currentMonth += step;
     if (currentMonth > 11) {
@@ -209,8 +211,7 @@ function changeMonth(step) {
     renderCalendar(currentYear, currentMonth);
 }
 
-// 3. 颜色选择器逻辑
-let selectedColor = '#007AFF'; // 默认蓝色
+let selectedColor = '#007AFF'; 
 function setupColorPicker() {
     const dots = document.querySelectorAll('.color-dot');
     dots.forEach(dot => {
@@ -221,9 +222,6 @@ function setupColorPicker() {
         });
     });
 }
-
-// 4. 保存任务逻辑 (手稿中的Confirm按钮)
-// saveTask moved to appended Pomodoro module
 
 function updateTaskList() {
     const container = document.getElementById('daily-task-list');
@@ -326,34 +324,45 @@ async function refreshStats() {
 
 function updateStatsSummary(remoteSummary) {
     const computed = computeMonthlyTaskSummary(statsMonth.year, statsMonth.month);
+    
     const totalEl = document.getElementById('statTotalTask') || document.getElementById('ov-stat-total');
     const completedEl = document.getElementById('statCompletedTask') || document.getElementById('ov-stat-completed');
     const pendingEl = document.getElementById('statPendingTask') || document.getElementById('ov-stat-pending');
-    const studyMinutesEl = document.getElementById('statStudyMinutes') || document.getElementById('ov-stat-minutes');
+    const studyMinutesEl = document.getElementById('statMinutes') || document.getElementById('statStudyMinutes') || document.getElementById('ov-stat-minutes');
     const completionFillEl = document.getElementById('completionFill');
-    const completionTextEl = document.getElementById('completionText') || document.getElementById('ov-completion-text');
+    const completionTextEl = document.getElementById('ov-completion-text') || document.getElementById('completionText');
+    
     const overviewRingEl = document.getElementById('ov-completion-ring');
     const overviewRingLabelEl = document.getElementById('ov-completion-ring-label');
     const overviewPercentEl = document.getElementById('ov-completion-percent');
-    if (!totalEl || !completedEl || !pendingEl || !studyMinutesEl || !completionTextEl) return;
 
-    const total = Number(remoteSummary?.total ?? remoteSummary?.totalTasks ?? remoteSummary?.total_tasks ?? computed.total ?? 0);
-    const completed = Number(remoteSummary?.completed ?? remoteSummary?.completedTasks ?? remoteSummary?.completed_tasks ?? computed.completed ?? 0);
-    const pending = Number(remoteSummary?.pending ?? remoteSummary?.pendingTasks ?? remoteSummary?.pending_tasks ?? computed.pending ?? 0);
-    const minutes = Number(remoteSummary?.pomodoroMinutes ?? remoteSummary?.pomodoro_minutes ?? remoteSummary?.minutes ?? remoteSummary?.totalMinutes ?? remoteSummary?.total_minutes ?? computed.minutes ?? 0);
-    const percentage = Number(remoteSummary?.completionPercentage ?? remoteSummary?.completion_percentage ?? remoteSummary?.percentage ?? (total === 0 ? 0 : Math.round((completed / total) * 100)));
+    if (!totalEl || !completedEl || !pendingEl) {
+        console.warn('[Stats] Core elements missing, skipping rendering.');
+        return;
+    }
 
-    if (totalEl) totalEl.textContent = total;
-    if (completedEl) completedEl.textContent = completed;
-    if (pendingEl) pendingEl.textContent = pending;
+    const total = Number(remoteSummary?.total ?? computed.total);
+    const completed = Number(remoteSummary?.completed ?? computed.completed ?? 0);
+    const pending = Number(remoteSummary?.pending ?? computed.pending ?? 0);
+    const minutes = Number(remoteSummary?.pomodoroMinutes ?? remoteSummary?.minutes ?? computed.minutes ?? 0);
+    const percentage = Number(remoteSummary?.completionPercentage ?? remoteSummary?.percentage ?? (total === 0 ? 0 : Math.round((completed / total) * 100)));
+
+    totalEl.textContent = total;
+    completedEl.textContent = completed;
+    pendingEl.textContent = pending;
     if (studyMinutesEl) studyMinutesEl.textContent = minutes;
+    
     if (completionFillEl) {
         completionFillEl.style.transition = 'width 0.45s ease';
         completionFillEl.style.width = `${percentage}%`;
     }
+    
     if (completionTextEl) {
-        completionTextEl.textContent = percentage === 0 ? 'No tasks completed yet' : `${percentage}% completed this month`;
+        completionTextEl.textContent = percentage === 0 
+            ? (window.i18n ? window.i18n('no-tasks-completed') : 'No tasks completed yet') 
+            : `${percentage}% ${window.i18n ? window.i18n('completed-this-month') : 'completed this month'}`;
     }
+    
     if (overviewRingEl) overviewRingEl.style.setProperty('--progress', `${percentage}%`);
     if (overviewRingLabelEl) overviewRingLabelEl.textContent = `${percentage}%`;
     if (overviewPercentEl) overviewPercentEl.textContent = `${percentage}%`;
@@ -433,7 +442,7 @@ function renderEmotionTrend() {
         const mood = emotionHistory[hourKey] || '';
         const label = `${hourDate.getHours()}:00`;
         const icon = mood === 'good' ? '😊' : mood === 'bad' ? '😟' : '–';
-        const moodText = mood === 'good' ? 'Good' : mood === 'bad' ? 'Bad' : 'No mood';
+        const moodText = mood === 'good' ? window.i18n ? window.i18n('good') : 'Good' : mood === 'bad' ? window.i18n ? window.i18n('bad') : 'Bad' : window.i18n ? window.i18n('no-mood') : 'No mood';
         items.push(`
             <div class="emotion-hour-card ${mood}">
                 <div class="hour-label">${label}</div>
@@ -628,8 +637,7 @@ const track = document.getElementById('pillTrack');
             if (!Array.isArray(tasks) || tasks.length === 0) {
                 container.innerHTML = `
                     <div class="ov-tasks-empty-state">
-                        <p>🎉 Great job — no overdue items in the mini view.</p>
-                        <button class="quick-add-btn" onclick="openQuickAddTaskModal()">+ Add a task</button>
+                        <p>${window.i18n ? window.i18n('overview-no-overdue') : '🎉 Great job — no overdue items in the mini view.'}</p>
                     </div>
                 `;
                 return;
@@ -694,6 +702,19 @@ const track = document.getElementById('pillTrack');
 
         function openQuickAddTaskModal() {
             openQuickAddTask();
+        }
+
+        function toggleOverviewQuickAddRow() {
+            const row = document.getElementById('overviewQuickAddRow');
+            if (!row) return;
+            const isHidden = row.style.display === 'none' || !row.style.display;
+            row.style.display = isHidden ? 'flex' : 'none';
+            if (isHidden) {
+                const input = document.getElementById('overviewQuickTaskTitle');
+                if (input) {
+                    input.focus();
+                }
+            }
         }
 
         async function submitMood(mood) {
@@ -792,7 +813,6 @@ const track = document.getElementById('pillTrack');
         let pomodoroCurrentVisualProgress = 1;
         const pomodoroRingCircumference = 2 * Math.PI * 104;
 
-        // 番茄钟同步函数
         function syncPomodoroState() {
             const state = {
                 totalSeconds: pomodoroTotalSeconds,
@@ -817,7 +837,6 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // 每 500ms 同步一次状态
         setInterval(() => {
             syncPomodoroState();
             const stored = localStorage.getItem('pomodoroState');
@@ -832,7 +851,7 @@ const track = document.getElementById('pillTrack');
                     }
                 } catch (e) {}
             }
-        }, 500);
+        }, 100);
 
         function initPomodoroWidgets() {
             if (pomodoroWidgetsInitialized) return;
@@ -1028,7 +1047,7 @@ const track = document.getElementById('pillTrack');
                 if (startBtn) startBtn.style.display = 'none';
                 if (pauseBtn) {
                     pauseBtn.style.display = 'inline-flex';
-                    pauseBtn.innerText = pomodoroPaused ? 'Continue' : 'Pause';
+                    pauseBtn.innerText = pomodoroPaused ? (window.i18n ? window.i18n('continue') : 'Continue') : (window.i18n ? window.i18n('pause') : 'Pause');
                 }
                 if (resetBtn) resetBtn.style.display = 'inline-flex';
             } else {
@@ -1052,7 +1071,7 @@ const track = document.getElementById('pillTrack');
                 if (startBtn) startBtn.style.display = 'none';
                 if (pauseBtn) {
                     pauseBtn.style.display = 'inline-flex';
-                    pauseBtn.innerText = pomodoroPaused ? 'Continue' : 'Pause';
+                    pauseBtn.innerText = pomodoroPaused ? (window.i18n ? window.i18n('continue') : 'Continue') : (window.i18n ? window.i18n('pause') : 'Pause');
                 }
                 if (resetBtn) resetBtn.style.display = 'inline-flex';
             } else {
@@ -1069,15 +1088,20 @@ const track = document.getElementById('pillTrack');
             pomodoroPaused = false;
             syncPomodoroState();
             setWheelLockState();
-            const startBtn = document.getElementById('startPomodoroBtn');
-            const pauseBtn = document.getElementById('pausePomodoroBtn');
-            const resetBtn = document.getElementById('resetPomodoroBtn');
-            if (startBtn) startBtn.style.display = 'none';
-            if (pauseBtn) {
-                pauseBtn.style.display = 'inline-flex';
-                pauseBtn.innerText = 'Pause';
-            }
-            if (resetBtn) resetBtn.style.display = 'inline-flex';
+            
+            document.querySelectorAll('#startPomodoroBtn').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
+            document.querySelectorAll('#pausePomodoroBtn').forEach(btn => {
+                btn.style.display = 'inline-flex';
+                btn.dataset.i18n = 'pause';
+                btn.innerText = window.i18n ? window.i18n('pause') : 'Pause';
+            });
+            
+            document.querySelectorAll('#resetPomodoroBtn').forEach(btn => {
+                btn.style.display = 'inline-flex';
+            });
             updateZenControls();
 
             if (pomodoroTotalSeconds === 0) {
@@ -1088,9 +1112,15 @@ const track = document.getElementById('pillTrack');
                 showNotification('success', 'Pomodoro Complete', 'Zero-second session completed.');
                 pomodoroRunning = false;
                 setWheelLockState();
-                if (startBtn) startBtn.style.display = 'inline-flex';
-                if (pauseBtn) pauseBtn.style.display = 'none';
-                if (resetBtn) resetBtn.style.display = 'none';
+                document.querySelectorAll('#startPomodoroBtn').forEach(btn => {
+                    btn.style.display = 'inline-flex';
+                });
+                document.querySelectorAll('#pausePomodoroBtn').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                document.querySelectorAll('#resetPomodoroBtn').forEach(btn => {
+                    btn.style.display = 'none';
+                });
                 return;
             }
 
@@ -1111,9 +1141,15 @@ const track = document.getElementById('pillTrack');
                             recordPomodoro(Math.max(1, Math.round(pomodoroTotalSeconds / 60)));
                         }
                         showNotification('success', 'Pomodoro Completed', 'Great work! Focus session finished.');
-                        if (startBtn) startBtn.style.display = 'inline-flex';
-                        if (pauseBtn) pauseBtn.style.display = 'none';
-                        if (resetBtn) resetBtn.style.display = 'none';
+                        document.querySelectorAll('#startPomodoroBtn').forEach(btn => {
+                            btn.style.display = 'inline-flex';
+                        });
+                        document.querySelectorAll('#pausePomodoroBtn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
+                        document.querySelectorAll('#resetPomodoroBtn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
                         return;
                     }
                     updatePomodoroDisplay();
@@ -1128,16 +1164,16 @@ const track = document.getElementById('pillTrack');
             }
             pomodoroPaused = !pomodoroPaused;
             syncPomodoroState();
-            const pauseBtn = document.getElementById('pausePomodoroBtn');
+            document.querySelectorAll('#pausePomodoroBtn').forEach(btn => {
+                btn.dataset.i18n = pomodoroPaused ? 'continue' : 'pause';
+                btn.innerText = pomodoroPaused ? (window.i18n ? window.i18n('continue') : 'Continue') : (window.i18n ? window.i18n('pause') : 'Pause');
+            });
             const zenPlayPauseBtn = document.getElementById('zenPlayPauseBtn');
-            if (pauseBtn) {
-                pauseBtn.innerText = pomodoroPaused ? 'Continue' : 'Pause';
-            }
             if (zenPlayPauseBtn) {
                 zenPlayPauseBtn.innerHTML = pomodoroPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
             }
             updateZenControls();
-            showNotification('success', pomodoroPaused ? 'Paused' : 'Resumed', pomodoroPaused ? 'Timer paused.' : 'Timer resumed.');
+            showNotification('success', pomodoroPaused ? (window.i18n ? window.i18n('paused') : 'Paused') : (window.i18n ? window.i18n('resumed') : 'Resumed'), pomodoroPaused ? (window.i18n ? window.i18n('timer-paused') : 'Timer paused.') : (window.i18n ? window.i18n('timer-resumed') : 'Timer resumed.'));
         }
 
         function toggleTimer() {
@@ -1156,13 +1192,18 @@ const track = document.getElementById('pillTrack');
             updatePomodoroDisplay();
             updateZenTimerDisplay();
             syncPomodoroState();
-            const startBtn = document.getElementById('startPomodoroBtn');
-            const pauseBtn = document.getElementById('pausePomodoroBtn');
-            const resetBtn = document.getElementById('resetPomodoroBtn');
+            
+            document.querySelectorAll('#startPomodoroBtn').forEach(btn => {
+                btn.style.display = 'inline-flex';
+            });
+            document.querySelectorAll('#pausePomodoroBtn').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            document.querySelectorAll('#resetPomodoroBtn').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
             const zenPlayPauseBtn = document.getElementById('zenPlayPauseBtn');
-            if (startBtn) startBtn.style.display = 'inline-flex';
-            if (pauseBtn) pauseBtn.style.display = 'none';
-            if (resetBtn) resetBtn.style.display = 'none';
             if (zenPlayPauseBtn) zenPlayPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
             updateZenControls();
         }
@@ -1423,7 +1464,6 @@ const track = document.getElementById('pillTrack');
 
             if (!nextView || currentView === nextView) return;
 
-            // Control pulse-ring visibility: only show on intro, signin, signup pages
             if (videoPlaceholder) {
                 if (viewId === 'intro' || viewId === 'signin' || viewId === 'signup') {
                     videoPlaceholder.style.display = 'flex';
@@ -1447,7 +1487,6 @@ const track = document.getElementById('pillTrack');
             } else {
                 container.classList.remove('dashboard-mode');
                 if (features) features.style.display = 'none';
-                // Hide nav bar elements on auth pages (intro, signin, signup)
                 if (navPills) navPills.style.display = 'none';
                 if (navActions) navActions.style.display = 'none';
                 setTimeout(updateScrollButtons, 300);
@@ -1504,131 +1543,115 @@ const track = document.getElementById('pillTrack');
             closeMobileMenu();
         }
 
-        async function handleSignIn() {
-            const email = document.getElementById('signin-email').value;
-            const password = document.getElementById('signin-password').value;
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/signin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    // ================================================
-                    // 1. Store user data in localStorage (新增)
-                    // ================================================
-                    localStorage.setItem('userId', data.user.id);
-                    localStorage.setItem('userEmail', data.user.email);
-                    localStorage.setItem('userName', data.user.fullname);
-                    // Store full user object for quick access
-                    localStorage.setItem('currentUser', JSON.stringify({
-                        id: data.user.id,
-                        name: data.user.fullname,
-                        email: data.user.email
-                    }));
-                    // Store auth token if backend provides it
-                    if (data.token) {
-                        localStorage.setItem('authToken', data.token);
-                    }
-                    
-                    document.getElementById('nav-pills').style.display = 'flex';
-                    document.getElementById('nav-actions').style.display = 'flex';
-                    
-                    const blueCircle = document.getElementById('video-placeholder');
-                    if (blueCircle) blueCircle.style.display = 'none';
 
-                    document.getElementById('user-greeting').innerText = `Hello, ${data.user.fullname}`;
+async function handleSignIn(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+    
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+            const currentUser = {
+                id: data.user.id,
+                fullname: data.user.fullname || data.user.name || 'User',
+                email: data.user.email || ''
+            };
 
-                    const currentUser = {
-                        id: data.user.id,
-                        fullname: data.user.fullname || data.user.name || 'User',
-                        name: data.user.fullname || data.user.name || 'User',
-                        email: data.user.email || ''
-                    };
-
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    localStorage.setItem('userId', currentUser.id);
-                    localStorage.setItem('userEmail', currentUser.email);
-                    localStorage.setItem('userName', currentUser.fullname);
-
-                    if (typeof updateAccountModal === 'function') {
-                        updateAccountModal({
-                            name: currentUser.fullname,
-                            email: currentUser.email
-                        });
-                    }
-                    if (typeof renderUserIdentity === 'function') {
-                        renderUserIdentity();
-                    }
-                    if (typeof initAppData === 'function') {
-                        await initAppData(currentUser.id, false);
-                    }
-
-                    showNotification('success', 'Welcome Back!', `Hello ${currentUser.fullname}, you're now signed in.`);
-                    setTimeout(() => {
-                        showView('dashboard');
-                    }, 1200);
-                } else {
-                    showNotification('error', 'Login Failed', data.message);
-                }
-            } catch (err) { 
-                showNotification('error', 'Connection Error', 'Backend server not running!'); 
+            localStorage.setItem('userId', currentUser.id);
+            localStorage.setItem('userEmail', currentUser.email);
+            localStorage.setItem('userName', currentUser.fullname);
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            if (data.token) {
+                localStorage.setItem('authToken', data.token);
             }
+            
+            document.getElementById('nav-pills').style.display = 'flex';
+            document.getElementById('nav-actions').style.display = 'flex';
+            
+            const blueCircle = document.getElementById('video-placeholder');
+            if (blueCircle) blueCircle.style.display = 'none';
+
+            document.getElementById('user-greeting').innerText = `Hello, ${currentUser.fullname}`;
+
+            if (typeof updateAccountModal === 'function') updateAccountModal({ name: currentUser.fullname, email: currentUser.email });
+            if (typeof renderUserIdentity === 'function') renderUserIdentity();
+            if (typeof initAppData === 'function') await initAppData(currentUser.id, false);
+
+            showNotification('success', window.i18n ? window.i18n('welcome-back') : 'Welcome Back!', `Hello ${currentUser.fullname}`);
+            setTimeout(() => { showView('dashboard'); }, 1200);
+
+        } else if (response.status === 403) {
+            const pendingEmailAddress = data.email || email;
+            localStorage.setItem('pendingEmail', pendingEmailAddress);
+            
+            showNotification('error', 'Verification Required', '您的邮箱尚未验证，正在前往激活页面...');
+            setTimeout(() => {
+                window.location.href = 'otp.html';
+            }, 1200);
+
+        } else {
+            showNotification('error', 'Login Failed', data.message);
         }
+    } catch (err) { 
+        showNotification('error', 'Connection Error', 'Backend server not running!'); 
+    }
+}
 
-        async function handleSignUp() {
-            const fullname = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = document.getElementById('signup-confirm-password').value;
-            const confirmError = document.getElementById('confirm-error');
+async function handleSignUp(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    const fullname = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-confirm-password').value;
+    const confirmError = document.getElementById('confirm-error');
 
-            // Check if passwords match
-            if (password !== confirmPassword) {
-                confirmError.textContent = "Passwords do not match!";
-                confirmError.classList.add('show');
-                return;
-            }
+    if (password !== confirmPassword) {
+        confirmError.textContent = "Passwords do not match!";
+        confirmError.classList.add('show');
+        return;
+    }
 
-            // Check password strength (minimum medium required)
-            const strength = getPasswordStrength(password);
-            if (strength < 3) {
-                confirmError.textContent = "Password is too weak! Please use a stronger password.";
-                confirmError.classList.add('show');
-                return;
-            }
+    const strength = getPasswordStrength(password);
+    if (strength < 3) {
+        confirmError.textContent = "Password is too weak! Please use a stronger password.";
+        confirmError.classList.add('show');
+        return;
+    }
 
-            confirmError.classList.remove('show');
+    confirmError.classList.remove('show');
 
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/signup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullname, email, password })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    pendingEmail = email;
-                    localStorage.setItem('pendingEmail', email);
-                    clearOtpInputs();
-                    // Show the embedded OTP verification view
-                    showView('otp');
-                    setTimeout(() => {
-                        const firstOtp = document.getElementById('otp-1');
-                        if (firstOtp) firstOtp.focus();
-                    }, 100);
-                    showNotification('success', 'OTP Sent', 'OTP 已发送到您的邮箱，请继续验证。');
-                    return;
-                } else {
-                    showNotification('error', 'Registration Failed', data.message);
-                }
-            } catch (err) { 
-                showNotification('error', 'Connection Error', 'Backend server not running!'); 
-            }
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullname, email, password })
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+            localStorage.setItem('pendingEmail', email);
+            showNotification('success', 'OTP Sent', 'OTP 已发送到您的邮箱，正在跳转验证...');
+            setTimeout(() => {
+                window.location.href = 'otp.html';
+            }, 1200);
+            return;
+        } else {
+            showNotification('error', 'Registration Failed', data.message);
         }
+    } catch (err) { 
+        showNotification('error', 'Connection Error', 'Backend server not running!'); 
+    }
+}
 
-        // OTP Functions
+
         function handleOtpInput(current, nextId) {
             const value = current.value;
             current.value = value.replace(/[^0-9]/g, '');
@@ -1636,9 +1659,7 @@ const track = document.getElementById('pillTrack');
                 current.classList.add('filled');
                 if (nextId) {
                     const nextInput = document.getElementById(nextId);
-                    if (nextInput) {
-                        nextInput.focus();
-                    }
+                    if (nextInput) nextInput.focus();
                 }
             } else {
                 current.classList.remove('filled');
@@ -1649,105 +1670,20 @@ const track = document.getElementById('pillTrack');
             if (event.key === 'Backspace') {
                 if (!current.value && prevId) {
                     const prevInput = document.getElementById(prevId);
-                    if (prevInput) {
-                        prevInput.focus();
-                    }
+                    if (prevInput) prevInput.focus();
                 }
-            }
-        }
-
-        function getOtpCode() {
-            let code = '';
-            for (let i = 1; i <= 6; i++) {
-                const input = document.getElementById('otp-' + i);
-                if (input) code += input.value;
-            }
-            return code;
-        }
-
-        function clearOtpInputs() {
-            for (let i = 1; i <= 6; i++) {
-                const input = document.getElementById('otp-' + i);
-                if (input) {
-                    input.value = '';
-                    input.classList.remove('filled', 'error', 'success');
-                }
-            }
-        }
-
-        function showAllOtpInputs(state) {
-            for (let i = 1; i <= 6; i++) {
-                const input = document.getElementById('otp-' + i);
-                if (input) {
-                    input.classList.remove('filled', 'error', 'success');
-                    if (state) input.classList.add(state);
-                }
-            }
-        }
-
-        async function handleOtpVerify() {
-            const code = getOtpCode();
-            if (code.length !== 6) {
-                showAllOtpInputs('error');
-                showNotification('error', 'Invalid Code', 'Please enter all 6 digits of the verification code.');
-                return;
-            }
-
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/verify-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    showAllOtpInputs('success');
-                    showNotification('success', 'Email Verified!', 'Your account has been verified successfully.');
-                    setTimeout(() => {
-                        localStorage.removeItem('pendingEmail');
-                        clearOtpInputs();
-                        showView('signin');
-                    }, 1500);
-                } else {
-                    showAllOtpInputs('error');
-                    showNotification('error', 'Verification Failed', data.message || 'Invalid or expired verification code.');
-                }
-            } catch (err) {
-                showNotification('error', 'Connection Error', 'Backend server not running!');
-            }
-        }
-
-        async function resendOtp() {
-            const email = pendingEmail || localStorage.getItem('pendingEmail');
-            if (!email) {
-                showNotification('error', 'Email Missing', 'Please return to sign up and re-enter your email.');
-                return;
-            }
-
-            try {
-                const response = await fetch('http://127.0.0.1:5000/api/resend-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    showNotification('success', 'Code Sent!', data.message || 'A new verification code has been sent to your email.');
-                } else {
-                    showNotification('error', 'Resend Failed', data.message || 'Unable to resend code.');
-                }
-            } catch (err) {
-                showNotification('error', 'Connection Error', 'Backend server not running!');
             }
         }
 
         function goBackToSignUp() {
             localStorage.removeItem('pendingEmail');
-            pendingEmail = '';
-            showView('signup');
+            if (typeof showView === 'function') {
+                showView('signup');
+            } else {
+                window.location.href = 'index.html';
+            }
         }
 
-        // Notification System
         function showNotification(type, title, message) {
             const backdrop = document.getElementById('notificationBackdrop');
             const modal = document.getElementById('notificationModal');
@@ -1757,29 +1693,23 @@ const track = document.getElementById('pillTrack');
             const messageEl = document.getElementById('notificationMessage');
             const closeBtn = document.getElementById('notificationCloseBtn');
 
-            // Set content
             titleEl.textContent = title;
             messageEl.textContent = message;
             
-            // Set type
             window.className = 'notification-window ' + type;
             modal.className = 'notification-modal ' + type;
             
-            // Set icon
             if (type === 'success') {
                 icon.textContent = '✓';
             } else {
                 icon.textContent = '✕';
             }
 
-            // Show close button only for error
             closeBtn.style.display = type === 'error' ? 'flex' : 'none';
 
-            // Show modal
             backdrop.classList.add('show');
             modal.classList.add('show');
 
-            // Auto hide for success after 1 second
             if (type === 'success') {
                 setTimeout(() => {
                     closeNotification();
@@ -1795,7 +1725,6 @@ const track = document.getElementById('pillTrack');
             modal.classList.remove('show');
         }
 
-        // Close notification when clicking backdrop
         document.addEventListener('DOMContentLoaded', function() {
             const backdrop = document.getElementById('notificationBackdrop');
             if (backdrop) {
@@ -1812,7 +1741,6 @@ const track = document.getElementById('pillTrack');
             }
         });
 
-        // Password Strength Checker
         function getPasswordStrength(password) {
             let score = 0;
             if (password.length >= 8) score++;
@@ -1863,14 +1791,12 @@ const track = document.getElementById('pillTrack');
             fill.className = 'password-strength-fill ' + strengthClass;
             label.textContent = strengthText;
 
-            // Show checkmark for strong passwords (score >= 4)
             if (strength >= 4) {
                 check.classList.add('show');
             } else {
                 check.classList.remove('show');
             }
 
-            // Clear confirm error when password changes
             if (confirmInput.value) {
                 if (password === confirmInput.value) {
                     confirmError.classList.remove('show');
@@ -1878,7 +1804,6 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // Confirm password validation on input
         document.addEventListener('DOMContentLoaded', function() {
             const confirmInput = document.getElementById('signup-confirm-password');
             if (confirmInput) {
@@ -1896,25 +1821,24 @@ const track = document.getElementById('pillTrack');
             }
         });
 
-        function saveTask() {
-            if (!selectedDate) {
+        async function saveTask(source) {
+            const actualDateKey = selectedDate || (source === 'overview' ? getDateKey(new Date()) : null);
+            if (!actualDateKey) {
                 alert("Please select a date first!");
                 return;
             }
 
-            const titleEl = document.getElementById('task-title');
-            const descEl = document.getElementById('task-desc');
-            const timeEl = document.getElementById('task-time'); // 获取新元素
+            const titleEl = document.getElementById(source === 'overview' ? 'overviewQuickTaskTitle' : 'task-title');
+            const descEl = source === 'overview' ? { value: '' } : document.getElementById('task-desc');
+            const timeEl = source === 'overview' ? null : document.getElementById('task-time');
 
-            if (!titleEl.value.trim()) {
+            if (!titleEl || !titleEl.value.trim()) {
                 alert("Please enter a title");
                 return;
             }
 
-            // 处理时间：优先使用用户选择的时间，否则使用当前系统时间
             let finalTime;
             if (timeEl && timeEl.value) {
-                // 将 24小时制的 input 值转换为 12小时制 (例如 14:00 -> 02:00 PM)
                 const [hours, minutes] = timeEl.value.split(':');
                 const suffix = hours >= 12 ? 'PM' : 'AM';
                 const displayHours = hours % 12 || 12;
@@ -1924,30 +1848,81 @@ const track = document.getElementById('pillTrack');
                 finalTime = now.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
             }
 
-            const newTask = {
+            // 【关键修复 1】：获取当前登录用户上下文
+            let userEmail = '';
+            if (typeof window.api?.getCurrentUser === 'function') {
+                const currentUser = window.api.getCurrentUser();
+                if (currentUser && currentUser.email) {
+                    userEmail = currentUser.email;
+                }
+            }
+
+            // 拼装符合后端 SQLite 数据库模型的 Payload
+            const taskPayload = {
                 title: titleEl.value.trim(),
-                description: descEl.value.trim(),
-                color: selectedColor,
-                time: finalTime // 使用处理后的时间
+                description: descEl?.value.trim() || '',
+                color: selectedColor || '#007AFF',
+                time: finalTime,
+                date: actualDateKey,     // 确保契合后端对应的 Date 字符串
+                user_email: userEmail,   // 【关键修复 2】：注入多租户隔离标识
+                status: 'pending'
             };
 
-            if (!tasks[selectedDate]) tasks[selectedDate] = [];
-            tasks[selectedDate].push(newTask);
+            let savedTask = null;
 
-            // 重置输入框
+            if (window.api?.createTask) {
+                try {
+                    // 请求后端 Flask API 进行数据持久化
+                    const created = await window.api.createTask(taskPayload);
+                    
+                    // 组装后端成功返回并带有自增 ID 的新任务对象
+                    savedTask = {
+                        ...taskPayload,
+                        ...created,
+                        status: created.status || 'pending',
+                        id: created.id || created._id || created.taskId || null
+                    };
+                } catch (error) {
+                    // 【关键修复 3】：阻止静默失败，数据没入库时及时向用户报错，停止继续清空表单
+                    console.error('[Task] Database write failed:', error);
+                    alert("Failed to save task to server database. Please check your login session or network.");
+                    return; // 阻断执行，防止前端误以为添加成功
+                }
+            } else {
+                // 如果完全没有 API 模块，则作为纯本地降级
+                savedTask = { ...taskPayload, id: 'local_' + Date.now() };
+            }
+
+            // 只有后端成功写入响应后，才更新前端缓存状态空间
+            if (savedTask) {
+                if (!tasks[actualDateKey]) tasks[actualDateKey] = [];
+                tasks[actualDateKey].push(savedTask);
+            }
+
+            // 清空输入表单及隐藏快捷面板
             titleEl.value = '';
-            descEl.value = '';
-            timeEl.value = ''; // 清空时间选择
-            
+            if (timeEl) timeEl.value = '';
+            if (source !== 'overview' && descEl) descEl.value = '';
+            if (source === 'overview') {
+                const quickAddRow = document.getElementById('overviewQuickAddRow');
+                if (quickAddRow) quickAddRow.style.display = 'none';
+            }
+
+            // 触发页面各数据看板视图层的级联重绘刷新
             updateTaskList();
             if (typeof loadOverviewTasks === 'function') {
-                loadOverviewTasks();
+                await loadOverviewTasks();
+            }
+            if (typeof refreshStats === 'function') {
+                refreshStats();
+            }
+            
+            // 可选：添加成功气泡提示
+            if (typeof showNotification === 'function') {
+                showNotification('success', 'Success', 'Task saved to database.');
             }
         }
 
-        // ==================== Modal Functions ====================
-        
-        // Open Modal
         function openModal(type) {
             const backdrop = document.getElementById(type + 'Backdrop');
             const modal = document.getElementById(type + 'Modal');
@@ -1963,7 +1938,6 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // Close Modal
         function closeModal(type) {
             const backdrop = document.getElementById(type + 'Backdrop');
             const modal = document.getElementById(type + 'Modal');
@@ -1974,7 +1948,6 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // Search Function
         function handleSearch(query) {
             const searchResults = document.getElementById('searchResults');
             const pages = ['Dashboard', 'Task', 'Leaderboard', 'Stats', 'Pomodoro'];
@@ -1987,14 +1960,12 @@ const track = document.getElementById('pillTrack');
             const lowerQuery = query.toLowerCase();
             const results = [];
 
-            // Search pages
             pages.forEach(page => {
                 if (page.toLowerCase().includes(lowerQuery)) {
                     results.push({ type: 'page', name: page, icon: '📄' });
                 }
             });
 
-            // Search tasks
             Object.keys(tasks).forEach(date => {
                 tasks[date].forEach((task, index) => {
                     if (task.title.toLowerCase().includes(lowerQuery)) {
@@ -2003,7 +1974,6 @@ const track = document.getElementById('pillTrack');
                 });
             });
 
-            // Display results
             if (results.length === 0) {
                 searchResults.innerHTML = '<div class="search-result-item" style="padding: 12px; opacity: 0.6;">No results found</div>';
                 return;
@@ -2104,15 +2074,12 @@ const track = document.getElementById('pillTrack');
             syncNotificationToggleUI();
         });
 
-        // Switch Settings Tab
         function switchSettingsTab(event, tabName) {
-            // Update active menu item
             document.querySelectorAll('.settings-menu-item').forEach(item => {
                 item.classList.remove('active');
             });
             event.target.classList.add('active');
 
-            // Update active section
             document.querySelectorAll('.settings-section').forEach(section => {
                 section.classList.remove('active');
             });
@@ -2120,7 +2087,6 @@ const track = document.getElementById('pillTrack');
             if (section) section.classList.add('active');
         }
 
-        // Open Edit Profile Modal
         function openEditProfileModal() {
             const currentName = document.getElementById('accountName')?.textContent || localStorage.getItem('userName') || 'User';
             const currentEmail = document.getElementById('accountEmail')?.textContent || localStorage.getItem('userEmail') || '';
@@ -2172,7 +2138,6 @@ const track = document.getElementById('pillTrack');
             showNotification('success', 'Profile updated', 'Your account details have been saved.');
         }
 
-        // Open Switch Account Modal
         function openSwitchAccountModal() {
             openModal('switchAccount');
         }
@@ -2184,7 +2149,6 @@ const track = document.getElementById('pillTrack');
             closeMobileMenu();
         }
 
-        // Logout
         function openLogoutModal() {
             openModal('logout');
         }
@@ -2208,7 +2172,6 @@ const track = document.getElementById('pillTrack');
             if (navActions) navActions.style.display = 'none';
         }
 
-        // Change Avatar
         function changeAvatar() {
             const initials = prompt('Enter your initials (1-2 characters):', 'U');
             if (initials && initials.trim()) {
@@ -2216,7 +2179,6 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // Open Mail Client
         function openMailClient(email) {
             window.location.href = 'mailto:' + email;
         }
@@ -2232,9 +2194,6 @@ const track = document.getElementById('pillTrack');
             showView('task');
         }
 
-        // ==================== Leaderboard Functions ====================
-        
-        // Fetch and display leaderboard data
         async function loadLeaderboard() {
             try {
                 const response = await fetch('/api/leaderboard');
@@ -2254,7 +2213,6 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // Fetch current user stats
         async function loadUserStats() {
             if (!currentUserId) return;
             
@@ -2270,26 +2228,21 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // Update leaderboard with user data
         function updateLeaderboard(userData) {
-            // Update user rank
             if (userData.rank) {
                 document.getElementById('userRank').textContent = '#' + userData.rank;
             }
             
-            // Update user name and avatar
             if (userData.name) {
                 document.getElementById('leaderboardUserName').textContent = userData.name;
                 document.getElementById('leaderboardAvatar').textContent = userData.name.charAt(0).toUpperCase();
             }
             
-            // Update total pomodoro time
             if (userData.total_hours !== undefined) {
                 document.getElementById('totalPomodoroHours').textContent = userData.total_hours;
             }
         }
 
-        // Populate leaderboard list from database
         function populateLeaderboard(leaderboardData) {
             const listContainer = document.getElementById('leaderboardList');
             if (!listContainer) return;
@@ -2305,7 +2258,6 @@ const track = document.getElementById('pillTrack');
             `).join('');
         }
 
-        // Record completed pomodoro
         async function recordPomodoro(duration = 25) {
             if (!currentUserId) return;
             
@@ -2321,11 +2273,9 @@ const track = document.getElementById('pillTrack');
                 const data = await response.json();
                 
                 if (data.total_minutes) {
-                    // Update total time display
                     const totalHours = (data.total_minutes / 60).toFixed(1);
                     document.getElementById('totalPomodoroHours').textContent = totalHours;
                     
-                    // Refresh leaderboard
                     loadLeaderboard();
                     loadUserStats();
                 }
@@ -2334,19 +2284,15 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // ==================== Share Modal Functions ====================
-        
-        // Open share modal with user data
         function openShareModal() {
             const backdrop = document.getElementById('shareBackdrop');
             const modal = document.getElementById('shareModal');
             
             if (backdrop && modal) {
-                // Update share card with current user data
                 const rank = document.getElementById('userRank').textContent.replace('#', '');
                 const name = document.getElementById('leaderboardUserName').textContent;
                 const totalHours = document.getElementById('totalPomodoroHours').textContent;
-                const avgHours = (parseFloat(totalHours) / 30).toFixed(1); // Approximate daily average
+                const avgHours = (parseFloat(totalHours) / 30).toFixed(1); 
                 
                 document.getElementById('shareRankNumber').textContent = rank;
                 document.getElementById('shareUserName').textContent = name;
@@ -2359,7 +2305,6 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        // Close share modal and clear cache
         function closeShareModal() {
             const backdrop = document.getElementById('shareBackdrop');
             const modal = document.getElementById('shareModal');
@@ -2368,15 +2313,12 @@ const track = document.getElementById('pillTrack');
                 backdrop.classList.remove('open');
                 modal.classList.remove('open');
                 
-                // Clear any temporary cache
                 setTimeout(() => {
-                    // Clean up any generated images or data
                     console.log('Share modal closed, cache cleared');
                 }, 300);
             }
         }
 
-        // Share to Facebook
         function shareToFacebook() {
             const rank = document.getElementById('shareRankNumber').textContent;
             const name = document.getElementById('shareUserName').textContent;
@@ -2386,12 +2328,10 @@ const track = document.getElementById('pillTrack');
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`, '_blank');
         }
 
-        // Share to Instagram (opens Instagram app/page)
         function shareToInstagram() {
             alert('To share on Instagram, please download the image and upload it manually from the Instagram app.');
         }
 
-        // Share to X (Twitter)
         function shareToX() {
             const rank = document.getElementById('shareRankNumber').textContent;
             const name = document.getElementById('shareUserName').textContent;
@@ -2400,51 +2340,43 @@ const track = document.getElementById('pillTrack');
             window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`, '_blank');
         }
 
-        // Download share card as image
         function downloadShareCard() {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = 600;
             canvas.height = 400;
             
-            // Background
             const gradient = ctx.createLinearGradient(0, 0, 600, 400);
             gradient.addColorStop(0, '#1a1a2e');
             gradient.addColorStop(1, '#16213e');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 600, 400);
             
-            // Card content
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('🏆 My Ranking', 300, 60);
             
-            // Rank
             const rank = document.getElementById('shareRankNumber').textContent;
             ctx.font = 'bold 120px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillStyle = '#007AFF';
             ctx.fillText('#' + rank, 300, 180);
             
-            // Name
             const name = document.getElementById('shareUserName').textContent;
             ctx.font = '24px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillStyle = '#ffffff';
             ctx.fillText(name, 300, 220);
             
-            // Stats
             const totalHours = document.getElementById('shareTotalHours').textContent;
             const avgHours = document.getElementById('shareAvgHours').textContent;
             ctx.font = '18px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.fillText(`Total: ${totalHours}h | Daily Avg: ${avgHours}h`, 300, 280);
             
-            // Footer
             ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
             ctx.fillText('NMLM - No More Last Minute', 300, 360);
             
-            // Download
             const link = document.createElement('a');
             link.download = 'nmlm-ranking.png';
             link.href = canvas.toDataURL('image/png');

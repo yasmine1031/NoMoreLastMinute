@@ -1,4 +1,5 @@
 import os
+import random
 import jwt
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify 
@@ -34,9 +35,24 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     is_verified = db.Column(db.Boolean, default=False)
 
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, default='')
+    color = db.Column(db.String(32), default='#007AFF')
+    time = db.Column(db.String(64), default='')
+    date = db.Column(db.String(12), nullable=False)
+    status = db.Column(db.String(32), default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user_email = db.Column(db.String(120), nullable=True)
+
 with app.app_context():
-    db.create_all()#
+    db.create_all()
     print("Database initialized at:", app.config['SQLALCHEMY_DATABASE_URI'])
+
+
+verification_codes = {}
 
 def send_verification_email(email, fullname):
     try:
@@ -92,34 +108,43 @@ def verify_email(token):
         return jsonify({"message": "Invalid token"}), 400
 
 
-verification_codes = {}
-
 @app.route('/api/verify-otp', methods=['POST'])
 def verify_otp():
-    """验证OTP验证码"""
-    data = request.get_json()
-    code = data.get('code', '')
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
+    code = data.get('code', '').strip()
     
-    for email, otp_data in verification_codes.items():
-        if otp_data['code'] == code:
-            if datetime.utcnow() > otp_data['expires']:
-                del verification_codes[email]
-                return jsonify({"message": "Verification code expired"}), 400
+    if not email or not code:
+        return jsonify({"message": "Email and verification code are required"}), 400
+        
+    otp_data = verification_codes.get(email)
+    
+    if not otp_data:
+        return jsonify({"message": "Verification code not found. Please resend."}), 400
+        
+    if datetime.utcnow() > otp_data['expires']:
+        del verification_codes[email]
+        return jsonify({"message": "Verification code expired. Please request a new one."}), 400
+        
+    if otp_data['code'] == code:
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.is_verified = True
+            db.session.commit()
+            if email in verification_codes:
+                del verification_codes[email] 
+            print(f"OTP verification success for {email}")
+            return jsonify({"message": "Email verified successfully!"}), 200
+        else:
+            return jsonify({"message": "User not found"}), 404
             
-            user = User.query.filter_by(email=email).first()
-            if user:
-                user.is_verified = True
-                db.session.commit()
-                del verification_codes[email]
-                return jsonify({"message": "Email verified successfully!"}), 200
-    
     return jsonify({"message": "Invalid verification code"}), 400
 
 
 @app.route('/api/resend-otp', methods=['POST'])
 def resend_otp():
-    data = request.get_json()
-    email = data.get('email')
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
     
     if not email:
         return jsonify({"message": "Email is required"}), 400
@@ -128,9 +153,7 @@ def resend_otp():
     if not user:
         return jsonify({"message": "User not found"}), 404
     
-    import random
     otp = str(random.randint(100000, 999999))
-    
     verification_codes[email] = {
         'code': otp,
         'expires': datetime.utcnow() + timedelta(minutes=10)
@@ -153,7 +176,7 @@ Best regards,
 No More Last Minute Team'''
         
         mail.send(msg)
-        print(f"OTP sent to {email}: {otp}")
+        print(f"OTP resent to {email}: {otp}")
         return jsonify({"message": "Verification code sent"}), 200
     except Exception as e:
         print(f"Error sending OTP: {str(e)}")
@@ -162,18 +185,25 @@ No More Last Minute Team'''
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
-    data = request.get_json()
-    print(f"--- Signup Attempt: {data.get('email')} ---") 
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
+    fullname = data.get('fullname', '').strip()
+    password = data.get('password')
     
-    if User.query.filter_by(email=data['email']).first():
+    print(f"--- Signup Attempt: {email} ---") 
+    
+    if not email or not password:
+        return jsonify({"message": "Email and password are required"}), 400
+        
+    if User.query.filter_by(email=email).first():
         print("Signup failed: Email already exists.")
         return jsonify({"message": "Email already registered"}), 400
     
-    hashed_pw = generate_password_hash(data['password'])
+    hashed_pw = generate_password_hash(password)
     
     new_user = User(
-        fullname=data.get('fullname'),
-        email=data['email'],
+        fullname=fullname,
+        email=email,
         password=hashed_pw,
         is_verified=False
     )
@@ -183,9 +213,8 @@ def signup():
         db.session.commit()
         print(f"Signup success: User {new_user.fullname} added to DB.")
         
-        import random
         otp = str(random.randint(100000, 999999))
-        verification_codes[data['email']] = {
+        verification_codes[email] = {
             'code': otp,
             'expires': datetime.utcnow() + timedelta(minutes=10)
         }
@@ -193,7 +222,7 @@ def signup():
         try:
             msg = Message(
                 'Your No More Last Minute Verification Code',
-                recipients=[data['email']]
+                recipients=[email]
             )
             msg.body = f'''Hi {new_user.fullname},
 
@@ -208,7 +237,7 @@ If you didn't create an account, please ignore this email.
 Best regards,
 No More Last Minute Team'''
             mail.send(msg)
-            print(f"OTP sent to {data['email']}: {otp}")
+            print(f"OTP sent to {email}: {otp}")
         except Exception as e:
             print(f"Error sending OTP: {str(e)}")
         
@@ -217,10 +246,11 @@ No More Last Minute Team'''
         print(f"DB Error: {str(e)}")
         return jsonify({"message": "Database error"}), 500
 
+
 @app.route('/api/signin', methods=['POST'])
 def signin():
-    data = request.get_json()
-    email = data.get('email')
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
     password = data.get('password')
     
     print(f"--- Signin Attempt: {email} ---") 
@@ -230,10 +260,23 @@ def signin():
     if user:
         print(f"User found: {user.fullname}, checking password...")
         if check_password_hash(user.password, password):
+            
+            if not user.is_verified:
+                print(f"Signin intercepted: {email} is not verified.")
+                return jsonify({
+                    "message": "Email not verified",
+                    "needs_verification": True,
+                    "email": user.email
+                }), 403
+                
             print("Password matches! Access granted.")
             return jsonify({
                 "message": "Login successful!",
-                "user": {"fullname": user.fullname, "email": user.email}
+                "user": {
+                    "id": user.id, 
+                    "fullname": user.fullname, 
+                    "email": user.email
+                }
             }), 200
         else:
             print("Password mismatch!")
@@ -241,6 +284,101 @@ def signin():
         print("User not found in database.")
     
     return jsonify({"message": "Invalid email or password"}), 401
+
+
+def serialize_task(task):
+    return {
+        "id": task.id,
+        "title": task.title,
+        "description": task.description,
+        "color": task.color,
+        "time": task.time,
+        "date": task.date,
+        "status": task.status,
+        "created_at": task.created_at.isoformat() if task.created_at else None,
+        "updated_at": task.updated_at.isoformat() if task.updated_at else None,
+        "user_email": task.user_email,
+    }
+
+@app.route('/api/tasks', methods=['GET'])
+def get_tasks():
+    date_key = request.args.get('date')
+    if not date_key:
+        return jsonify({"message": "Date parameter is required"}), 400
+    tasks_query = Task.query.filter_by(date=date_key).order_by(Task.created_at.asc()).all()
+    return jsonify([serialize_task(task) for task in tasks_query]), 200
+
+@app.route('/api/tasks', methods=['POST'])
+def create_task():
+    data = request.get_json() or {}
+    title = data.get('title', '').strip()
+    if not title:
+        return jsonify({"message": "Task title is required"}), 400
+    date_key = data.get('date') or data.get('dateKey')
+    if not date_key:
+        return jsonify({"message": "Task date is required"}), 400
+
+    new_task = Task(
+        title=title,
+        description=data.get('description', '').strip(),
+        color=data.get('color', '#007AFF'),
+        time=data.get('time', ''),
+        date=date_key,
+        status=data.get('status', 'pending'),
+        user_email=data.get('user_email') or data.get('email') or None
+    )
+    db.session.add(new_task)
+    db.session.commit()
+    return jsonify({"task": serialize_task(new_task)}), 201                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+
+@app.route('/api/tasks/<int:task_id>/toggle', methods=['POST'])
+def toggle_task_status(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({"message": "Task not found"}), 404
+    task.status = 'completed' if task.status != 'completed' else 'pending'
+    db.session.commit()
+    return jsonify({"task": serialize_task(task)}), 200
+
+@app.route('/api/stats/summary', methods=['GET'])
+def stats_summary():
+    year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int)
+    if year is None or month is None:
+        return jsonify({"message": "Year and month parameters are required"}), 400
+
+    month_str = str(month).zfill(2)
+    date_prefix = f"{year}-{month_str}-"
+    tasks_query = Task.query.filter(Task.date.like(f"{date_prefix}%"))
+    total = tasks_query.count()
+    completed = tasks_query.filter_by(status='completed').count()
+    pending = tasks_query.filter_by(status='pending').count()
+    minutes = 0
+    for task in tasks_query.all():
+        if task.time:
+            try:
+                time_parts = task.time.split(":")
+                if len(time_parts) >= 2:
+                    hour = int(time_parts[0])
+                    minute = int(time_parts[1].split(' ')[0])
+                    minutes += hour * 60 + minute
+            except ValueError:
+                pass
+    completion_percentage = round((completed / total) * 100) if total else 0
+    return jsonify({
+        "stats": {
+            "total": total,
+            "completed": completed,
+            "pending": pending,
+            "pomodoroMinutes": minutes,
+            "completionPercentage": completion_percentage
+        }
+    }), 200
+
+@app.route('/api/stats/month/<int:year>/<int:month>', methods=['GET'])
+def stats_summary_fallback(year, month):
+    with app.test_request_context(f"/api/stats/summary?year={year}&month={month}"):
+        return stats_summary()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

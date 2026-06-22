@@ -1,29 +1,6 @@
-/**
- * ================================================================
- * API Service Layer - NMLM Task Management Module
- * ================================================================
- * This module handles all API communication with the backend.
- * All functions use async/await and include error handling.
- * 
- * Assumption: Backend endpoints follow RESTful conventions
- * 
- * Required backend endpoints:
- * - GET  /api/tasks?date=YYYY-MM-DD
- * - POST /api/tasks/<id>/toggle
- * - GET  /api/user/info
- * - GET  /api/user/rank
- * - POST /api/tasks
- * - PUT  /api/tasks/:id
- * - DELETE /api/tasks/:id
- */
-
-// Configuration
 const API_BASE_URL = window.location.origin || 'http://localhost:5000';
-const API_TIMEOUT = 10000; // 10 seconds
+const API_TIMEOUT = 10000; 
 
-/**
- * Generic fetch wrapper with error handling
- */
 async function apiFetch(endpoint, options = {}) {
     try {
         const url = `${API_BASE_URL}${endpoint}`;
@@ -31,7 +8,6 @@ async function apiFetch(endpoint, options = {}) {
             'Content-Type': 'application/json',
         };
 
-        // Add JWT token from localStorage if available
         const token = localStorage.getItem('authToken');
         if (token) {
             defaultHeaders['Authorization'] = `Bearer ${token}`;
@@ -59,15 +35,8 @@ async function apiFetch(endpoint, options = {}) {
 }
 
 /**
- * ================================================================
- * TASK API Functions
- * ================================================================
- */
-
-/**
  * Fetch today's tasks from backend
  * @returns {Promise<Array>} Array of task objects
- * Expected format: [{ id, title, startTime, endTime, status, color }]
  */
 async function fetchTodaysTasks() {
     const todayKey = new Date().toISOString().split('T')[0];
@@ -186,12 +155,6 @@ async function deleteTask(taskId) {
 }
 
 /**
- * ================================================================
- * USER API Functions
- * ================================================================
- */
-
-/**
  * Fetch current user information
  * @returns {Promise<Object>} User object { id, name, email, avatar, rank, totalHours }
  */
@@ -238,12 +201,6 @@ async function fetchUserRank() {
         }
     }
 }
-
-/**
- * ================================================================
- * STATISTICS API Functions
- * ================================================================
- */
 
 /**
  * Fetch monthly statistics

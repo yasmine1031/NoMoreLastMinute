@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Account - No More Last Minute</title>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg: #f5f5f7;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #dddddd;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .otp-container {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        h2 { margin-bottom: 0.5rem; font-size: 1.6rem; }
+        p { color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.4; }
+        .email-highlight { font-weight: 600; color: #111; }
+        
+        .otp-input-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 2rem 0;
+        }
+        .otp-box {
+            width: 100%;
+            height: 52px;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 700;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.2s ease;
+            background: #fafafa;
+        }
+        .otp-box:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(0,122,255,0.15);
+        }
+        
+        button {
+            width: 100%;
+            padding: 0.85rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        
+        .link-btn {
+            background: none;
+            color: var(--primary);
+            margin-top: 1.2rem;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .link-btn:hover { text-decoration: underline; }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: -320px;
+            width: 280px;
+            padding: 1rem;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: right 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 0.9rem;
+            text-align: left;
+            z-index: 1000;
+        }
+        .toast.show { right: 20px; }
+        .toast.success { background: #34c759; }
+        .toast.error { background: #ff3b30; }
+    </style>
+</head>
+<body>
+
+    <div class="otp-container">
+        <h2 data-i18="verify-your-email">Verify Your Email</h2>
+        <p data-i18="verify-desc">We've sent a 6-digit OTP code to <br><span id="display-email" class="email-highlight">loading...</span></p>
+
+        <div class="otp-input-container">
+            <input type="text" class="otp-box" id="otp-1" maxlength="1" pattern="\d*" inputmode="numeric" autocomplete="one-time-code">
+            <input type="text" class="otp-box" id="otp-2" maxlength="1" pattern="\d*" inputmode="numeric">
+            <input type="text" class="otp-box" id="otp-3" maxlength="1" pattern="\d*" inputmode="numeric">
+            <input type="text" class="otp-box" id="otp-4" maxlength="1" pattern="\d*" inputmode="numeric">
+            <input type="text" class="otp-box" id="otp-5" maxlength="1" pattern="\d*" inputmode="numeric">
+            <input type="text" class="otp-box" id="otp-6" maxlength="1" pattern="\d*" inputmode="numeric">
+        </div>
+
+        <button type="button" onclick="handleVerifyOTP()" data-i18="verify-button">Verify & Activate</button>
+        <div>
+            <span class="link-btn" onclick="handleResend()" data-i18="resend-link">Resend Code</span>
+        </div>
+        <div>
+            <a href="index.html" class="link-btn" style="color: #666;" data-i18="back-link">Back to Login</a>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const translations = {
+            en:{
+                "verify_title": "Verify Your Email",
+                "verify_desc": "We've sent a 6-digit OTP code to <br><span id=\"display-email\" class=\"email-highlight\">loading...</span>",
+                "verify_button": "Verify & Activate",
+                "resend_link": "Resend Code",
+                "back_link": "Back to Login",
+                "otp_incomplete": "Please enter a complete 6-digit code.",
+                "otp_success": "Email verified successfully! Redirecting...",
+                "otp_error": "Invalid or expired code. Please try again.",
+                "resend_success": "A new verification code has been sent!",
+                "resend_error": "Failed to resend code. Please try again later.",
+                "no_pending": "No pending verification found. Returning to login..."
+            },
+            zh: {
+                "verify_title": "验证您的邮箱",
+                "verify_desc": "我们已向 <br><span id=\"display-email\" class=\"email-highlight\">loading...</span> 发送了一个 6 位数的验证码",
+                "verify_button": "验证并激活",
+                "resend_link": "重新发送验证码",
+                "back_link": "返回登录",
+                "otp_incomplete": "请输入完整的 6 位验证码。",
+                "otp_success": "邮箱验证成功！正在跳转...",
+                "otp_error": "无效或过期的验证码。请重试。",
+                "resend_success": "新的验证码已发送！",
+                "resend_error": "重新发送验证码失败。请稍后再试。",
+                "no_pending": "未找到待验证信息。正在返回登录..."
+            },
+            ms:{
+                "verify_title": "Sahkan Emel Anda",
+                "verify_desc": "Kami telah menghantar kod OTP 6 digit ke <br><span id=\"display-email\" class=\"email-highlight\">loading...</span>",
+                "verify_button": "Sahkan & Aktifkan",
+                "resend_link": "Hantar Semula Kod",
+                "back_link": "Kembali ke Login",
+                "otp_incomplete": "Sila masukkan kod 6 digit yang lengkap.",
+                "otp_success": "Emel berjaya disahkan! Mengalihkan...",
+                "otp_error": "Kod tidak sah atau telah tamat. Sila cuba lagi.",
+                "resend_success": "Kod pengesahan baru telah dihantar!",
+                "resend_error": "Gagal menghantar semula kod. Sila cuba lagi nanti.",
+                "no_pending": "Tiada pengesahan tertunda ditemukan. Kembali ke login..."
+            },
+            tamil:{
+                "verify_title": "உங்கள் மின்னஞ்சலை சரிபார்க்கவும்",
+                "verify_desc": "நாங்கள் <br><span id=\"display-email\" class=\"email-highlight\">loading...</span>க்கு 6-அங்க இலக்க OTP குறியீட்டை அனுப்பியுள்ளோம்",
+                "verify_button": "சரிபார்க்கவும் & செயல்படுத்தவும்",
+                "resend_link": "குறியீட்டை மீண்டும் அனுப்பவும்",
+                "back_link": "பின்வாங்கி உள்நுழையவும்",
+                "otp_incomplete": "தயவுசெய்து முழுமையான 6-அங்க குறியீட்டை உள்ளிடவும்.",
+                "otp_success": "மின்னஞ்சல் வெற்றிகரமாக சரிபார்க்கப்பட்டது! மறுவழிசெலுத்துகிறது...",
+                "otp_error": "தவறான அல்லது காலாவதியான குறியீடு. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+                "resend_success": "புதிய சரிபார்ப்பு குறியீடு அனுப்பப்பட்டுள்ளது!",
+                "resend_error": "குறியீட்டை மீண்டும் அனுப்ப முடியவில்லை. தயவுசெய்து பின்னர் முயற்சிக்கவும்.",
+                "no_pending": "எந்த நிலுவையில் உள்ள சரிபார்ப்பும் காணப்படவில்லை. உள்நுழைய திரும்புகிறது..."
+            }
+        };
+
+        const API_URL = 'http://127.0.0.1:5000/api';
+        const email = localStorage.getItem('pendingEmail');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!email) {
+                showToast('error', 'No pending verification found. Returning to login...');
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                return;
+            }
+            document.getElementById('display-email').textContent = email;
+            setupOtpInputs();
+        });
+
+        function setupOtpInputs() {
+            const inputs = document.querySelectorAll('.otp-box');
+            
+            inputs[0].focus();
+
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    e.target.value = value.replace(/[^0-9]/g, '');
+                    
+                    if (e.target.value.length >= 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace') {
+                        if (input.value === '' && index > 0) {
+                            inputs[index - 1].focus();
+                        }
+                    }
+                });
+
+                input.addEventListener('paste', (e) => {
+                    if (index === 0) { 
+                        const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+                        if (pasteData.length === 6 && /^\d+$/.test(pasteData)) {
+                            inputs.forEach((box, i) => {
+                                box.value = pasteData[i];
+                            });
+                            e.preventDefault();
+                            handleVerifyOTP(); 
+                        }
+                    }
+                });
+            });
+        }
+
+        async function handleVerifyOTP() {
+            let code = '';
+            for (let i = 1; i <= 6; i++) {
+                code += document.getElementById(`otp-${i}`).value;
+            }
+
+            if (code.length < 6) {
+                showToast('error', 'Please enter a complete 6-digit code.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, code: code })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast('success', 'Email verified successfully! Redirecting...');
+                    localStorage.removeItem('pendingEmail');
+                    setTimeout(() => {
+                        window.location.href = 'index.html'; 
+                    }, 2000);
+                } else {
+                    showToast('error', data.message);
+                }
+            } catch (err) {
+                showToast('error', 'Network error. Failed to connect to server.');
+            }
+        }
+
+        async function handleResend() {
+            try {
+                const response = await fetch(`${API_URL}/resend-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showToast('success', 'A new verification code has been sent!');
+                } else {
+                    showToast('error', data.message);
+                }
+            } catch (err) {
+                showToast('error', 'Failed to resend code due to a network error.');
+            }
+        }
+
+        function showToast(type, msg) {
+            const toast = document.getElementById('toast');
+            toast.className = `toast show ${type}`;
+            toast.textContent = msg;
+            setTimeout(() => { toast.classList.remove('show'); }, 3500);
+        }
+    </script>
+</body>
+</html>
