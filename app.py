@@ -9,7 +9,7 @@ from flask_cors import CORS
 from flask_mail import Mail, Message 
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -20,8 +20,7 @@ app.config['MAIL_DEFAULT_SENDER'] = 'joanwanni1201@gmail.com'
 
 mail = Mail(app)
 
-SECRET_KEY = 'your-secret-key-change-this'
-
+SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(24).hex())
 basedir = os.path.abspath(os.path.dirname(__file__)) 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'nmlm_users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -61,8 +60,7 @@ def send_verification_email(email, fullname):
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY, algorithm='HS256')
         
-        verification_url = f'http://127.0.0.1:5000/api/verify/{token}'
-        
+        verification_url = f'https://GOH.pythonanywhere.com/api/verify/{token}'        
         msg = Message(
             'Verify your No More Last Minute account',
             recipients=[email]
@@ -305,7 +303,7 @@ def get_tasks():
     date_key = request.args.get('date')
     if not date_key:
         return jsonify({"message": "Date parameter is required"}), 400
-    tasks_query = Task.query.filter_by(date=date_key).order_by(Task.created_at.asc()).all()
+    tasks_query = Task.query.filter_by(date=date_key).all()
     return jsonify([serialize_task(task) for task in tasks_query]), 200
 
 @app.route('/api/tasks', methods=['POST'])
@@ -340,6 +338,25 @@ def toggle_task_status(task_id):
     db.session.commit()
     return jsonify({"task": serialize_task(task)}), 200
 
+@app.route('/api/tasks/<int:task_id>', methods=['PUT'])
+def update_task_endpoint(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({"message": "Task not found"}), 404
+        
+    data = request.get_json() or {}
+    
+    if 'title' in data: task.title = data['title']
+    if 'description' in data: task.description = data['description']
+    if 'color' in data: task.color = data['color']
+    if 'time' in data: task.time = str(data['time'])  
+    if 'date' in data: task.date = data['date']
+    if 'status' in data: task.status = data['status']
+    
+    db.session.commit()
+    return jsonify({"task": serialize_task(task)}), 200
+
+
 @app.route('/api/stats/summary', methods=['GET'])
 def stats_summary():
     year = request.args.get('year', type=int)
@@ -353,17 +370,16 @@ def stats_summary():
     total = tasks_query.count()
     completed = tasks_query.filter_by(status='completed').count()
     pending = tasks_query.filter_by(status='pending').count()
+    
     minutes = 0
     for task in tasks_query.all():
         if task.time:
-            try:
-                time_parts = task.time.split(":")
-                if len(time_parts) >= 2:
-                    hour = int(time_parts[0])
-                    minute = int(time_parts[1].split(' ')[0])
-                    minutes += hour * 60 + minute
-            except ValueError:
-                pass
+            if ":" not in task.time:
+                try:
+                    minutes += int(task.time.strip())
+                except ValueError:
+                    pass
+                    
     completion_percentage = round((completed / total) * 100) if total else 0
     return jsonify({
         "stats": {
@@ -375,10 +391,46 @@ def stats_summary():
         }
     }), 200
 
+@app.route('/api/leaderboard', methods=['GET'])
+def get_leaderboard():
+    users = User.query.all()
+    leaderboard_data = []
+
+    for user in users:
+        user_tasks = Task.query.filter_by(user_email=user.email).all()
+        
+        total_minutes = 0
+        for task in user_tasks:
+            if task.time and ":" not in task.time:
+                try:
+                    total_minutes += int(task.time.strip())
+                except ValueError:
+                    pass
+        
+        total_hours = round(total_minutes / 60, 1)
+
+        display_name = user.fullname
+        if not display_name or display_name.strip() == "" or display_name == "Unknown User":
+            display_name = user.email.split('@')[0] if user.email else "Goh"
+
+        leaderboard_data.append({
+            "id": user.id,
+            "fullname": display_name,
+            "email": user.email,
+            "totalHours": total_hours
+        })
+
+    leaderboard_data.sort(key=lambda x: x['totalHours'], reverse=True)
+
+    return jsonify({
+        "leaderboard": leaderboard_data
+    }), 200
+
 @app.route('/api/stats/month/<int:year>/<int:month>', methods=['GET'])
 def stats_summary_fallback(year, month):
     with app.test_request_context(f"/api/stats/summary?year={year}&month={month}"):
         return stats_summary()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
