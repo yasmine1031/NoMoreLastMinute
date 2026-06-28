@@ -1582,7 +1582,7 @@ async function handleSignIn(e) {
     const password = document.getElementById('signin-password').value;
     
     try {
-        const response = await fetch('https://GOH.pythonanywhere.com/api/signin',{
+        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signin',{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -1661,7 +1661,7 @@ async function handleSignUp(e) {
     confirmError.classList.remove('show');
 
     try {
-        const response = await fetch('https://GOH.pythonanywhere.com/api/signup',{
+        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signup',{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullname, email, password })
