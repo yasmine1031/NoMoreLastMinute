@@ -1624,7 +1624,7 @@ async function handleSignIn(e) {
             const pendingEmailAddress = data.email || email;
             localStorage.setItem('pendingEmail', pendingEmailAddress);
             
-            showNotification('error', 'Verification Required', '您的邮箱尚未验证，正在前往激活页面...');
+            showNotification('error', 'Verification Required', 'Your email has not been verified. Redirecting to activation page...');
             setTimeout(() => {
                 window.location.href = 'otp.html';
             }, 1200);
@@ -1670,7 +1670,7 @@ async function handleSignUp(e) {
         
         if (response.ok) {
             localStorage.setItem('pendingEmail', email);
-            showNotification('success', 'OTP Sent', 'OTP 已发送到您的邮箱，正在跳转验证...');
+            showNotification('success', 'OTP Sent', 'The OTP has been sent to your email, redirecting for verification...');
             setTimeout(() => {
                 window.location.href = 'otp.html';
             }, 1200);
