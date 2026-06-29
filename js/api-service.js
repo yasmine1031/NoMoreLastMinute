@@ -1,5 +1,5 @@
-const API_BASE_URL = window.location.origin || 'http://localhost:5000';
-const API_TIMEOUT = 10000; 
+const API_BASE_URL = 'https://Yasmine1031.pythonanywhere.com';
+const API_TIMEOUT = 10000;
 
 async function apiFetch(endpoint, options = {}) {
     try {

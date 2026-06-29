@@ -308,6 +308,7 @@ function computeMonthlyTaskSummary(year, month) {
 
 async function refreshStats() {
     let summary = null;
+    
     if (window.api?.fetchStatsSummary) {
         try {
             summary = await window.api.fetchStatsSummary(statsMonth.year, statsMonth.month);
@@ -315,11 +316,42 @@ async function refreshStats() {
             console.warn('[Stats] fetchStatsSummary failed, using local fallback:', error);
         }
     }
-    updateStatsSummary(summary);
-    renderTrendChart();
-    renderEmotionTrend();
-    updatePomodoroUsage();
-    refreshEmotionButtons();
+
+    let data = summary;
+    if (summary && summary.stats) {
+        data = summary.stats;
+    }
+
+    const total = data?.total ?? 0;
+    const completed = data?.completed ?? 0;
+    const pending = data?.pending ?? 0;
+    const minutes = data?.minutes ?? data?.pomodoroMinutes ?? 0; 
+
+    if (document.getElementById('statTotalTask')) document.getElementById('statTotalTask').textContent = total;
+    if (document.getElementById('statCompletedTask')) document.getElementById('statCompletedTask').textContent = completed;
+    if (document.getElementById('statPendingTask')) document.getElementById('statPendingTask').textContent = pending;
+    if (document.getElementById('statMinutes')) document.getElementById('statMinutes').textContent = minutes;
+
+    if (document.getElementById('month-statTotalTask')) document.getElementById('month-statTotalTask').textContent = total;
+    if (document.getElementById('month-statCompletedTask')) document.getElementById('month-statCompletedTask').textContent = completed;
+    if (document.getElementById('month-statPendingTask')) document.getElementById('month-statPendingTask').textContent = pending;
+    if (document.getElementById('month-statMinutes')) document.getElementById('month-statMinutes').textContent = minutes;
+
+    if (typeof updateStatsSummary === 'function') {
+        try { updateStatsSummary(summary); } catch(e) { console.warn(e); }
+    }
+    if (typeof renderTrendChart === 'function') {
+        renderTrendChart();
+    }
+    if (typeof renderEmotionTrend === 'function') {
+        renderEmotionTrend();
+    }
+    if (typeof updatePomodoroUsage === 'function') {
+        updatePomodoroUsage();
+    }
+    if (typeof refreshEmotionButtons === 'function') {
+        refreshEmotionButtons();
+    }
 }
 
 function updateStatsSummary(remoteSummary) {
@@ -1550,7 +1582,7 @@ async function handleSignIn(e) {
     const password = document.getElementById('signin-password').value;
     
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/signin', {
+        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signin',{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -1629,7 +1661,7 @@ async function handleSignUp(e) {
     confirmError.classList.remove('show');
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/signup', {
+        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signup',{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullname, email, password })
@@ -1821,7 +1853,11 @@ async function handleSignUp(e) {
             }
         });
 
-        async function saveTask(source) {
+        async function saveTask(source, event) {
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+
             const actualDateKey = selectedDate || (source === 'overview' ? getDateKey(new Date()) : null);
             if (!actualDateKey) {
                 alert("Please select a date first!");
@@ -1848,7 +1884,6 @@ async function handleSignUp(e) {
                 finalTime = now.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
             }
 
-            // 【关键修复 1】：获取当前登录用户上下文
             let userEmail = '';
             if (typeof window.api?.getCurrentUser === 'function') {
                 const currentUser = window.api.getCurrentUser();
@@ -1857,14 +1892,13 @@ async function handleSignUp(e) {
                 }
             }
 
-            // 拼装符合后端 SQLite 数据库模型的 Payload
             const taskPayload = {
                 title: titleEl.value.trim(),
                 description: descEl?.value.trim() || '',
                 color: selectedColor || '#007AFF',
                 time: finalTime,
-                date: actualDateKey,     // 确保契合后端对应的 Date 字符串
-                user_email: userEmail,   // 【关键修复 2】：注入多租户隔离标识
+                date: actualDateKey,     
+                user_email: userEmail,   
                 status: 'pending'
             };
 
@@ -1872,10 +1906,7 @@ async function handleSignUp(e) {
 
             if (window.api?.createTask) {
                 try {
-                    // 请求后端 Flask API 进行数据持久化
                     const created = await window.api.createTask(taskPayload);
-                    
-                    // 组装后端成功返回并带有自增 ID 的新任务对象
                     savedTask = {
                         ...taskPayload,
                         ...created,
@@ -1883,23 +1914,19 @@ async function handleSignUp(e) {
                         id: created.id || created._id || created.taskId || null
                     };
                 } catch (error) {
-                    // 【关键修复 3】：阻止静默失败，数据没入库时及时向用户报错，停止继续清空表单
-                    console.error('[Task] Database write failed:', error);
-                    alert("Failed to save task to server database. Please check your login session or network.");
-                    return; // 阻断执行，防止前端误以为添加成功
+                    console.error('[Task] Database write failed Safely Catched:', error);
+                    alert("Server error when saving task. Keeping current view.");
+                    return; 
                 }
             } else {
-                // 如果完全没有 API 模块，则作为纯本地降级
                 savedTask = { ...taskPayload, id: 'local_' + Date.now() };
             }
 
-            // 只有后端成功写入响应后，才更新前端缓存状态空间
             if (savedTask) {
                 if (!tasks[actualDateKey]) tasks[actualDateKey] = [];
                 tasks[actualDateKey].push(savedTask);
             }
 
-            // 清空输入表单及隐藏快捷面板
             titleEl.value = '';
             if (timeEl) timeEl.value = '';
             if (source !== 'overview' && descEl) descEl.value = '';
@@ -1908,7 +1935,6 @@ async function handleSignUp(e) {
                 if (quickAddRow) quickAddRow.style.display = 'none';
             }
 
-            // 触发页面各数据看板视图层的级联重绘刷新
             updateTaskList();
             if (typeof loadOverviewTasks === 'function') {
                 await loadOverviewTasks();
@@ -1916,8 +1942,6 @@ async function handleSignUp(e) {
             if (typeof refreshStats === 'function') {
                 refreshStats();
             }
-            
-            // 可选：添加成功气泡提示
             if (typeof showNotification === 'function') {
                 showNotification('success', 'Success', 'Task saved to database.');
             }
@@ -2246,17 +2270,61 @@ async function handleSignUp(e) {
         function populateLeaderboard(leaderboardData) {
             const listContainer = document.getElementById('leaderboardList');
             if (!listContainer) return;
+
+            listContainer.innerHTML = '';
+
+            let currentUserEmail = localStorage.getItem('currentUserEmail') || "";
+            const displayedTopName = document.getElementById('leaderboardUserName')?.textContent || "Goh";
+
+            let listHtml = '';
+            let currentUserRank = '--';
+            let currentUserHours = '0';
+
+            if (!leaderboardData || leaderboardData.length === 0) {
+                listContainer.innerHTML = '<div class="leaderboard-empty">No data yet.</div>';
+                return;
+            }
+
+            leaderboardData.forEach((user, index) => {
+                const rank = index + 1;
+                let nameToDisplay = user.fullname;
+                if (!nameToDisplay || nameToDisplay.trim() === "" || nameToDisplay === "Unknown User") {
+                    if (user.email === currentUserEmail && currentUserEmail) {
+                        nameToDisplay = displayedTopName;
+                    } else if (user.email) {
+                        nameToDisplay = user.email.split('@')[0];
+                    }
+                }
+                const isSelf = (user.email === currentUserEmail && currentUserEmail !== "");
+
+                listHtml += `
+                    <div class="leaderboard-item ${isSelf ? 'is-current-user' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <span class="rank-num" style="width: 30px; font-weight: bold; color: ${rank <= 3 ? '#3b82f6' : '#888'};">${rank}</span>
+                            <div class="user-avatar-small" style="width: 36px; height: 36px; background: rgba(59, 130, 246, 0.2); color: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                ${nameToDisplay.charAt(0).toUpperCase()}
+                            </div>
+                            <span class="user-name" style="font-weight: ${isSelf ? 'bold' : 'normal'}; color: #fff;">${nameToDisplay}</span>
+                        </div>
+                        <span class="user-time" style="font-weight: bold; color: #aaa;">${user.totalHours}h</span>
+                    </div>
+                `;
+
+                if (isSelf) {
+                    currentUserRank = `#${rank}`;
+                    currentUserHours = user.totalHours;
+                }
+            });
+
+            listContainer.innerHTML = listHtml;
+
+            const rankNumEl = document.getElementById('userRank');
+            const totalHoursEl = document.getElementById('totalPomodoroHours');
             
-            listContainer.innerHTML = leaderboardData.map((user) => `
-                <div class="leaderboard-item ${user.id === currentUserId ? 'current-user' : ''}">
-                    <span class="lb-rank">#${user.rank}</span>
-                    <div class="lb-avatar">${user.name.charAt(0).toUpperCase()}</div>
-                    <span class="lb-name">${user.name}</span>
-                    <span class="lb-avg">${user.avg_daily_hours}h/day</span>
-                    <span class="lb-total">${user.total_hours}h</span>
-                </div>
-            `).join('');
+            if (rankNumEl && currentUserRank !== '--') rankNumEl.textContent = currentUserRank;
+            if (totalHoursEl) totalHoursEl.textContent = currentUserHours;
         }
+        
 
         async function recordPomodoro(duration = 25) {
             if (!currentUserId) return;
@@ -2381,6 +2449,42 @@ async function handleSignUp(e) {
             link.download = 'nmlm-ranking.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
+        }
+
+        async function handleToggleTask(taskId) {
+            if (!taskId) {
+                console.warn('[Task Toggle] Missing taskId');
+                return;
+            }
+            
+            try {
+                const response = await safeApiFetch(`/api/tasks/${taskId}/toggle`, {
+                    method: 'POST'
+                });
+                
+                if (response) {
+                    if (typeof showNotification === 'function') {
+                        showNotification('success', 'Updated', 'Task status updated');
+                    }
+                    
+                    if (typeof fetchDailyTasks === 'function') {
+                        await fetchDailyTasks();
+                    } else if (typeof initAppData === 'function' && localStorage.getItem('userId')) {
+                        await initAppData(localStorage.getItem('userId'), false);
+                    } else {
+                        window.location.reload();
+                    }
+                    
+                    if (typeof refreshStats === 'function') {
+                        await refreshStats();
+                    }
+                }
+            } catch (error) {
+                console.error('[Task Toggle Error]', error);
+                if (typeof showNotification === 'function') {
+                    showNotification('error', 'Error', 'Failed to update task status.');
+                }
+            }
         }
 
         updateMobileNavVisibility();

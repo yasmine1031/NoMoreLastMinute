@@ -12,7 +12,7 @@ window.api.getCurrentUser = function() {
 };
 
 async function safeApiFetch(endpoint, options = {}) {
-    const API_BASE_URL = 'http://127.0.0.1:5000'; 
+    const API_BASE_URL = 'https://Yasmine1031.pythonanywhere.com';
     const API_TIMEOUT = 10000;
     
     const defaultHeaders = {

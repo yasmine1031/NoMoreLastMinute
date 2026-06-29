@@ -18,25 +18,47 @@ function renderDailyTasks(tasksData) {
         const timeText = task.startTime && task.endTime
             ? `${task.startTime} - ${task.endTime}`
             : (task.startTime || task.time || 'No time set');
+        
+        const isCompleted = task.status === 'completed' || task.completed === true;
+
         return `
-        <div class="task-item-entry" data-id="${task.id}">
-            <div class="task-info">
-                <span class="dot-indicator" style="background: ${task.color || '#007AFF'};"></span>
+        <div class="task-item-entry ${isCompleted ? 'task-completed-style' : ''}" data-id="${task.id || task._id}" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="task-info" style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                <span class="dot-indicator" style="background: ${task.color || '#007AFF'}; flex-shrink: 0;"></span>
                 <div class="text-group">
-                    <p class="t-name">${escapeHtml(task.title)}</p>
+                    <p class="t-name" style="${isCompleted ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeHtml(task.title)}</p>
                     <p class="t-time">${escapeHtml(timeText)}</p>
                 </div>
             </div>
+            <button class="task-complete-toggle action-toggle-btn" 
+                    data-id="${task.id || task._id}"
+                    style="background: ${isCompleted ? 'rgba(255,255,255,0.1)' : 'var(--apple-blue)'}; border: none; padding: 6px 12px; border-radius: 12px; color: #fff; cursor: pointer; font-size: 12px; z-index: 10; flex-shrink: 0;">
+                ${isCompleted ? '↩️ Redo' : '✅ Done'}
+            </button>
         </div>
     `;
     }).join('');
 
     container.querySelectorAll('.task-item-entry').forEach(item => {
         item.addEventListener('click', function(e) {
-            if (e.target.classList.contains('task-complete-toggle')) return;
+            if (e.target.classList.contains('task-complete-toggle') || e.target.closest('.task-complete-toggle')) {
+                e.stopPropagation();
+                e.preventDefault();
+                const btn = e.target.classList.contains('task-complete-toggle') ? e.target : e.target.closest('.task-complete-toggle');
+                const taskId = btn.getAttribute('data-id');
+                
+                if (typeof handleToggleTask === 'function') {
+                    handleToggleTask(taskId);
+                } else if (typeof toggleTaskStatus === 'function') {
+                    toggleTaskStatus(taskId);
+                }
+                return;
+            }
+            
             const taskId = this.getAttribute('data-id');
-            if (tasks[selectedDate]) {
-                const task = tasks[selectedDate].find(t => t.id == taskId);
+            const currentDateKey = selectedDate || new Date().toISOString().split('T')[0];
+            if (tasks && tasks[currentDateKey]) {
+                const task = tasks[currentDateKey].find(t => (t.id == taskId || t._id == taskId));
                 if (task && task.description) {
                     alert(`Description: ${task.description}`);
                 }

@@ -300,9 +300,11 @@
         }
 
         .stats-subgrid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 14px;
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 15px;            
+            margin-top: 15px;
+            width: 100%;      
         }
 
         .stat-item {
@@ -313,6 +315,20 @@
             border-radius: 24px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.08);
+            
+            flex: 1 1 120px;     
+            width: 100%;         
+            box-sizing: border-box; 
+
+            overflow: hidden;     
+            min-width: 0;    
+        }
+
+        .stat-item .stat-value,
+        .stat-item .stat-label {
+            white-space: nowrap;  
+            overflow: hidden;     
+            text-overflow: ellipsis; 
         }
 
         .stat-value {
@@ -916,10 +932,6 @@
                                         <span class="stat-value" id="statPendingTask">0</span>
                                         <span class="stat-label" data-i18n="pending">Pending</span>
                                     </div>
-                                    <div class="stat-item">
-                                        <span class="stat-value" id="statMinutes">0</span>
-                                        <span class="stat-label" data-i18n="minutes">Minutes</span>
-                                    </div>
                                 </div>
                             </div>
 
@@ -995,20 +1007,16 @@
                                 </div>
                                 <div class="stats-subgrid">
                                     <div class="stat-item">
-                                        <span class="stat-value" id="statTotalTask">0</span>
+                                        <span class="stat-value" id="month-statTotalTask">0</span>
                                         <span class="stat-label" data-i18n="total-task">Total Tasks</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-value" id="statCompletedTask">0</span>
+                                        <span class="stat-value" id="month-statCompletedTask">0</span>
                                         <span class="stat-label" data-i18n="completed">Completed</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-value" id="statPendingTask">0</span>
+                                        <span class="stat-value" id="month-statPendingTask">0</span>
                                         <span class="stat-label" data-i18n="pending">Pending</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-value" id="statStudyMinutes">0</span>
-                                        <span class="stat-label" data-i18n="minutes">Study Minutes</span>
                                     </div>
                                 </div>
                                 <div class="completion-block">
@@ -1158,7 +1166,7 @@
                                         <div class="color-dot" style="background: #AF52DE;" onclick="selectColor(this, '#AF52DE')"></div>
                                     </div>
 
-                                    <button class="action-btn confirm-btn" onclick="saveTask()" data-i18n="confirm">Confirm</button>
+                                    <button class="action-btn confirm-btn" onclick="saveTask('normal', event)" data-i18n="confirm">Confirm</button>
                                 </div>
 
                                 <div class="g2-component list-card">
@@ -1175,9 +1183,7 @@
                 <!-- Leaderboard View -->
                 <div id="view-leaderboard" class="auth-view">
                     <div class="leaderboard-page-layout">
-                        <!-- Top Section: User Info + Total Time -->
                         <div class="leaderboard-top-section">
-                            <!-- Left: User Rank & Share -->
                             <div class="leaderboard-user-card g2-component">
                                 <div class="user-rank-display">
                                     <span class="rank-label" data-i18n="your-rank">Your Rank</span>
@@ -1220,9 +1226,7 @@
                                 <div class="leaderboard-header">
                                 <span class="leaderboard-title" data-i18n="leaderboard">Leaderboard</span>
                             </div>
-                            <div class="leaderboard-list" id="leaderboardList">
-                                <!-- Leaderboard items will be populated from database -->
-                            </div>
+                            <div class="leaderboard-list" id="leaderboardList"></div>
                         </div>
                     </div>
                 </div>
@@ -2622,6 +2626,7 @@
                 updateCursorButtonStates(id);
             }
         }
+
 
         function updateCursorButtonStates(activeId) {
             document.querySelectorAll('.cursor-selector-btn').forEach((btn) => {
