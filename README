@@ -59,10 +59,13 @@ File structure:
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 How to view the website:
+You can either visit the live deployed version, or run the project locally.
+🔗 Live site: https://nomorelastminute.netlify.app/
+
 1. Download the zip file and extract it.
 2. Open a terminal in that folder and run: code . (This opens the extracted folder directly in Visual Studio Code)
 3. Terminal > New Terminal > python -m venv venv > enter > pip install flask flask-sqlalchemy pyjwt werkzeug flask-cors flask-mail > enter > python app.py > enter
 4. Open the frontend with Live Server
-3. Navigate using the navigation bar or in-page buttons to move between the different sections of the website.
+5. Navigate using the navigation bar or in-page buttons to move between the different sections of the website.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
