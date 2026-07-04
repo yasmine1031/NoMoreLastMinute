@@ -9,7 +9,7 @@ from flask_cors import CORS
 from flask_mail import Mail, Message 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app) 
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -20,7 +20,8 @@ app.config['MAIL_DEFAULT_SENDER'] = 'joanwanni1201@gmail.com'
 
 mail = Mail(app)
 
-SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(24).hex())
+SECRET_KEY = 'your-secret-key-change-this'
+
 basedir = os.path.abspath(os.path.dirname(__file__)) 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'nmlm_users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -60,7 +61,8 @@ def send_verification_email(email, fullname):
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY, algorithm='HS256')
         
-        verification_url = f'https://Yasmine1031.pythonanywhere.com/api/verify/{token}'        
+        verification_url = f'http://127.0.0.1:5000/api/verify/{token}'
+        
         msg = Message(
             'Verify your No More Last Minute account',
             recipients=[email]
@@ -303,7 +305,6 @@ def get_tasks():
     date_key = request.args.get('date')
     if not date_key:
         return jsonify({"message": "Date parameter is required"}), 400
-    tasks_query = Task.query.filter_by(date=date_key).all()
     return jsonify([serialize_task(task) for task in tasks_query]), 200
 
 @app.route('/api/tasks', methods=['POST'])
@@ -432,5 +433,4 @@ def stats_summary_fallback(year, month):
         return stats_summary()
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(debug=True, port=5000)

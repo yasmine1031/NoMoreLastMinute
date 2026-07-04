@@ -646,7 +646,7 @@ const track = document.getElementById('pillTrack');
 
         async function loadOverviewTasks() {
             const todayStr = new Date().toISOString().split('T')[0];
-            const container = document.getElementById('overview-tasks-container') || document.getElementById('ov-tasks-stream-container');
+            const container = document.getElementById('ov-tasks-stream-container') || document.getElementById('overview-tasks-container');
             if (!container) return;
 
             let taskItems = [];
@@ -663,7 +663,7 @@ const track = document.getElementById('pillTrack');
         }
 
         function renderOverviewTasks(tasks) {
-            const container = document.getElementById('overview-tasks-container') || document.getElementById('ov-tasks-stream-container');
+            const container = document.getElementById('ov-tasks-stream-container') || document.getElementById('overview-tasks-container');
             if (!container) return;
 
             if (!Array.isArray(tasks) || tasks.length === 0) {
@@ -1582,7 +1582,7 @@ async function handleSignIn(e) {
     const password = document.getElementById('signin-password').value;
     
     try {
-        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signin',{
+        const response = await fetch('http://127.0.0.1:5000/api/signin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -1624,7 +1624,7 @@ async function handleSignIn(e) {
             const pendingEmailAddress = data.email || email;
             localStorage.setItem('pendingEmail', pendingEmailAddress);
             
-            showNotification('error', 'Verification Required', 'Your email has not been verified. Redirecting to activation page...');
+            showNotification('error', 'Verification Required', '您的邮箱尚未验证，正在前往激活页面...');
             setTimeout(() => {
                 window.location.href = 'otp.html';
             }, 1200);
@@ -1661,7 +1661,7 @@ async function handleSignUp(e) {
     confirmError.classList.remove('show');
 
     try {
-        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signup',{
+        const response = await fetch('http://127.0.0.1:5000/api/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullname, email, password })
@@ -1670,7 +1670,7 @@ async function handleSignUp(e) {
         
         if (response.ok) {
             localStorage.setItem('pendingEmail', email);
-            showNotification('success', 'OTP Sent', 'The OTP has been sent to your email, redirecting for verification...');
+            showNotification('success', 'OTP Sent', 'OTP 已发送到您的邮箱，正在跳转验证...');
             setTimeout(() => {
                 window.location.href = 'otp.html';
             }, 1200);
@@ -2271,8 +2271,10 @@ async function handleSignUp(e) {
             const listContainer = document.getElementById('leaderboardList');
             if (!listContainer) return;
 
+            // 清空现有的所有内容（防止写死的数据残留）
             listContainer.innerHTML = '';
 
+            // 获取当前登录用户，如果拿不到，我们从上方的 DOM 节点直接抓取已经显示成功的名字！
             let currentUserEmail = localStorage.getItem('currentUserEmail') || "";
             const displayedTopName = document.getElementById('leaderboardUserName')?.textContent || "Goh";
 
@@ -2280,6 +2282,7 @@ async function handleSignUp(e) {
             let currentUserRank = '--';
             let currentUserHours = '0';
 
+            // 检查后端有没有传回有效数组
             if (!leaderboardData || leaderboardData.length === 0) {
                 listContainer.innerHTML = '<div class="leaderboard-empty">No data yet.</div>';
                 return;
@@ -2287,16 +2290,24 @@ async function handleSignUp(e) {
 
             leaderboardData.forEach((user, index) => {
                 const rank = index + 1;
+
+                // 强力拦截：如果名字是空或者 Unknown User，直接根据身份进行修复
                 let nameToDisplay = user.fullname;
                 if (!nameToDisplay || nameToDisplay.trim() === "" || nameToDisplay === "Unknown User") {
+                    // 如果是当前用户，用上方卡片已经显示成功的名字，否则用 Email 前缀
                     if (user.email === currentUserEmail && currentUserEmail) {
                         nameToDisplay = displayedTopName;
                     } else if (user.email) {
                         nameToDisplay = user.email.split('@')[0];
+                    } else {
+                        nameToDisplay = "Goh"; // 终极保底
                     }
                 }
+
+                // 判断当前行是否是当前登录用户
                 const isSelf = (user.email === currentUserEmail && currentUserEmail !== "");
 
+                // 拼接全新生成的列表 HTML 
                 listHtml += `
                     <div class="leaderboard-item ${isSelf ? 'is-current-user' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
                         <div style="display: flex; align-items: center; gap: 20px;">
@@ -2316,8 +2327,10 @@ async function handleSignUp(e) {
                 }
             });
 
+            // 将完全重构后的干净数据写入容器
             listContainer.innerHTML = listHtml;
 
+            // 同步更新上方个人卡片的数据（做二次精准校对）
             const rankNumEl = document.getElementById('userRank');
             const totalHoursEl = document.getElementById('totalPomodoroHours');
             
