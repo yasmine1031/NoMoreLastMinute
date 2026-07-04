@@ -646,7 +646,7 @@ const track = document.getElementById('pillTrack');
 
         async function loadOverviewTasks() {
             const todayStr = new Date().toISOString().split('T')[0];
-            const container = document.getElementById('ov-tasks-stream-container') || document.getElementById('overview-tasks-container');
+            const container = document.getElementById('overview-tasks-container') || document.getElementById('ov-tasks-stream-container');
             if (!container) return;
 
             let taskItems = [];
@@ -663,7 +663,7 @@ const track = document.getElementById('pillTrack');
         }
 
         function renderOverviewTasks(tasks) {
-            const container = document.getElementById('ov-tasks-stream-container') || document.getElementById('overview-tasks-container');
+            const container = document.getElementById('overview-tasks-container') || document.getElementById('ov-tasks-stream-container');
             if (!container) return;
 
             if (!Array.isArray(tasks) || tasks.length === 0) {
