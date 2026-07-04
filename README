@@ -1,0 +1,71 @@
+# No More Last Minute: A Smart Study Planner with Mood & Productivity Tracking
+
+**No More Last Minute** is designed to help students manage their academic tasks, track their study habits, and improve productivity in a simple and effective way. It integrates task management, mood tracking, and study time analysis into one platform to support better study planning.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+Group Members:
+-Foo Yu Xuan
+-Joan Chai Wan Ni
+-Cheok Tze Yuh
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+Project description:
+This is a system is designed to help students manage their academic tasks, track their study habits, and improve productivity in a simple 
+and effective way. It integrates task management, mood tracking, and study time analysis into one platform to support better study planning.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+File structure:
+.
+├── app.py                        # Flask application & API routes
+├── requirements.txt              # Python dependencies
+├── nmlm_users.db                 # SQLite database (users & tasks)
+│
+├── index.html                    # Main single-page app (dashboard,auth, tasks, etc.)
+├── otp.html                      # Email OTP verification page
+│
+├── css/
+│   ├── style.css                 # Main stylesheet
+│   ├── modals.css                # Modal-specific styles
+│   └── zen.css                   # Zen Mode styles
+│
+├── js/
+│   ├── main.js                   # Core app logic (calendar, tasks, pomodoro, mood themes)
+│   ├── app-init.js               # Post-login data bootstrapping (user info, stats, tasks)
+│   ├── api.js                    # API client wrapper (fetch helpers, endpoints)
+│   ├── api-service.js            # Alternate/legacy API client wrapper
+│   ├── render-engine.js          # DOM rendering for tasks, leaderboard, user info
+│   └── particle.js               # Zen Mode particle/audio visualization engine
+│
+├──assets/
+├── img/
+│   └── NMLM_logo.png             # App logo
+└── audio/
+│   ├── alarm/
+│   │   └── alarm.mpeg            # Pomodoro end-of-session alarm sound
+│   └── pomodoro/
+│         ├── audio_01.mpeg       # Zen Mode ambient audio tracks
+│         ├── audio_02.mpeg
+│         ├── audio_03.mpeg
+│         ├── audio_04.mpeg
+│         ├── audio_05.mpeg
+│         └── audio_06.mpeg
+│ 
+├── venv/                        # Local Python virtual environment (not committed)
+└── .git/                        # Git repository metadata
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+How to view the website:
+You can either visit the live deployed version, or run the project locally.
+🔗 Live site: https://nomorelastminute.netlify.app/
+
+1. Download the zip file and extract it.
+2. Open a terminal in that folder and run: code . (This opens the extracted folder directly in Visual Studio Code)
+3. Terminal > New Terminal > python -m venv venv > enter > pip install flask flask-sqlalchemy pyjwt werkzeug flask-cors flask-mail > enter > python app.py > enter
+4. Open the frontend with Live Server
+5. Navigate using the navigation bar or in-page buttons to move between the different sections of the website.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
