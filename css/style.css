@@ -1626,7 +1626,35 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     color: rgba(255, 255, 255, 0.4);
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-bottom: 0;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 15px;
+}
+
+.task-clear-btn {
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.task-clear-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.task-clear-btn:active {
+    transform: translateY(0);
 }
 
 .task-input {
@@ -1711,7 +1739,56 @@ body.theme-recovery { --theme-color-1:#245532; --theme-color-2:#447542; --theme-
     transition: transform 0.1s ease;
 }
 
-.task-info { display: flex; align-items: center; gap: 15px; }
+.task-info { display: flex; align-items: center; gap: 15px; min-width: 0; }
+
+.task-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.task-delete-btn,
+.task-complete-toggle {
+    border: none;
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.task-complete-toggle {
+    background: var(--apple-blue);
+    color: #fff;
+}
+
+.task-delete-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.task-delete-btn:hover {
+    background: rgba(255, 0, 0, 0.16);
+}
+
+.task-complete-toggle:hover,
+.task-delete-btn:hover {
+    transform: translateY(-1px);
+}
+
+.task-item-entry {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 14px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+}
 
 .dot-indicator {
     width: 8px;
