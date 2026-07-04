@@ -1935,7 +1935,9 @@ async function handleSignUp(e) {
                 if (quickAddRow) quickAddRow.style.display = 'none';
             }
 
-            updateTaskList();
+            if (source !== 'overview' && typeof updateTaskList === 'function') {
+                updateTaskList();
+            }
             if (typeof loadOverviewTasks === 'function') {
                 await loadOverviewTasks();
             }
