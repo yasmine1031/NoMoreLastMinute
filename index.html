@@ -880,33 +880,37 @@
 
                 <div id="view-signin" class="auth-view">
                     <h1 class="welcome-title" data-i18n="sign-in">Sign In</h1>
-                    <div class="input-stack">
-                        <input type="email" id="signin-email" placeholder="Email or Student ID" class="apple-input" data-i18n="email-or-id">
-                        <input type="password" id="signin-password" placeholder="Password" class="apple-input" data-i18n="password">
-                    </div>
-                    <button class="action-btn" onclick="handleSignIn()" data-i18n="login">Login</button>
+                    <form onsubmit="handleSignIn(event)">
+                        <div class="input-stack">
+                            <input type="email" id="signin-email" placeholder="Email or Student ID" class="apple-input" data-i18n="email-or-id" required>
+                            <input type="password" id="signin-password" placeholder="Password" class="apple-input" data-i18n="password" required>
+                        </div>
+                        <button type="submit" class="action-btn" data-i18n="login">Login</button>
+                    </form>
                     <p class="form-switch"><span data-i18n="dont-have-id">Don't have an ID?</span> <span onclick="showView('signup')" data-i18n="create-yours">Create Yours</span></p>
                 </div>
 
                 <div id="view-signup" class="auth-view">
                     <h1 class="welcome-title" data-i18n="sign-up">Sign Up</h1>
-                    <div class="input-stack">
-                        <input type="text" id="signup-name" placeholder="Full Name" class="apple-input" data-i18n="full-name">
-                        <input type="email" id="signup-email" placeholder="Student Email" class="apple-input" data-i18n="student-email">
-                        <input type="password" id="signup-password" placeholder="Password" class="apple-input" oninput="checkPasswordStrength()" data-i18n="password">
-                        <div class="password-strength-container">
-                            <div class="password-strength-bar">
-                                <div class="password-strength-fill" id="strength-fill"></div>
+                    <form onsubmit="handleSignUp(event)">
+                        <div class="input-stack">
+                            <input type="text" id="signup-name" placeholder="Full Name" class="apple-input" data-i18n="full-name" required>
+                            <input type="email" id="signup-email" placeholder="Student Email" class="apple-input" data-i18n="student-email" required>
+                            <input type="password" id="signup-password" placeholder="Password" class="apple-input" oninput="checkPasswordStrength()" data-i18n="password" required>
+                            <div class="password-strength-container">
+                                <div class="password-strength-bar">
+                                    <div class="password-strength-fill" id="strength-fill"></div>
+                                </div>
+                                <div class="password-strength-info">
+                                    <span class="strength-label" id="strength-label"></span>
+                                    <span class="strength-check" id="strength-check">✓</span>
+                                </div>
                             </div>
-                            <div class="password-strength-info">
-                                <span class="strength-label" id="strength-label"></span>
-                                <span class="strength-check" id="strength-check">✓</span>
-                            </div>
+                            <input type="password" id="signup-confirm-password" placeholder="Confirm Password" class="apple-input" data-i18n="confirm-password" required>
+                            <span class="confirm-error" id="confirm-error"></span>
                         </div>
-                        <input type="password" id="signup-confirm-password" placeholder="Confirm Password" class="apple-input" data-i18n="confirm-password">
-                        <span class="confirm-error" id="confirm-error"></span>
-                    </div>
-                    <button class="action-btn" onclick="handleSignUp()" data-i18n="create-account">Create Account</button>
+                        <button type="submit" class="action-btn" data-i18n="create-account">Create Account</button>
+                    </form>
                     <p class="form-switch"><span data-i18n="already-have-id">Already have an ID?</span> <span onclick="showView('signin')" data-i18n="sign-in">Sign In</span></p>
                 </div>
 
@@ -963,7 +967,7 @@
                                     <input id="overviewQuickTaskTitle" type="text" class="task-input" placeholder="Quick task title" data-i18n="quick-task-title" style="flex:1; min-width:0; padding:10px 12px; font-size:0.95rem;" />
                                     <button class="action-btn confirm-btn" type="button" onclick="saveTask('overview')" data-i18n="confirm">Confirm</button>
                                 </div>
-                                <div id="overview-tasks-container" class="mini-task-list"></div>
+                                <div id="ov-tasks-stream-container" class="mini-task-list"></div>
                             </div>
 
                             <div class="ov-premium-card overview-card pomodoro-mini-module">
@@ -1035,8 +1039,8 @@
                                 </div>
                                 <div class="pomodoro-dashboard">
                                     <div class="pomodoro-stat">
-                                        <span class="pomodoro-value" id="dailyPomodoroMinutes">0</span>
-                                        <span class="pomodoro-label" data-i18n="minutes-today">Minutes today</span>
+                                        <span class="pomodoro-value" id="dashboardPomodoroSeconds">0</span>
+                                        <span class="pomodoro-label" data-i18n="seconds-today">Seconds today</span>
                                     </div>
                                     <div class="pomodoro-stat">
                                         <span class="pomodoro-value" id="todayPomodoroSessions">0</span>
@@ -1150,11 +1154,7 @@
                                     <span class="card-label" data-i18n="new-task-label">New Task</span>
                                     <input type="text" id="task-title" placeholder="Title" class="task-input" data-i18n="title">
                                     <textarea id="task-desc" placeholder="Description" class="task-input" rows="3" data-i18n="description"></textarea>
-                                        
-                                        <div class="time-picker-row">
-                                            <span class="input-sublabel" data-i18n="execution-time">Execution Time:</span>
-                                            <input type="time" id="task-time" class="task-input-time">
-                                        </div>
+                        
 
                                     <div class="color-picker">
                                         <div class="color-dot" style="background: #FF3B30;" onclick="selectColor(this, '#FF3B30')"></div>
@@ -1170,7 +1170,9 @@
                                 </div>
 
                                 <div class="g2-component list-card">
-                                    <span class="card-label" data-i18n="todays-tasks">Today's Tasks</span>
+                                    <div class="card-header">
+                                        <span class="card-label" data-i18n="todays-tasks">Today's Tasks</span>
+                                    </div>
                                     <div id="daily-task-list" class="task-items-container">
                                         <div class="loading-state" data-i18n="loading-tasks">Loading tasks...</div>
                                     </div>
@@ -1210,7 +1212,7 @@
                                 <span class="stats-card-label" data-i18n="total-study-time">Total Pomodoro Time</span>
                                 <div class="total-time-display">
                                     <span class="time-value" id="totalPomodoroHours">0</span>
-                                    <span class="time-unit" data-i18n="hours">hours</span>
+                                    <span class="time-unit" data-i18n="seconds">seconds</span>
                                 </div>
                                 <div class="pomodoro-icon-large">
                                     <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -1526,7 +1528,6 @@
         </div>
     </footer>
 
-    <audio id="pomodoroEndAudio" preload="auto"></audio>
     <audio id="zenAudio" preload="auto"></audio>
 
     <!-- Notification Toast Modal -->
@@ -1588,6 +1589,7 @@
                 'current-hour-mood': 'Current hour mood',
                 'tap-mood': 'Tap a mood once an hour. You can change it if needed.',
                 'daily-pomodoro-minutes': 'Daily pomodoro minutes',
+                'seconds-today': 'Seconds today',
                 'hours': 'hours',
 
                 // Settings
