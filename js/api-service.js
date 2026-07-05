@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://Yasmine1031.pythonanywhere.com';
+const API_BASE_URL = 'http://127.0.0.1:5000';
 const API_TIMEOUT = 10000;
 
 async function apiFetch(endpoint, options = {}) {
@@ -65,7 +65,12 @@ async function fetchDailyTasks() {
  */
 async function fetchTasksByDate(dateKey) {
     try {
-        const response = await apiFetch(`/api/tasks?date=${encodeURIComponent(dateKey)}`, {
+        const currentUser = window.api?.getCurrentUser?.();
+        const userEmail = currentUser?.email || localStorage.getItem('userEmail') || '';
+        const params = [`date=${encodeURIComponent(dateKey)}`];
+        if (userEmail) params.push(`user_email=${encodeURIComponent(userEmail)}`);
+
+        const response = await apiFetch(`/api/tasks?${params.join('&')}`, {
             method: 'GET',
         });
         if (Array.isArray(response)) {
