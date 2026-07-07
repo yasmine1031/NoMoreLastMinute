@@ -22,25 +22,49 @@ function renderDailyTasks(tasksData) {
         const isCompleted = task.status === 'completed' || task.completed === true;
 
         return `
-        <div class="task-item-entry ${isCompleted ? 'task-completed-style' : ''}" data-id="${task.id || task._id}" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <div class="task-info" style="display: flex; align-items: center; gap: 10px; flex: 1;">
+        <div class="task-item-entry ${isCompleted ? 'task-completed-style' : ''}" data-id="${task.id || task._id}">
+            <div class="task-info" style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
                 <span class="dot-indicator" style="background: ${task.color || '#007AFF'}; flex-shrink: 0;"></span>
                 <div class="text-group">
                     <p class="t-name" style="${isCompleted ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${escapeHtml(task.title)}</p>
                     <p class="t-time">${escapeHtml(timeText)}</p>
                 </div>
             </div>
-            <button class="task-complete-toggle action-toggle-btn" 
-                    data-id="${task.id || task._id}"
-                    style="background: ${isCompleted ? 'rgba(255,255,255,0.1)' : 'var(--apple-blue)'}; border: none; padding: 6px 12px; border-radius: 12px; color: #fff; cursor: pointer; font-size: 12px; z-index: 10; flex-shrink: 0;">
-                ${isCompleted ? '↩️ Redo' : '✅ Done'}
-            </button>
+            <div class="task-actions">
+                <button class="task-complete-toggle action-toggle-btn" 
+                        data-id="${task.id || task._id}"
+                        style="background: ${isCompleted ? 'rgba(255,255,255,0.1)' : 'var(--apple-blue)'}; color: #fff;">
+                    ${isCompleted ? '↩️ Redo' : '✅ Done'}
+                </button>
+                <button class="task-delete-btn action-delete-btn" data-id="${task.id || task._id}" title="Delete task">🗑️</button>
+            </div>
         </div>
     `;
     }).join('');
 
     container.querySelectorAll('.task-item-entry').forEach(item => {
         item.addEventListener('click', function(e) {
+            if (e.target.classList.contains('task-delete-btn') || e.target.closest('.task-delete-btn')) {
+                e.stopPropagation();
+                e.preventDefault();
+                const btn = e.target.classList.contains('task-delete-btn') ? e.target : e.target.closest('.task-delete-btn');
+                const taskId = btn.getAttribute('data-id');
+                const currentDateKey = selectedDate || new Date().toISOString().split('T')[0];
+                const taskIndex = tasks?.[currentDateKey]?.findIndex(t => String(t.id || t._id) === String(taskId));
+
+                if (typeof handleDeleteTask === 'function' && taskIndex >= 0) {
+                    handleDeleteTask(currentDateKey, taskIndex, taskId);
+                } else if (typeof deleteTask === 'function') {
+                    deleteTask(taskId).then(() => {
+                        if (tasks && tasks[currentDateKey]) {
+                            tasks[currentDateKey] = tasks[currentDateKey].filter(t => String(t.id || t._id) !== String(taskId));
+                            renderDailyTasks(tasks[currentDateKey]);
+                        }
+                    }).catch(() => {});
+                }
+                return;
+            }
+
             if (e.target.classList.contains('task-complete-toggle') || e.target.closest('.task-complete-toggle')) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -175,7 +199,7 @@ async function loadLeaderboardData() {
                     <div class="leaderboard-avatar">${(entry.name || 'U').charAt(0).toUpperCase()}</div>
                     <div class="leaderboard-name">${escapeHtml(entry.name || 'Unknown User')}</div>
                 </div>
-                <div class="leaderboard-score">${entry.totalHours || 0}h</div>
+                <div class="leaderboard-score">${entry.totalSeconds || 0}s</div>
             </div>
         `).join('');
     } catch (error) {

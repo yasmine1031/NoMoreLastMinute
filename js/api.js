@@ -12,7 +12,7 @@ window.api.getCurrentUser = function() {
 };
 
 async function safeApiFetch(endpoint, options = {}) {
-    const API_BASE_URL = 'https://Yasmine1031.pythonanywhere.com'; 
+    const API_BASE_URL = 'http://127.0.0.1:5000'; 
     const API_TIMEOUT = 10000;
     
     const defaultHeaders = {
@@ -49,7 +49,12 @@ async function safeApiFetch(endpoint, options = {}) {
 }
 
 window.api.getTasksByDate = async function(dateKey) {
-    const response = await safeApiFetch(`/api/tasks?date=${encodeURIComponent(dateKey)}`, {
+    const currentUser = window.api.getCurrentUser?.();
+    const userEmail = currentUser?.email || localStorage.getItem('userEmail') || '';
+    const params = [`date=${encodeURIComponent(dateKey)}`];
+    if (userEmail) params.push(`user_email=${encodeURIComponent(userEmail)}`);
+
+    const response = await safeApiFetch(`/api/tasks?${params.join('&')}`, {
         method: 'GET',
     });
     if (Array.isArray(response)) {
@@ -137,10 +142,23 @@ window.api.submitDailyMood = async function(mood, dateKey) {
     return response;
 };
 
+window.api.completePomodoroSession = async function(duration = 25) {
+    const response = await safeApiFetch('/api/pomodoro/complete', {
+        method: 'POST',
+        body: JSON.stringify({ duration }),
+    });
+    return response;
+};
+
 window.api.createTask = async function(taskData) {
+    const currentUser = window.api.getCurrentUser?.();
+    const enhancedTaskData = {
+        ...taskData,
+        user_email: taskData.user_email || currentUser?.email || localStorage.getItem('userEmail') || ''
+    };
     const response = await safeApiFetch('/api/tasks', {
         method: 'POST',
-        body: JSON.stringify(taskData),
+        body: JSON.stringify(enhancedTaskData),
     });
     return response.task || response;
 };

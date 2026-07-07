@@ -105,16 +105,28 @@ function integrateInitAppData() {
  */
 async function loadTasksForDate(dateKey) {
     try {
-        if (tasks[dateKey]) {
+        const hasCachedTasks = Object.prototype.hasOwnProperty.call(tasks, dateKey);
+        if (hasCachedTasks && Array.isArray(tasks[dateKey]) && tasks[dateKey].length > 0) {
             renderDailyTasks(tasks[dateKey]);
             return;
         }
 
         console.log(`[App] Loading tasks for date: ${dateKey}`);
         const tasksData = await fetchTasksByDate(dateKey);
-        if (tasksData) {
+        if (Array.isArray(tasksData)) {
             tasks[dateKey] = tasksData;
-            renderDailyTasks(tasksData);
+            if (typeof refreshTaskViews === 'function') {
+                refreshTaskViews(dateKey);
+            } else {
+                renderDailyTasks(tasksData);
+            }
+        } else if (!hasCachedTasks) {
+            tasks[dateKey] = [];
+            if (typeof refreshTaskViews === 'function') {
+                refreshTaskViews(dateKey);
+            } else {
+                renderDailyTasks([]);
+            }
         }
     } catch (error) {
         console.error(`Failed to load tasks for ${dateKey}:`, error);
