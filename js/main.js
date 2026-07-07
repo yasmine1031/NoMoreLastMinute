@@ -1,12 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-const BACKEND_BASE_URL = 'https://Yasmine1031.pythonanywhere.com';
-=======
-const BACKEND_BASE_URL = 'https://Yasmine1031.pythonanywhere.com';
->>>>>>> 0027276e4ca900fbd604acd3b4a4be68994d5ff1
-=======
 const BACKEND_BASE_URL = 'http://127.0.0.1:5000';
->>>>>>> 0027276e4ca900fbd604acd3b4a4be68994d5ff1
 let selectedDate = null;
 const now = new Date();
 let currentYear = now.getFullYear();
@@ -2421,7 +2413,7 @@ async function handleSignUp(e) {
 
             // 获取当前登录用户，如果拿不到，我们从上方的 DOM 节点直接抓取已经显示成功的名字！
             let currentUserEmail = localStorage.getItem('currentUserEmail') || "";
-            const displayedTopName = document.getElementById('leaderboardUserName')?.textContent || "Foo";
+            const displayedTopName = document.getElementById('leaderboardUserName')?.textContent || "Goh";
 
             let listHtml = '';
             let currentUserRank = '--';
@@ -2444,6 +2436,8 @@ async function handleSignUp(e) {
                         nameToDisplay = displayedTopName;
                     } else if (user.email) {
                         nameToDisplay = user.email.split('@')[0];
+                    } else {
+                        nameToDisplay = "Goh"; // 终极保底
                     }
                 }
 
