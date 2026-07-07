@@ -43,9 +43,9 @@ File structure:
 │   └── NMLM_logo.png             # App logo
 └── audio/
 │   ├── alarm/
-│   │   └── alarm.mpeg            # Pomodoro end-of-session alarm sound
+│   │   └── alarm.mpeg            # Alarm pomodoro end-of-session alarm sound
 │   └── pomodoro/
-│         ├── audio_01.mpeg       # Zen Mode ambient audio tracks
+│         ├── audio_01.mpeg       # Zen Mode ambient 
 │         ├── audio_02.mpeg
 │         ├── audio_03.mpeg
 │         ├── audio_04.mpeg

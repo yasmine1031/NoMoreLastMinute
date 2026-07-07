@@ -1,11 +1,9 @@
-const BACKEND_BASE_URL = 'http://127.0.0.1:5000';
 let selectedDate = null;
-const now = new Date();
-let currentYear = now.getFullYear();
-let currentMonth = now.getMonth();
+let currentYear = 2026;
+let currentMonth = 4; 
 let tasks = {}; 
 let pomodoroHistory = {};
-let emotionHistory = {}; 
+let emotionHistory = {};
 let statsMonth = { year: new Date().getFullYear(), month: new Date().getMonth() };
 let pendingEmail = '';
 
@@ -50,7 +48,7 @@ async function initializeMoodTheme() {
     }
 
     try {
-        const response = await fetch(`${BACKEND_BASE_URL}/api/mood/today`, { cache: 'no-store' });
+        const response = await fetch('/api/mood/today', { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         const apiMood = data?.mood || data?.theme || '';
@@ -121,23 +119,6 @@ function renderUserIdentity() {
         if (leaderboardAvatarEl) leaderboardAvatarEl.textContent = avatarChar;
     } catch (error) {
         console.error('[App] renderUserIdentity failed:', error);
-    }
-}
-
-function focusTodayTaskView() {
-    const today = new Date();
-    const todayKey = getDateKey(today);
-
-    currentYear = today.getFullYear();
-    currentMonth = today.getMonth();
-    selectedDate = todayKey;
-
-    renderCalendar(currentYear, currentMonth);
-
-    if (typeof loadTasksForDate === 'function') {
-        loadTasksForDate(todayKey);
-    } else {
-        updateTaskList();
     }
 }
 
@@ -260,10 +241,7 @@ function updateTaskList() {
                     <p class="t-time">${task.time}</p>
                 </div>
             </div>
-            <div class="task-actions">
-                <button class="task-complete-toggle">${task.completed ? 'Undo' : 'Done'}</button>
-                <button class="task-delete-btn">🗑️</button>
-            </div>
+            <button class="task-complete-toggle">${task.completed ? 'Undo' : 'Done'}</button>
         `;
         const toggleButton = item.querySelector('.task-complete-toggle');
         if (toggleButton) {
@@ -272,83 +250,12 @@ function updateTaskList() {
                 toggleTaskCompletion(selectedDate, index);
             };
         }
-        const deleteButton = item.querySelector('.task-delete-btn');
-        if (deleteButton) {
-            deleteButton.onclick = (event) => {
-                event.stopPropagation();
-                handleDeleteTask(selectedDate, index, task.id || task._id);
-            };
-        }
 
         item.onclick = () => {
             if (task.description) alert(`Description: ${task.description}`);
         };
         container.appendChild(item);
     });
-}
-
-async function clearDailyTasks() {
-    const dateKey = selectedDate || new Date().toISOString().split('T')[0];
-    const currentTasks = tasks[dateKey] || [];
-
-    if (!currentTasks.length) {
-        if (typeof showNotification === 'function') {
-            showNotification('warning', 'No tasks', 'There are no saved tasks to delete for the current date.');
-        } else {
-            alert('There are no saved tasks to delete for the current date.');
-        }
-        return;
-    }
-
-    const confirmed = confirm('Delete all saved tasks for this date?');
-    if (!confirmed) {
-        return;
-    }
-
-    const taskIds = currentTasks.map(task => task.id || task._id).filter(Boolean);
-    if (taskIds.length > 0 && typeof deleteTask === 'function') {
-        const results = await Promise.all(taskIds.map(id => deleteTask(id).catch(() => false)));
-        if (results.includes(false)) {
-            if (typeof showNotification === 'function') {
-                showNotification('error', 'Delete failed', 'Some tasks could not be deleted from the server.');
-            } else {
-                alert('Some tasks could not be deleted from the server.');
-            }
-            return;
-        }
-    }
-
-    tasks[dateKey] = [];
-    renderDailyTasks([]);
-    if (typeof refreshStats === 'function') refreshStats();
-    if (typeof loadOverviewTasks === 'function') loadOverviewTasks();
-    if (typeof showNotification === 'function') {
-        showNotification('success', 'Deleted', 'Saved tasks have been removed.');
-    }
-}
-
-async function handleDeleteTask(dateKey, index, taskId) {
-    if (!dateKey || index == null || index < 0) return;
-    const taskList = tasks[dateKey] || [];
-    if (!taskList[index]) return;
-
-    const confirmed = confirm('Delete this task?');
-    if (!confirmed) return;
-
-    const deletedTask = taskList.splice(index, 1)[0];
-    tasks[dateKey] = taskList;
-
-    if (taskId && typeof deleteTask === 'function') {
-        await deleteTask(taskId).catch(() => {});
-    }
-
-    if (typeof renderDailyTasks === 'function' && selectedDate === dateKey) {
-        renderDailyTasks(taskList);
-    } else {
-        updateTaskList();
-    }
-    if (typeof refreshStats === 'function') refreshStats();
-    if (typeof loadOverviewTasks === 'function') loadOverviewTasks();
 }
 
 function toggleTaskCompletion(dateKey, index) {
@@ -366,10 +273,10 @@ function getHourlyKey(date) {
     return `${getDateKey(date)}-${String(date.getHours()).padStart(2, '0')}`;
 }
 
-function calculateMonthPomodoroSeconds(year, month) {
-    return Object.entries(pomodoroHistory).reduce((sum, [dateKey, seconds]) => {
+function calculateMonthPomodoroMinutes(year, month) {
+    return Object.entries(pomodoroHistory).reduce((sum, [dateKey, minutes]) => {
         const [y, m] = dateKey.split('-').map(Number);
-        if (y === year && m === month + 1) return sum + seconds;
+        if (y === year && m === month + 1) return sum + minutes;
         return sum;
     }, 0);
 }
@@ -394,9 +301,9 @@ function computeMonthlyTaskSummary(year, month) {
         });
     });
 
-    const seconds = calculateMonthPomodoroSeconds(year, month);
+    const minutes = calculateMonthPomodoroMinutes(year, month);
     const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-    return { total, completed, pending, seconds, percentage };
+    return { total, completed, pending, minutes, percentage };
 }
 
 async function refreshStats() {
@@ -418,17 +325,17 @@ async function refreshStats() {
     const total = data?.total ?? 0;
     const completed = data?.completed ?? 0;
     const pending = data?.pending ?? 0;
-    const seconds = data?.seconds ?? data?.pomodoroSeconds ?? 0;
+    const minutes = data?.minutes ?? data?.pomodoroMinutes ?? 0; 
 
     if (document.getElementById('statTotalTask')) document.getElementById('statTotalTask').textContent = total;
     if (document.getElementById('statCompletedTask')) document.getElementById('statCompletedTask').textContent = completed;
     if (document.getElementById('statPendingTask')) document.getElementById('statPendingTask').textContent = pending;
-    if (document.getElementById('statSeconds')) document.getElementById('statSeconds').textContent = seconds;
+    if (document.getElementById('statMinutes')) document.getElementById('statMinutes').textContent = minutes;
 
     if (document.getElementById('month-statTotalTask')) document.getElementById('month-statTotalTask').textContent = total;
     if (document.getElementById('month-statCompletedTask')) document.getElementById('month-statCompletedTask').textContent = completed;
     if (document.getElementById('month-statPendingTask')) document.getElementById('month-statPendingTask').textContent = pending;
-    if (document.getElementById('month-statSeconds')) document.getElementById('month-statSeconds').textContent = seconds;
+    if (document.getElementById('month-statMinutes')) document.getElementById('month-statMinutes').textContent = minutes;
 
     if (typeof updateStatsSummary === 'function') {
         try { updateStatsSummary(summary); } catch(e) { console.warn(e); }
@@ -503,20 +410,20 @@ function renderTrendChart() {
 
     for (let day = 1; day <= daysInMonth; day++) {
         const dateKey = `${statsMonth.year}-${String(statsMonth.month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const seconds = pomodoroHistory[dateKey] || 0;
-        values.push({ day, seconds });
-        if (seconds > maxValue) maxValue = seconds;
+        const minutes = pomodoroHistory[dateKey] || 0;
+        values.push({ day, minutes });
+        if (minutes > maxValue) maxValue = minutes;
     }
 
     container.innerHTML = values.map(dayInfo => {
-        const fillHeight = maxValue === 0 ? 8 : Math.max(8, Math.round((dayInfo.seconds / maxValue) * 100));
+        const fillHeight = maxValue === 0 ? 8 : Math.max(8, Math.round((dayInfo.minutes / maxValue) * 100));
         return `
             <div class="trend-day">
                 <div class="trend-day-label">${dayInfo.day}</div>
                 <div class="trend-bar">
                     <div class="trend-bar-fill" style="height:${fillHeight}%"></div>
                 </div>
-                <div class="trend-day-value">${dayInfo.seconds}s</div>
+                <div class="trend-day-value">${dayInfo.minutes}m</div>
             </div>
         `;
     }).join('');
@@ -524,24 +431,24 @@ function renderTrendChart() {
 
 function updatePomodoroUsage() {
     const todayKey = getDateKey(new Date());
-    const todaySeconds = pomodoroHistory[todayKey] || 0;
-    const sessions = todaySeconds === 0 ? 0 : Math.ceil(todaySeconds / 1500);
+    const todayMinutes = pomodoroHistory[todayKey] || 0;
+    const sessions = todayMinutes === 0 ? 0 : Math.ceil(todayMinutes / 25);
     const dailyMinutesEl = document.getElementById('dailyPomodoroMinutes');
     const sessionsEl = document.getElementById('todayPomodoroSessions');
-    if (dailyMinutesEl) dailyMinutesEl.textContent = todaySeconds;
+    if (dailyMinutesEl) dailyMinutesEl.textContent = todayMinutes;
     if (sessionsEl) sessionsEl.textContent = sessions;
-    const fillPct = Math.min(100, Math.round((todaySeconds / 7200) * 100));
+    const fillPct = Math.min(100, Math.round((todayMinutes / 120) * 100));
     const fill = document.getElementById('pomodoroMeterFill');
     if (fill) fill.style.width = `${fillPct}%`;
 }
 
-function recordPomodoroSession(durationSeconds = 1500) {
+function recordPomodoroSession(duration = 25) {
     const todayKey = getDateKey(new Date());
-    pomodoroHistory[todayKey] = (pomodoroHistory[todayKey] || 0) + durationSeconds;
+    pomodoroHistory[todayKey] = (pomodoroHistory[todayKey] || 0) + duration;
     updatePomodoroUsage();
     renderTrendChart();
     refreshStats();
-    showNotification('success', 'Pomodoro recorded', `Added ${durationSeconds} seconds to today’s study trend.`);
+    showNotification('success', 'Pomodoro recorded', `Added ${duration} minutes to today’s study trend.`);
 }
 
 function refreshEmotionButtons() {
@@ -737,43 +644,29 @@ const track = document.getElementById('pillTrack');
             }
         }
 
-        function refreshTaskViews(dateKey = selectedDate || getDateKey(new Date())) {
-            const targetDateKey = dateKey || getDateKey(new Date());
-            const visibleTasks = Array.isArray(tasks[targetDateKey]) ? tasks[targetDateKey] : [];
-
-            if (typeof renderDailyTasks === 'function') {
-                renderDailyTasks(visibleTasks);
-            }
-            if (typeof renderOverviewTasks === 'function') {
-                renderOverviewTasks(visibleTasks);
-            }
-        }
-
         async function loadOverviewTasks() {
-            const todayKey = getDateKey(new Date());
+            const todayStr = new Date().toISOString().split('T')[0];
             const container = document.getElementById('ov-tasks-stream-container') || document.getElementById('overview-tasks-container');
             if (!container) return;
 
             let taskItems = [];
             try {
-                taskItems = await window.api.getTasksByDate?.(todayKey);
-                if (!Array.isArray(taskItems)) {
-                    taskItems = [];
-                }
+                taskItems = await window.api.getTasksByDate(todayStr);
+                const todayKey = getDateKey(new Date());
                 tasks[todayKey] = taskItems;
             } catch (error) {
                 console.warn('[Overview] loadOverviewTasks failed:', error);
                 taskItems = [];
             }
 
-            refreshTaskViews(todayKey);
+            renderOverviewTasks(taskItems);
         }
 
-        function renderOverviewTasks(tasksData) {
+        function renderOverviewTasks(tasks) {
             const container = document.getElementById('ov-tasks-stream-container') || document.getElementById('overview-tasks-container');
             if (!container) return;
 
-            if (!Array.isArray(tasksData) || tasksData.length === 0) {
+            if (!Array.isArray(tasks) || tasks.length === 0) {
                 container.innerHTML = `
                     <div class="ov-tasks-empty-state">
                         <p>${window.i18n ? window.i18n('overview-no-overdue') : '🎉 Great job — no overdue items in the mini view.'}</p>
@@ -782,20 +675,19 @@ const track = document.getElementById('pillTrack');
                 return;
             }
 
-            const sortedTasks = tasksData.slice().sort((a, b) => {
-                const aValue = a.startTime || a.endTime || a.time || '';
-                const bValue = b.startTime || b.endTime || b.time || '';
+            const sortedTasks = tasks.slice().sort((a, b) => {
+                const aValue = a.startTime || a.endTime || '';
+                const bValue = b.startTime || b.endTime || '';
                 return aValue.localeCompare(bValue);
             });
+            const topTasks = sortedTasks.slice(0, 3);
 
-            container.innerHTML = sortedTasks.map(task => {
-                const completed = task.status === 'completed' || task.completed === true;
-                const timeLabel = (task.startTime && task.endTime)
-                    ? `${task.startTime} - ${task.endTime}`
-                    : (task.startTime || task.time || 'No time set');
+            container.innerHTML = topTasks.map(task => {
+                const completed = task.status === 'completed';
+                const timeLabel = `${task.startTime || ''}${task.startTime && task.endTime ? ' - ' : ''}${task.endTime || ''}`.trim() || '未设时间';
                 return `
-                    <div class="task-item-entry ${completed ? 'task-completed-style' : ''}">
-                        <button class="task-checkbox-btn" type="button" onclick="toggleOverviewTask(${JSON.stringify(task.id || task._id)}, ${JSON.stringify(task.status || task.completed)})">
+                    <div class="task-item-entry ${completed ? 'completed' : ''}">
+                        <button class="task-checkbox-btn" onclick="toggleOverviewTask(${JSON.stringify(task.id)}, ${JSON.stringify(task.status)})">
                             <i class="${completed ? 'fas fa-check-circle' : 'far fa-circle'}"></i>
                         </button>
                         <div class="task-info">
@@ -811,20 +703,7 @@ const track = document.getElementById('pillTrack');
             if (!window.api?.toggleTaskStatus) return;
             try {
                 await window.api.toggleTaskStatus(taskId);
-
-                const todayKey = selectedDate || getDateKey(new Date());
-                const taskList = Array.isArray(tasks[todayKey]) ? tasks[todayKey] : [];
-                const taskIndex = taskList.findIndex(task => String(task.id || task._id) === String(taskId));
-
-                if (taskIndex >= 0) {
-                    const task = taskList[taskIndex];
-                    task.status = currentStatus === 'completed' ? 'pending' : 'completed';
-                    task.completed = task.status === 'completed';
-                    tasks[todayKey] = taskList;
-                }
-
-                refreshTaskViews(todayKey);
-                await loadOverviewStatsSummary();
+                await Promise.all([loadOverviewTasks(), loadOverviewStatsSummary()]);
                 if (typeof refreshStats === 'function') {
                     refreshStats();
                 }
@@ -1277,44 +1156,36 @@ const track = document.getElementById('pillTrack');
                 return;
             }
 
-            pomodoroIntervalId = setInterval(async () => {
-                try {
-                    if (!pomodoroPaused) {
-                        pomodoroRemainingSeconds -= 1;
-                        syncPomodoroState();
-                        if (pomodoroRemainingSeconds <= 0) {
-                            pomodoroRemainingSeconds = 0;
-                            updatePomodoroDisplay();
-                            updateZenTimerDisplay();
-                            clearInterval(pomodoroIntervalId);
-                            pomodoroRunning = false;
-                            setWheelLockState();
-                            syncPomodoroState();
-                            playPomodoroEndSound();
-                            if (typeof recordPomodoro === 'function') {
-                                try {
-                                    await recordPomodoro(Math.max(1, pomodoroTotalSeconds));
-                                } catch (recordError) {
-                                    console.error('[Pomodoro] recordPomodoro failed:', recordError);
-                                }
-                            }
-                            showNotification('success', 'Pomodoro Completed', 'Great work! Focus session finished.');
-                            document.querySelectorAll('#startPomodoroBtn').forEach(btn => {
-                                btn.style.display = 'inline-flex';
-                            });
-                            document.querySelectorAll('#pausePomodoroBtn').forEach(btn => {
-                                btn.style.display = 'none';
-                            });
-                            document.querySelectorAll('#resetPomodoroBtn').forEach(btn => {
-                                btn.style.display = 'none';
-                            });
-                            return;
-                        }
+            pomodoroIntervalId = setInterval(() => {
+                if (!pomodoroPaused) {
+                    pomodoroRemainingSeconds -= 1;
+                    syncPomodoroState();
+                    if (pomodoroRemainingSeconds <= 0) {
+                        pomodoroRemainingSeconds = 0;
                         updatePomodoroDisplay();
                         updateZenTimerDisplay();
+                        clearInterval(pomodoroIntervalId);
+                        pomodoroRunning = false;
+                        setWheelLockState();
+                        syncPomodoroState();
+                        playPomodoroEndSound();
+                        if (typeof recordPomodoro === 'function') {
+                            recordPomodoro(Math.max(1, Math.round(pomodoroTotalSeconds / 60)));
+                        }
+                        showNotification('success', 'Pomodoro Completed', 'Great work! Focus session finished.');
+                        document.querySelectorAll('#startPomodoroBtn').forEach(btn => {
+                            btn.style.display = 'inline-flex';
+                        });
+                        document.querySelectorAll('#pausePomodoroBtn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
+                        document.querySelectorAll('#resetPomodoroBtn').forEach(btn => {
+                            btn.style.display = 'none';
+                        });
+                        return;
                     }
-                } catch (timerError) {
-                    console.error('[Pomodoro] interval error:', timerError);
+                    updatePomodoroDisplay();
+                    updateZenTimerDisplay();
                 }
             }, 1000);
         }
@@ -1623,14 +1494,7 @@ const track = document.getElementById('pillTrack');
             const navActions = document.getElementById('nav-actions');
             const videoPlaceholder = document.getElementById('video-placeholder');
 
-            if (!nextView) return;
-
-            if (currentView === nextView) {
-                if (viewId === 'task') {
-                    focusTodayTaskView();
-                }
-                return;
-            }
+            if (!nextView || currentView === nextView) return;
 
             if (videoPlaceholder) {
                 if (viewId === 'intro' || viewId === 'signin' || viewId === 'signup') {
@@ -1661,7 +1525,10 @@ const track = document.getElementById('pillTrack');
             }
 
             if (viewId === 'task') {
-                focusTodayTaskView();
+                const freshDate = new Date();
+                currentYear = freshDate.getFullYear();
+                currentMonth = freshDate.getMonth();
+                renderCalendar(currentYear, currentMonth);
             }
 
             if (viewId === 'pomodoro') {
@@ -1687,6 +1554,10 @@ const track = document.getElementById('pillTrack');
             }
             if (nextView) nextView.classList.add('active');
 
+            if (viewId === 'task') {
+                renderCalendar(currentYear, currentMonth);
+            }
+
             if (viewId === 'dashboard') {
                 renderOverviewDashboard();
             }
@@ -1711,7 +1582,7 @@ async function handleSignIn(e) {
     const password = document.getElementById('signin-password').value;
     
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/signin', {
+        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signin',{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -1790,7 +1661,7 @@ async function handleSignUp(e) {
     confirmError.classList.remove('show');
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/signup', {
+        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signup',{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullname, email, password })
@@ -2349,7 +2220,7 @@ async function handleSignUp(e) {
 
         async function loadLeaderboard() {
             try {
-                const response = await fetch(`${BACKEND_BASE_URL}/api/leaderboard`);
+                const response = await fetch('/api/leaderboard');
                 const data = await response.json();
                 
                 if (data.leaderboard && data.leaderboard.length > 0) {
@@ -2370,12 +2241,7 @@ async function handleSignUp(e) {
             if (!currentUserId) return;
             
             try {
-                const response = await fetch(`${BACKEND_BASE_URL}/api/user/${currentUserId}/stats`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                const response = await fetch(`/api/user/${currentUserId}/stats`);
                 const data = await response.json();
                 
                 if (data.name) {
@@ -2396,11 +2262,8 @@ async function handleSignUp(e) {
                 document.getElementById('leaderboardAvatar').textContent = userData.name.charAt(0).toUpperCase();
             }
             
-            if (userData.total_seconds !== undefined) {
-                const dashboardSecondsEl = document.getElementById('dashboardPomodoroSeconds');
-                const leaderboardSecondsEl = document.getElementById('totalPomodoroHours');
-                if (dashboardSecondsEl) dashboardSecondsEl.textContent = userData.total_seconds;
-                if (leaderboardSecondsEl) leaderboardSecondsEl.textContent = userData.total_seconds;
+            if (userData.total_hours !== undefined) {
+                document.getElementById('totalPomodoroHours').textContent = userData.total_hours;
             }
         }
 
@@ -2408,18 +2271,15 @@ async function handleSignUp(e) {
             const listContainer = document.getElementById('leaderboardList');
             if (!listContainer) return;
 
-            // 清空现有的所有内容（防止写死的数据残留）
             listContainer.innerHTML = '';
 
-            // 获取当前登录用户，如果拿不到，我们从上方的 DOM 节点直接抓取已经显示成功的名字！
             let currentUserEmail = localStorage.getItem('currentUserEmail') || "";
-            const displayedTopName = document.getElementById('leaderboardUserName')?.textContent || "Goh";
+            const displayedTopName = document.getElementById('leaderboardUserName')?.textContent || "Foo";
 
             let listHtml = '';
             let currentUserRank = '--';
             let currentUserHours = '0';
 
-            // 检查后端有没有传回有效数组
             if (!leaderboardData || leaderboardData.length === 0) {
                 listContainer.innerHTML = '<div class="leaderboard-empty">No data yet.</div>';
                 return;
@@ -2427,24 +2287,16 @@ async function handleSignUp(e) {
 
             leaderboardData.forEach((user, index) => {
                 const rank = index + 1;
-
-                // 强力拦截：如果名字是空或者 Unknown User，直接根据身份进行修复
                 let nameToDisplay = user.fullname;
                 if (!nameToDisplay || nameToDisplay.trim() === "" || nameToDisplay === "Unknown User") {
-                    // 如果是当前用户，用上方卡片已经显示成功的名字，否则用 Email 前缀
                     if (user.email === currentUserEmail && currentUserEmail) {
                         nameToDisplay = displayedTopName;
                     } else if (user.email) {
                         nameToDisplay = user.email.split('@')[0];
-                    } else {
-                        nameToDisplay = "Goh"; // 终极保底
                     }
                 }
-
-                // 判断当前行是否是当前登录用户
                 const isSelf = (user.email === currentUserEmail && currentUserEmail !== "");
 
-                // 拼接全新生成的列表 HTML 
                 listHtml += `
                     <div class="leaderboard-item ${isSelf ? 'is-current-user' : ''}" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
                         <div style="display: flex; align-items: center; gap: 20px;">
@@ -2454,64 +2306,49 @@ async function handleSignUp(e) {
                             </div>
                             <span class="user-name" style="font-weight: ${isSelf ? 'bold' : 'normal'}; color: #fff;">${nameToDisplay}</span>
                         </div>
-                        <span class="user-time" style="font-weight: bold; color: #aaa;">${user.totalSeconds || 0}s</span>
+                        <span class="user-time" style="font-weight: bold; color: #aaa;">${user.totalHours}h</span>
                     </div>
                 `;
 
                 if (isSelf) {
                     currentUserRank = `#${rank}`;
-                    currentUserHours = user.totalSeconds || 0;
+                    currentUserHours = user.totalHours;
                 }
             });
 
-            // 将完全重构后的干净数据写入容器
             listContainer.innerHTML = listHtml;
 
-            // 同步更新上方个人卡片的数据（做二次精准校对）
             const rankNumEl = document.getElementById('userRank');
-            const totalSecondsEl = document.getElementById('totalPomodoroHours');
+            const totalHoursEl = document.getElementById('totalPomodoroHours');
             
             if (rankNumEl && currentUserRank !== '--') rankNumEl.textContent = currentUserRank;
-            if (totalSecondsEl) totalSecondsEl.textContent = currentUserHours;
+            if (totalHoursEl) totalHoursEl.textContent = currentUserHours;
         }
         
 
         async function recordPomodoro(duration = 25) {
-            if (!currentUserId) return null;
+            if (!currentUserId) return;
             
             try {
-                let data = null;
-                if (window.api?.completePomodoroSession) {
-                    data = await window.api.completePomodoroSession(duration);
-                } else {
-                    const response = await fetch(`${BACKEND_BASE_URL}/api/pomodoro/complete`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            user_id: currentUserId,
-                            duration: duration
-                        })
-                    });
-                    if (!response.ok) {
-                        const text = await response.text().catch(() => 'Unknown error');
-                        console.error('[Pomodoro] server error:', response.status, text);
-                        return null;
-                    }
-                    data = await response.json();
+                const response = await fetch('/api/pomodoro/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        duration: duration
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.total_minutes) {
+                    const totalHours = (data.total_minutes / 60).toFixed(1);
+                    document.getElementById('totalPomodoroHours').textContent = totalHours;
+                    
+                    loadLeaderboard();
+                    loadUserStats();
                 }
-
-                if (data?.total_seconds != null) {
-                    const totalPomodoroHoursEl = document.getElementById('totalPomodoroHours');
-                    if (totalPomodoroHoursEl) {
-                        totalPomodoroHoursEl.textContent = data.total_seconds;
-                    }
-                    await loadLeaderboard();
-                    await loadUserStats();
-                }
-                return data;
             } catch (error) {
                 console.error('Error recording pomodoro:', error);
-                return null;
             }
         }
 

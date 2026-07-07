@@ -1,4 +1,5 @@
 let currentUserId = null; 
+let appState = 'uninitialized'; // States: 'uninitialized', 'loading', 'ready'
 
 /**
  * Initialize all app data after successful login
@@ -88,15 +89,40 @@ async function initAppData(userId, showWelcome = false) {
 }
 
 function integrateInitAppData() {
+    // Skip if already initialized or currently initializing
+    if (appState !== 'uninitialized') {
+        console.log('[App] Skipping integration check - appState is:', appState);
+        return;
+    }
+    
     const checkLoginInterval = setInterval(() => {
         const userId = localStorage.getItem('userId');
-        if (userId && currentUserId !== userId) {
+        
+        // CRITICAL: Check if we should proceed BEFORE any async operations
+        if (userId && appState === 'uninitialized') {
+            // Clear interval IMMEDIATELY - BEFORE initiating async work
             clearInterval(checkLoginInterval);
+            console.log('[App] Interval cleared. Triggering initialization for:', userId);
+            
+            // NOW safely call async initAppData
             initAppData(userId, false);
+            return;
+        }
+        
+        // Stop checking if state has changed from uninitialized
+        if (appState !== 'uninitialized') {
+            clearInterval(checkLoginInterval);
+            console.log('[App] Integration interval stopped - appState is:', appState);
         }
     }, 500);
     
-    setTimeout(() => clearInterval(checkLoginInterval), 30000);
+    // Safety timeout to clear interval after max duration
+    setTimeout(() => {
+        if (appState === 'uninitialized') {
+            console.warn('[App] Integration timeout reached - clearing interval');
+            clearInterval(checkLoginInterval);
+        }
+    }, 30000);
 }
 
 /**
