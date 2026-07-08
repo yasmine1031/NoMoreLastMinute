@@ -98,7 +98,7 @@ function renderDailyTasks(tasksData) {
 function updateUserRank(rankData) {
     const rankElement = document.getElementById('userRank');
     if (rankElement && rankData) {
-        rankElement.textContent = rankData.rank ? `#${rankData.rank}` : '--';
+        rankElement.textContent = (rankData && rankData.rank && rankData.rank !== '--') ? `#${rankData.rank}` : '#1';
     }
 }
 
@@ -120,6 +120,14 @@ function updateUserInfo(userData) {
         const initial = (userData.name || userData.email || 'U').charAt(0).toUpperCase();
         avatarElement.textContent = initial;
     }
+}
+
+function formatSeconds(totalSeconds) {
+    const s = Number(totalSeconds) || 0;
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${h}h ${m}m ${sec}s`;
 }
 
 /**
@@ -188,7 +196,20 @@ async function loadLeaderboardData() {
         const leaderboardData = await fetchLeaderboard(20);
         
         if (!leaderboardData || leaderboardData.length === 0) {
-            leaderboardList.innerHTML = '<div class="empty-state">' + (window.i18n ? window.i18n('leaderboard-no-data') : 'No leaderboard data available') + '</div>';
+            const emptyText = window.i18n ? window.i18n('leaderboard-no-data') : 'User 1';
+            leaderboardList.innerHTML = `
+                <div class="leaderboard-item" style="pointer-events:none;">
+                    <div class="lb-rank">1</div>
+                    <div class="lb-avatar">-</div>
+                    <div class="lb-name">${emptyText}</div>
+                    <div class="lb-avg"></div>
+                            <div class="lb-total">${(() => {
+                                const totalHoursEl = document.getElementById('totalPomodoroHours');
+                                const hours = totalHoursEl ? parseFloat(totalHoursEl.textContent) || 0 : 0;
+                                return formatSeconds(Math.round(hours * 3600));
+                            })()}</div>
+                </div>
+            `;
             return;
         }
 
@@ -199,7 +220,7 @@ async function loadLeaderboardData() {
                     <div class="leaderboard-avatar">${(entry.name || 'U').charAt(0).toUpperCase()}</div>
                     <div class="leaderboard-name">${escapeHtml(entry.name || 'Unknown User')}</div>
                 </div>
-                <div class="leaderboard-score">${entry.totalSeconds || 0}s</div>
+                <div class="leaderboard-score">${formatSeconds(entry.totalSeconds || Math.round((entry.totalHours || 0) * 3600) || 0)}</div>
             </div>
         `).join('');
     } catch (error) {

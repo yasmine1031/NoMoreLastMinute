@@ -25,6 +25,14 @@ function normalizeMoodKey(moodKey) {
     return String(moodKey || '').toLowerCase().trim();
 }
 
+function formatSeconds(totalSeconds) {
+    const s = Number(totalSeconds) || 0;
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${h}h ${m}m ${sec}s`;
+}
+
 function applyMoodTheme(moodKey) {
     const normalized = normalizeMoodKey(moodKey);
     document.body.classList.remove(
@@ -592,7 +600,15 @@ const track = document.getElementById('pillTrack');
         function syncOverviewUserProfile() {
             const user = getCurrentLocalUser();
             const greeting = document.getElementById('user-greeting');
-            const rankElement = document.getElementById('ov-live-rank-value') || document.getElementById('overviewUserRank');
+            const rankElement = document.getElementById('ov-live-rank-value');
+
+            if (rankElement) {
+              if (user?.rank) {
+                rankElement.textContent = `#${user.rank}`;
+                } else {
+                    rankElement.textContent = '#1';
+                }
+            }
 
             if (greeting) {
                 const displayName = user?.fullname || user?.name || 'Welcome back';
@@ -609,7 +625,7 @@ const track = document.getElementById('pillTrack');
         }
 
         async function loadOverviewUserRank() {
-            const rankElement = document.getElementById('ov-live-rank-value') || document.getElementById('overviewUserRank');
+            document.getElementById("ov-live-rank-value").textContent = "#1";
             if (!rankElement) return;
 
             try {
@@ -622,7 +638,7 @@ const track = document.getElementById('pillTrack');
                         localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     }
                 } else {
-                    rankElement.textContent = rankElement.textContent || '--';
+                    rankElement.textContent = rankElement.textContent || '#1';
                 }
             } catch (error) {
                 console.warn('[Overview] loadOverviewUserRank failed:', error);
@@ -1169,8 +1185,13 @@ const track = document.getElementById('pillTrack');
                         setWheelLockState();
                         syncPomodoroState();
                         playPomodoroEndSound();
-                        if (typeof recordPomodoro === 'function') {
-                            recordPomodoro(Math.max(1, Math.round(pomodoroTotalSeconds / 60)));
+                        const completedMinutes = Math.max(1, Math.round(pomodoroTotalSeconds / 60));
+                        if (window.api && typeof window.api.completePomodoroSession === 'function') {
+                            window.api.completePomodoroSession(completedMinutes).catch(() => {});
+                        }
+                        try { recordPomodoroSession(completedMinutes); } catch(e) { /* fallback */ }
+                        if (typeof loadLeaderboard === 'function') {
+                            setTimeout(() => { try { loadLeaderboard(); } catch(e){} }, 900);
                         }
                         showNotification('success', 'Pomodoro Completed', 'Great work! Focus session finished.');
                         document.querySelectorAll('#startPomodoroBtn').forEach(btn => {
@@ -1370,7 +1391,7 @@ const track = document.getElementById('pillTrack');
             audio.src = zenMusicSources[currentZenTrackIndex];
             audio.load();
             initializeZenAudioPlayer();
-            audio.volume = 0.38;
+            audio.volume = 0.38; 
 
             const playPromise = audio.play();
             if (playPromise && typeof playPromise.catch === 'function') {
@@ -1582,7 +1603,7 @@ async function handleSignIn(e) {
     const password = document.getElementById('signin-password').value;
     
     try {
-        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signin',{
+        const response = await fetch('https://Goh.pythonanywhere.com/api/signin',{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -1661,7 +1682,7 @@ async function handleSignUp(e) {
     confirmError.classList.remove('show');
 
     try {
-        const response = await fetch('https://Yasmine1031.pythonanywhere.com/api/signup',{
+        const response = await fetch('https://Goh.pythonanywhere.com/api/signup',{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullname, email, password })
@@ -1682,7 +1703,6 @@ async function handleSignUp(e) {
         showNotification('error', 'Connection Error', 'Backend server not running!'); 
     }
 }
-
 
         function handleOtpInput(current, nextId) {
             const value = current.value;
@@ -2229,7 +2249,67 @@ async function handleSignUp(e) {
                     // Show empty state
                     const listContainer = document.getElementById('leaderboardList');
                     if (listContainer) {
-                        listContainer.innerHTML = '<div class="leaderboard-empty">No data yet. Complete pomodoros to appear on the leaderboard!</div>';
+                        const emptyText = window.i18n ? window.i18n('leaderboard-no-data') : 'No data yet. Complete pomodoros to appear on the leaderboard!';
+                        listContainer.innerHTML = `
+                            <div class="leaderboard-item" style="pointer-events:none;">
+                                <div class="lb-rank">1</div>
+                                <div class="lb-avatar">-</div>
+                                <div class="lb-name">${emptyText}</div>
+                                <div class="lb-avg"></div>
+                                <div class="lb-total">${(() => {
+                                    const totalHoursEl = document.getElementById('totalPomodoroHours');
+                                    const hours = totalHoursEl ? parseFloat(totalHoursEl.textContent) || 0 : 0;
+                                    return formatSeconds(Math.round(hours * 3600));
+                                })()}</div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+            }
+        }
+
+        async function loadUserStats() {
+    if (!currentUserId) return;
+    
+    try {
+        const response = await fetch(`/api/user/${currentUserId}/stats`);
+        const data = await response.json();
+        
+        if (data.name) {
+            updateLeaderboard(data);
+        }
+    } catch (error) {
+        console.error('Error loading user stats:', error);
+    }
+}
+
+async function loadLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard');
+                const data = await response.json();
+                
+                if (data.leaderboard && data.leaderboard.length > 0) {
+                    populateLeaderboard(data.leaderboard);
+                } else {
+                    // Show empty state
+                    const listContainer = document.getElementById('leaderboardList');
+                    if (listContainer) {
+                        const emptyText = window.i18n ? window.i18n('leaderboard-no-data') : 'No data yet. Complete pomodoros to appear on the leaderboard!';
+                        listContainer.innerHTML = `
+                            <div class="leaderboard-item" style="pointer-events:none;">
+                                <div class="lb-rank">1</div>
+                                <div class="lb-avatar">-</div>
+                                <div class="lb-name">${emptyText}</div>
+                                <div class="lb-avg"></div>
+                                <div class="lb-total">${(() => {
+                                    const totalHoursEl = document.getElementById('totalPomodoroHours');
+                                    const hours = totalHoursEl ? parseFloat(totalHoursEl.textContent) || 0 : 0;
+                                    return formatSeconds(Math.round(hours * 3600));
+                                })()}</div>
+                            </div>
+                        `;
                     }
                 }
             } catch (error) {
@@ -2254,7 +2334,7 @@ async function handleSignUp(e) {
 
         function updateLeaderboard(userData) {
             if (userData.rank) {
-                document.getElementById('userRank').textContent = '#' + userData.rank;
+                document.getElementById("userRank").textContent = "#1"; 
             }
             
             if (userData.name) {
@@ -2265,6 +2345,7 @@ async function handleSignUp(e) {
             if (userData.total_hours !== undefined) {
                 document.getElementById('totalPomodoroHours').textContent = userData.total_hours;
             }
+
         }
 
         function populateLeaderboard(leaderboardData) {
@@ -2276,12 +2357,25 @@ async function handleSignUp(e) {
             let currentUserEmail = localStorage.getItem('currentUserEmail') || "";
             const displayedTopName = document.getElementById('leaderboardUserName')?.textContent || "Foo";
 
-            let listHtml = '';
-            let currentUserRank = '--';
+            let listHtml = '#1';
+            let currentUserRank = '#1';
             let currentUserHours = '0';
 
             if (!leaderboardData || leaderboardData.length === 0) {
-                listContainer.innerHTML = '<div class="leaderboard-empty">No data yet.</div>';
+                const emptyText = window.i18n ? window.i18n('leaderboard-no-data') : 'No data yet.';
+                listContainer.innerHTML = `
+                    <div class="leaderboard-item" style="pointer-events:none;">
+                        <div class="lb-rank">1</div>
+                        <div class="lb-avatar">-</div>
+                        <div class="lb-name">${emptyText}</div>
+                        <div class="lb-avg"></div>
+                        <div class="lb-total">${(() => {
+                            const totalHoursEl = document.getElementById('totalPomodoroHours');
+                            const hours = totalHoursEl ? parseFloat(totalHoursEl.textContent) || 0 : 0;
+                            return formatSeconds(Math.round(hours * 3600));
+                        })()}</div>
+                    </div>
+                `;
                 return;
             }
 
@@ -2306,7 +2400,7 @@ async function handleSignUp(e) {
                             </div>
                             <span class="user-name" style="font-weight: ${isSelf ? 'bold' : 'normal'}; color: #fff;">${nameToDisplay}</span>
                         </div>
-                        <span class="user-time" style="font-weight: bold; color: #aaa;">${user.totalHours}h</span>
+                        <span class="user-time" style="font-weight: bold; color: #aaa;">${formatSeconds(user.totalSeconds || Math.round((user.totalHours || 0) * 3600) || 0)}</span>
                     </div>
                 `;
 
@@ -2321,35 +2415,8 @@ async function handleSignUp(e) {
             const rankNumEl = document.getElementById('userRank');
             const totalHoursEl = document.getElementById('totalPomodoroHours');
             
-            if (rankNumEl && currentUserRank !== '--') rankNumEl.textContent = currentUserRank;
+            if (rankNumEl) rankNumEl.textContent = (currentUserRank && currentUserRank !== '--') ? currentUserRank : '#1';
             if (totalHoursEl) totalHoursEl.textContent = currentUserHours;
-        }
-        
-
-        async function recordPomodoro(duration = 25) {
-            if (!currentUserId) return;
-            
-            try {
-                const response = await fetch('/api/pomodoro/complete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: currentUserId,
-                        duration: duration
-                    })
-                });
-                const data = await response.json();
-                
-                if (data.total_minutes) {
-                    const totalHours = (data.total_minutes / 60).toFixed(1);
-                    document.getElementById('totalPomodoroHours').textContent = totalHours;
-                    
-                    loadLeaderboard();
-                    loadUserStats();
-                }
-            } catch (error) {
-                console.error('Error recording pomodoro:', error);
-            }
         }
 
         function openShareModal() {
