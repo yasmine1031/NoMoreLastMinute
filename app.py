@@ -116,7 +116,7 @@ def send_verification_email(email, fullname):
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, SECRET_KEY, algorithm='HS256')
         
-        verification_url = f'http://127.0.0.1:5000/api/verify/{token}'
+        verification_url = f'https://Yasmine1031.pythonanywhere.com/api/verify/{token}'
         
         msg = Message(
             'Verify your No More Last Minute account',
